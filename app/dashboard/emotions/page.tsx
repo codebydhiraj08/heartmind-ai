@@ -29,14 +29,20 @@ import { PremiumGate } from "@/components/premium-gate"
 import {
   LineChart,
   Line,
-  XAxis,
-  YAxis,
+  XAxis as OriginalXAxis,
+  YAxis as OriginalYAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as OriginalTooltip,
   ResponsiveContainer,
   AreaChart,
-  Area
+  Area as OriginalArea
 } from "recharts"
+
+const XAxis = OriginalXAxis as any;
+const YAxis = OriginalYAxis as any;
+const Tooltip = OriginalTooltip as any;
+const Area = OriginalArea as any;
+
 import Link from "next/link"
 
 const attachmentStyles = [
@@ -107,7 +113,7 @@ export default function EmotionsPage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="premium-card spotlight-glow rounded-3xl border border-white/[0.05] bg-zinc-950/60 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden glass-strong"
-          onMouseMove={(e) => {
+          onMouseMove={(e: any) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;

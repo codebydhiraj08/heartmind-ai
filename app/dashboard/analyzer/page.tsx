@@ -27,15 +27,20 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   PieChart,
-  Pie,
+  Pie as OriginalPie,
   Cell,
   ResponsiveContainer,
   BarChart,
   Bar,
-  XAxis,
-  YAxis,
-  Tooltip
+  XAxis as OriginalXAxis,
+  YAxis as OriginalYAxis,
+  Tooltip as OriginalTooltip
 } from "recharts"
+
+const Pie = OriginalPie as any;
+const XAxis = OriginalXAxis as any;
+const YAxis = OriginalYAxis as any;
+const Tooltip = OriginalTooltip as any;
 
 const platformOptions = [
   { name: "WhatsApp", color: "bg-green-500" },
@@ -1109,7 +1114,7 @@ function ChatAnalyzerInner() {
                   <CardContent className="pt-6">
                     {pastAnalyses.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {pastAnalyses.map((a) => (
+                        {pastAnalyses.map((a: any) => (
                           <button
                             key={a._id}
                             onClick={() => router.push(`/dashboard/analyzer?id=${a._id}`)}

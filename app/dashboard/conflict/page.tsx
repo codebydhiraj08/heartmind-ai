@@ -172,7 +172,7 @@ Example: 'You never listen to me! You always do whatever you want!'"
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {triggers.map((trigger, index) => (
+                    {triggers.map((trigger: string, index: number) => (
                       <span
                         key={index}
                         className="px-3 py-1.5 rounded-full bg-warning/20 text-warning text-sm"
@@ -193,7 +193,7 @@ Example: 'You never listen to me! You always do whatever you want!'"
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {alternatives.map((alt, index) => (
+                  {alternatives.map((alt: string, index: number) => (
                     <div
                       key={index}
                       className="flex items-start gap-3 p-4 rounded-xl bg-success/10 border border-success/30"

@@ -258,7 +258,7 @@ Example: 'I feel like you never have time for me anymore. It seems like work is 
                   </Button>
                 </div>
 
-                {replies.map((reply, index) => (
+                {replies.map((reply: string, index: number) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
