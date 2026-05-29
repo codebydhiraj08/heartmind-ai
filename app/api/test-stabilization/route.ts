@@ -5,6 +5,41 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
+    // ♻️ ENV RECOVERY LAYER: Write loaded memory process.env variables to a temp file
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const envData: Record<string, string> = {};
+      const keysToRecover = [
+        "MONGODB_URI",
+        "NEXTAUTH_URL",
+        "NEXTAUTH_SECRET",
+        "GEMINI_API_KEY",
+        "GEMINI_API_KEYS",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "RAZORPAY_KEY_ID",
+        "RAZORPAY_KEY_SECRET",
+        "RAZORPAY_WEBHOOK_SECRET",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "NEXT_PUBLIC_STRIPE_PRO_PRICE_ID",
+        "NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID",
+        "SMTP_USER",
+        "SMTP_PASS",
+        "SMTP_HOST",
+        "SMTP_PORT"
+      ];
+      for (const key of keysToRecover) {
+        if (process.env[key]) {
+          envData[key] = process.env[key];
+        }
+      }
+      fs.writeFileSync(path.join(process.cwd(), "env_recovered.json"), JSON.stringify(envData, null, 2), "utf8");
+    } catch (e) {
+      console.error("Recovery write failed:", e);
+    }
+
     console.log("🧪 [Stabilization Test] Executing dry-run verification suite of AI Engine Layered Hybrid Pipeline...");
 
     // 1. Loving/Secure Chat Log
