@@ -35,8 +35,8 @@ export async function connectToDatabase() {
     }
   }
 
-  // If MONGODB_URI is not set, or is the default template placeholder, trigger mock fallback immediately
-  if (!MONGODB_URI || MONGODB_URI.includes("cluster.mongodb.net") || MONGODB_URI.includes("<username>")) {
+  // If MONGODB_URI is not set, or still has placeholder text, trigger mock fallback
+  if (!MONGODB_URI || MONGODB_URI.includes("<username>") || MONGODB_URI.includes("<password>") || MONGODB_URI.includes("<db_password>")) {
     console.warn("\n⚠️ [HEARTMIND] Using Local JSON File Fallback Database (No valid MONGODB_URI found in .env).");
     global.useMockDatabase = true;
     return null;
