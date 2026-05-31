@@ -1,20 +1,28 @@
-# HeartMind AI Stabilization Checklist — Stage 2
+# HeartMind AI Client Polish & Mobile UX Checklist
 
-- `[x]` Core Schema Hardening
-  - `[x]` Update `models/ChatAnalysis.ts` with `schemaVersion: 2` (Schema, interface, and mock database implementation)
-  - `[x]` Update `models/VoiceAnalysis.ts` with `schemaVersion: 2` (Schema, interface, and mock database implementation)
-- `[x]` Refactor core interface `IAIRedFlag` to include `confidence` and `evidence` fields
-- `[x]` Refactor `lib/ai-engine.ts` into a hybrid layered pipeline:
-  - `[x]` `runRuleEngine(chatText)`: Scans for toxic phrase patterns, computes ceilings, returns high-confidence rules
-  - `[x]` `analyzeChatText` & `runLocalAIEngine`: Updates AI prompts and local heuristic parser to return confidence/evidence
-  - `[x]` `mergePipeline(ruleRes, aiRes)`: Merges metrics, caps positivity, handles overrides, maps confidence and evidence
-  - `[x]` `validateAndNormalizeAnalysis`: Enforces unique patterns, score alignment, and fallback checks
-- `[x]` Backend API Route Refinements (Single Source of Truth & Cache Invalidation)
-  - `[x]` Update `app/api/latest-analysis/route.ts` with backward compatibility layer and strict `no-store` headers
-  - `[x]` Update `app/api/analyze-chat/route.ts` with backward compatibility mapping, single source of truth, and strict `no-store` headers
-- `[x]` Frontend UI Integration
-  - `[x]` Update `app/dashboard/red-flags/page.tsx` to dynamically bind `confidence` and `evidence` fields from the database
-- `[x]` Verification Phase
-  - `[x]` Run TypeScript typecheck: `npx tsc --noEmit`
-  - `[x]` Run production build check: `npm run build`
-  - `[x]` Perform multi-scenario dry-runs (loving, neutral, toxic, gaslighting, empty states)
+- `[x]` 1. Landing Page Testimonials Removal
+  - `[x]` Remove the testimonials block in `app/page.tsx`
+- `[x]` 2. Settings Avatar Session Instant Update
+  - `[x]` Disable Cache-Control in `app/api/user/profile-image/route.ts`
+  - `[x]` Add React `key` props to `img` tags in `app/dashboard/settings/page.tsx` and `components/dashboard-nav.tsx`
+- `[x]` 3. Responsive Dashboard Charts
+  - `[x]` Refactor CardHeader in `app/dashboard/page.tsx` to handle flex-col/flex-row wrapping
+- `[x]` 4. Stress Pattern Insights Toggle
+  - `[x]` Render only 1 pattern by default and add inline "View All Patterns" expandable toggle in `app/dashboard/page.tsx`
+- `[x]` 5. Timeline Vercel Data Persistence Guide
+  - `[x]` Document deployment / MONGODB_URI environment steps inside README or walkthrough
+- `[x]` 6. Mobile Chat Upload Accordion Guide
+  - `[x]` Add step-by-step WhatsApp/Instagram chat export guide below upload button in `app/dashboard/analyzer/page.tsx`
+- `[x]` 7. Voice Recorder Universal Audio Playback & Alerts
+  - `[x]` Dynamically detect browser-supported container formats (WebM, MP4, AAC, WAV) in `app/dashboard/voice/page.tsx`
+  - `[x]` Tag blobs with correct MIME types to resolve mobile silence playback bugs
+  - `[x]` Display mic permission overlay warning guides if stream initialization throws an error
+- `[x]` 8. AI Replies Prompt Marathi/Hinglish Transliteration Tuning
+  - `[x]` Update prompts in `app/api/generate-replies/route.ts` with strict spelling guidelines ("shant", "aikun", "samjun") and spoken dialect naturalness
+- `[x]` 9. Emotional Intelligence Scroll Blur Fix & Chart Scale
+  - `[x]` Replace glassmorphism on EI cards with opaque `bg-zinc-950/80` to prevent WebKit display line cracking in `app/dashboard/emotions/page.tsx`
+  - `[x]` Expand timeline ResponsiveContainer minimum height/width to ensure legible mobile rendering
+- `[x]` 10. Attachment Style Calculation Logic & Learn More Modal
+  - `[x]` Fix math inversion in `lib/metrics.ts` to ensure primary attachment style holds the dominant percentage score
+  - `[x]` Build sliding glass overlay modal for "Learn More" in `app/dashboard/attachment/page.tsx`
+

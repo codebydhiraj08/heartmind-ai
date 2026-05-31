@@ -6,11 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    turbopack: {
-      root: '.',
-    },
-  },
+  allowedDevOrigins: ['good-symbols-open.loca.lt', '*.loca.lt', '*.lhr.life', '*.lhr.rocks'],
 }
 
 export default nextConfig

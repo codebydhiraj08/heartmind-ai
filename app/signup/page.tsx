@@ -63,17 +63,12 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[oklch(0.04_0.005_240)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a12] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative ambient backgrounds */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 25 }}
-        className="sm:mx-auto sm:w-full sm:max-w-md z-10"
-      >
+      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex justify-center mb-6">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/10">
             <Sparkles className="w-5 h-5 text-white" />
@@ -85,24 +80,15 @@ export default function SignupPage() {
         <p className="mt-2 text-center text-xs text-zinc-400">
           Get started with your relationship intelligence helper
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 25, delay: 0.05 }}
-        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10"
-      >
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div
           onMouseMove={handleMouseMove}
           className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] shadow-2xl p-8 relative overflow-hidden bg-gradient-to-b from-zinc-900/60 to-zinc-950/60"
         >
           {success ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-6 relative z-10 space-y-4"
-            >
+            <div className="text-center py-6 relative z-10 space-y-4">
               <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
@@ -119,18 +105,14 @@ export default function SignupPage() {
                   </Button>
                 </Link>
               </div>
-            </motion.div>
+            </div>
           ) : (
             <>
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 leading-normal relative z-10"
-                >
+                <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 leading-normal relative z-10">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span>{error}</span>
-                </motion.div>
+                </div>
               )}
 
               <form className="space-y-4 relative z-10" onSubmit={handleSignup}>
@@ -232,7 +214,7 @@ export default function SignupPage() {
             Sign in here
           </Link>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

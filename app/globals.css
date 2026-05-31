@@ -180,7 +180,7 @@
 
 /* Premium Card (Linear & Stripe Standard) */
 .premium-card {
-  background: linear-gradient(to bottom, oklch(0.07 0.008 240 / 0.6), oklch(0.05 0.006 240 / 0.6));
+  background: linear-gradient(to bottom, rgba(18, 18, 24, 0.6), rgba(13, 13, 17, 0.6));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid oklch(0.14 0.01 240 / 0.4);
@@ -234,14 +234,14 @@
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, oklch(0.7 0.25 330), oklch(0.75 0.15 200));
+  background: linear-gradient(135deg, hsl(330, 80%, 70%), hsl(200, 75%, 72%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-warm {
-  background: linear-gradient(135deg, oklch(0.7 0.25 330), oklch(0.6 0.2 280));
+  background: linear-gradient(135deg, hsl(330, 80%, 70%), hsl(280, 70%, 65%));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -260,10 +260,10 @@
 .animated-gradient {
   background: linear-gradient(
     -45deg,
-    oklch(0.05 0.01 280),
-    oklch(0.1 0.05 330),
-    oklch(0.08 0.03 280),
-    oklch(0.1 0.04 200)
+    rgb(11, 11, 16),
+    rgb(26, 15, 22),
+    rgb(15, 13, 20),
+    rgb(15, 21, 27)
   );
   background-size: 400% 400%;
   animation: gradient-shift 15s ease infinite;

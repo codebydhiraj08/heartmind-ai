@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import {
+  X,
   Target,
   Heart,
   Shield,
@@ -104,6 +105,7 @@ export default function AttachmentPage() {
   const { data: session, status: sessionStatus } = useSession()
   const [latestAnalysis, setLatestAnalysis] = useState<any>(null)
   const [loadingAnalyses, setLoadingAnalyses] = useState(true)
+  const [isLearnMoreOpen, setIsLearnMoreOpen] = useState(false)
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
@@ -384,7 +386,11 @@ export default function AttachmentPage() {
                       Attachment styles are formed in early childhood but can evolve with awareness and practice. Moving toward secure attachment is possible through self-work and healthy relationships.
                     </p>
                   </div>
-                  <Button variant="outline" className="flex-shrink-0">
+                  <Button
+                    onClick={() => setIsLearnMoreOpen(true)}
+                    variant="outline"
+                    className="flex-shrink-0 cursor-pointer"
+                  >
                     Learn More
                     <ChevronRight className="ml-2 w-4 h-4" />
                   </Button>
@@ -394,6 +400,94 @@ export default function AttachmentPage() {
           </motion.div>
         </div>
       </PremiumGate>
+
+      {/* Learn More Interactive sliding modal overlay */}
+      <AnimatePresence>
+        {isLearnMoreOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Dark glass backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsLearnMoreOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-white/[0.08] bg-zinc-950 p-6 shadow-2xl z-10 spotlight-glow"
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-bold text-white tracking-wide">Understanding Attachment Theory</h2>
+                </div>
+                <button
+                  onClick={() => setIsLearnMoreOpen(false)}
+                  className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-900/60 transition-all duration-200 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mt-4 space-y-4 max-h-[65vh] overflow-y-auto pr-1 text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                <p>
+                  Attachment theory, originally developed by British psychologist John Bowlby, outlines how human beings form emotional bonds with romantic partners. These patterns are rooted in childhood experiences but are highly dynamic and can be consciously re-trained.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 rounded-xl bg-emerald-500/[0.02] border border-emerald-500/10">
+                    <h4 className="font-bold text-emerald-400 mb-1">🤝 Secure Attachment</h4>
+                    <p className="text-zinc-400 text-xs">
+                      Comfortable with intimacy and vulnerability. Communicates needs clearly, welcomes mutual independence, and manages relationship conflicts with constructive composure.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-500/[0.02] border border-amber-500/10">
+                    <h4 className="font-bold text-amber-400 mb-1">🥺 Anxious Attachment</h4>
+                    <p className="text-zinc-400 text-xs">
+                      Deeply desires intense closeness but lives with high abandonment fears. Frequently seeks partner validation and can experience spikes of worry when communication lags.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-sky-500/[0.02] border border-sky-500/10">
+                    <h4 className="font-bold text-sky-400 mb-1">🛡️ Avoidant Attachment</h4>
+                    <p className="text-zinc-400 text-xs">
+                      Equates closeness with a loss of freedom. Struggles with vulnerability, uses defensive space when conflict increases, and shields independence at all costs.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-rose-500/[0.02] border border-rose-500/10">
+                    <h4 className="font-bold text-rose-400 mb-1">🧠 Fearful-Avoidant</h4>
+                    <p className="text-zinc-400 text-xs">
+                      A combination of anxious and avoidant traits. Craves intimacy but is terrified of getting hurt, leading to push-pull patterns and communication blockages.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 text-zinc-300 mt-4">
+                  <h4 className="font-bold text-zinc-200 mb-1 flex items-center gap-1.5">
+                    <span>💡</span> Transitioning Toward Secure Attachment
+                  </h4>
+                  <p className="text-xs text-zinc-450 leading-relaxed">
+                    Your attachment style is not set in stone! Research proves that attachment styles can transition into a healthy **Secure Attachment** status through self-awareness, active communication re-training, recognizing emotional triggers, and building healthy boundaries with supportive partners.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-zinc-800/80 mt-6">
+                <Button
+                  onClick={() => setIsLearnMoreOpen(false)}
+                  className="bg-primary hover:bg-primary/90 text-white font-semibold text-xs rounded-lg px-5 h-9 transition-all"
+                >
+                  Got It
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

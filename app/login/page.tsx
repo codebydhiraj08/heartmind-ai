@@ -76,11 +76,19 @@ function LoginPageContent() {
       const checkRes = await fetch("/api/auth/google-check");
       const { isPlaceholder } = await checkRes.json();
 
-      if (isPlaceholder) {
-        // 2. Active Local Mock Google Login!
+      // Only use mock mode for raw network IPs (192.168.x.x, 10.x.x.x, 172.x.x.x)
+      // localhost/127.0.0.1 pe REAL Google OAuth kaam karta hai (Google Console ne authorize kiya hai)
+      const isRawNetworkIP = window.location.hostname.startsWith("192.168.") || 
+                              window.location.hostname.startsWith("10.") || 
+                              (window.location.hostname.startsWith("172.") && 
+                               parseInt(window.location.hostname.split(".")[1]) >= 16 &&
+                               parseInt(window.location.hostname.split(".")[1]) <= 31);
+
+      if (isPlaceholder || isRawNetworkIP) {
+        // 2. Active Local Mock Google Login! (only for raw IPs)
         const googleEmail = prompt(
-          "🛡️ Google OAuth Mock Sign-in (Local Dev Mode)\n\n" +
-          "Aapke .env mein real Google credentials configured nahi hain.\n" +
+          "🛡️ Google OAuth Mock Sign-in (Network IP Mode)\n\n" +
+          "Aap local network IP se connect hain jahan Google OAuth redirect setup impossible hai.\n" +
           "Local testing ke liye koi bhi mock Google Email enter karein:",
           "dhiraj.google@gmail.com"
         );
@@ -159,17 +167,12 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[oklch(0.04_0.005_240)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a12] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Decorative ambient backgrounds */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 25 }}
-        className="sm:mx-auto sm:w-full sm:max-w-md z-10"
-      >
+      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex justify-center mb-6">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/10">
             <Sparkles className="w-5 h-5 text-white" />
@@ -181,27 +184,18 @@ function LoginPageContent() {
         <p className="mt-2 text-center text-xs text-zinc-400">
           Enter your credentials or sign in using Google
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 25, delay: 0.05 }}
-        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10"
-      >
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div
           onMouseMove={handleMouseMove}
           className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] shadow-2xl p-8 relative overflow-hidden bg-gradient-to-b from-zinc-900/60 to-zinc-950/60"
         >
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 leading-normal relative z-10"
-            >
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 leading-normal relative z-10">
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>{error}</span>
-            </motion.div>
+            </div>
           )}
 
           <form className="space-y-4 relative z-10" onSubmit={handleLogin}>
@@ -278,22 +272,23 @@ function LoginPageContent() {
             </Button>
           </form>
 
-          <div className="mt-6 relative z-10">
-            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="mt-6 relative z-10 pointer-events-none">
+            <div className="absolute inset-0 flex items-center pointer-events-none" aria-hidden="true">
               <div className="w-full border-t border-white/[0.04]"></div>
             </div>
-            <div className="relative flex justify-center text-xs">
+            <div className="relative flex justify-center text-xs pointer-events-none">
               <span className="px-3 bg-transparent text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                 Or Continue With
               </span>
             </div>
           </div>
 
-          <div className="mt-4 relative z-10">
+          <div className="mt-4 relative z-20">
             <button
               onClick={handleGoogleLogin}
               type="button"
-              className="w-full flex justify-center items-center gap-2 px-4 py-2 bg-zinc-950/50 hover:bg-zinc-900 border border-white/[0.06] hover:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white transition-all duration-300"
+              disabled={loading}
+              className="w-full flex justify-center items-center gap-2 px-4 py-2 bg-zinc-950/50 hover:bg-zinc-900 border border-white/[0.06] hover:border-zinc-800 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                 <path
@@ -327,7 +322,7 @@ function LoginPageContent() {
             Sign up for free
           </Link>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -335,7 +330,7 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[oklch(0.04_0.005_240)] flex items-center justify-center text-xs text-zinc-500">
+      <div className="min-h-screen bg-[#0a0a12] flex items-center justify-center text-xs text-zinc-500">
         <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
         <span>Loading Login Form...</span>
       </div>

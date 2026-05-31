@@ -243,7 +243,7 @@ export default function SettingsPage() {
   // Get active avatar background/preview
   const renderAvatarPreview = () => {
     if (customAvatarUrl && (customAvatarUrl.startsWith("http") || customAvatarUrl.startsWith("data:image/") || customAvatarUrl.startsWith("/api/"))) {
-      return <img src={customAvatarUrl} alt="Profile photo" className="w-full h-full object-cover animate-fade-in" />
+      return <img key={customAvatarUrl} src={customAvatarUrl} alt="Profile photo" className="w-full h-full object-cover animate-fade-in" />
     }
     
     // Legacy preset check for background fallback if custom URL is empty

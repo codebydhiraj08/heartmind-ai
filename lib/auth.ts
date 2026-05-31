@@ -11,6 +11,17 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days session
   },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: false,
+      },
+    },
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
@@ -48,8 +59,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Incorrect password");
         }
 
-        // Check if email is verified
-        if (!user.emailVerified) {
+        // Check if email is verified (bypassed in local/development environments for smooth mobile/offline testing)
+        const isLocalDev = 
+          process.env.NODE_ENV !== "production" || 
+          process.env.NEXTAUTH_URL?.includes("localhost") || 
+          process.env.NEXTAUTH_URL?.includes("127.0.0.1") || 
+          process.env.NEXTAUTH_URL?.includes("192.168");
+          
+        if (!user.emailVerified && !isLocalDev) {
           throw new Error("Please verify your email before logging in. Check your inbox for the link.");
         }
 

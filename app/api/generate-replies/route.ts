@@ -392,7 +392,17 @@ Tone Description: "${toneInfo.description}"
    - If the input message is short (1-2 lines, or under 20 words, e.g. "Because I'm your peace 😌❤️" or "kya hua?"), the generated replies MUST be equally short, sweet, and concise (strictly 1 or 2 short sentences). Do NOT generate long, wordy paragraphs for simple brief inputs.
    - If the input message is long (multiple lines, detailed emotional paragraph), the generated replies should be proportionally longer and more detailed (2-3 sentences or a concise paragraph) to match their emotional investment and provide comprehensive validation.
 4. Keep the replies conversational, realistic, and free of any robotic or cliché phrasing. Avoid overly generic templates.
-5. Output your response as a valid JSON array containing exactly 3 string values, like:
+5. **Strict Spoken Marathi & Hinglish Transliteration Guidelines (SPELLING & GRAMMAR CRITICAL):**
+   - Do NOT make spelling or word mismatch mistakes when transliterating Marathi/Hinglish in English script:
+     * Enforce **"shant"** or **"shaant"** (शांत) for quiet/calm. NEVER use **"sant"** (which means saint in Marathi).
+     * Enforce **"aikun"** or **"aikoon"** (ऐकून) for listening/hearing. NEVER use **"aikon"**.
+     * Enforce **"samjun"** (समजून) for understanding. NEVER use **"samjon"**.
+     * Enforce **"kalte"** or **"kalatay"** (कळतंय) for understanding/knowing.
+   - AVOID awkward literal structural translations of English. Make them sound like natural spoken texting. For example:
+     * Instead of "Mi aata tujhya sathi purnpane ahe" (which is an awkward English literal structure), output natural phrasing like "Mi ahe na tujhya sathi purnpane, bol na kaay zala?" or "Mi tula samjun ghyayla nehmich ithech ahe."
+     * Instead of "Jana ahe ki..." write "Mala kalat ahe ki..." or "Mala jaeniv ahe ki...".
+   - Mimic how modern, warm, high-EQ partners actually text each other to ensure emotional resonance and absolute linguistic clarity.
+6. Output your response as a valid JSON array containing exactly 3 string values, like:
 [
   "First generated reply option",
   "Second generated reply option",

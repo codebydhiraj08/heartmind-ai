@@ -413,7 +413,7 @@ export default function EmotionsPage() {
               onClick={() => setSelectedEmotion(emotion.name)}
               className="cursor-pointer"
             >
-              <Card className={`glass transition-all duration-300 ${activeStyle}`}>
+              <Card className={`bg-zinc-950/85 border border-white/[0.06] backdrop-blur-none sm:backdrop-blur-md transition-all duration-300 ${activeStyle}`}>
                 <CardContent className="p-4">
                   <div className={`w-10 h-10 rounded-xl ${emotion.color} flex items-center justify-center mb-3`}>
                     <emotion.icon className="w-5 h-5" />
@@ -478,7 +478,7 @@ export default function EmotionsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-72">
+            <div className="h-64 sm:h-80 w-full min-h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartTimeline}>
                   <defs>

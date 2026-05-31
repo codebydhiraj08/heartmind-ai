@@ -93,11 +93,7 @@ export default function LandingPage() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="md:hidden glass-strong border-t border-border"
-          >
+          <div className="md:hidden glass-strong border-t border-border">
             <div className="px-4 py-4 space-y-3">
               <Link href="#features" className="block py-2 text-muted-foreground hover:text-foreground">
                 Features
@@ -115,7 +111,7 @@ export default function LandingPage() {
                 <Button className="w-full bg-gradient-to-r from-primary to-accent">Get Started</Button>
               </Link>
             </div>
-          </motion.div>
+          </div>
         )}
       </nav>
 
@@ -128,12 +124,7 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center max-w-4xl mx-auto animate-fade-up"
-          >
+          <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-sm text-muted-foreground">AI-Powered Relationship Intelligence</span>
@@ -177,15 +168,10 @@ export default function LandingPage() {
                 <span className="text-sm">500K+ Users Trust Us</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Hero Dashboard Preview */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="mt-20 relative animate-fade-up"
-          >
+          <div className="mt-20 relative">
             <div className="glass rounded-3xl p-8 neon-glow-purple">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Analysis Card */}
@@ -259,31 +245,25 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Features Section */}
       <section id="features" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeInUp} className="text-primary font-medium mb-4">
+          <div className="text-center mb-16">
+            <p className="text-primary font-medium mb-4">
               POWERFUL FEATURES
-            </motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Everything You Need for
               <span className="block gradient-text">Emotional Intelligence</span>
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Advanced AI tools to analyze, understand, and improve your relationships
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
@@ -359,13 +339,9 @@ export default function LandingPage() {
                 description: "Generate better bios, conversation starters, first message ideas, and profile improvement suggestions.",
                 gradient: "from-warning to-accent"
               }
-            ].map((feature, index) => (
-              <motion.div
+            ].map((feature) => (
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
                 className="group glass rounded-xl p-6 hover:neon-glow-pink transition-all duration-300"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
@@ -373,7 +349,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -387,21 +363,15 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeInUp} className="text-primary font-medium mb-4">
+          <div className="text-center mb-16">
+            <p className="text-primary font-medium mb-4">
               HOW IT WORKS
-            </motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Three Simple Steps to
               <span className="block gradient-text">Better Relationships</span>
-            </motion.h2>
-          </motion.div>
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -421,12 +391,8 @@ export default function LandingPage() {
                 description: "Receive detailed reports, red flag alerts, and actionable suggestions."
               }
             ].map((item, index) => (
-              <motion.div
+              <div
                 key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
                 className="relative"
               >
                 <div className="glass rounded-xl p-8 text-center h-full">
@@ -439,74 +405,13 @@ export default function LandingPage() {
                     <ChevronRight className="w-8 h-8 text-primary" />
                   </div>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeInUp} className="text-primary font-medium mb-4">
-              TESTIMONIALS
-            </motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              Loved by Thousands
-            </motion.h2>
-          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                quote: "HeartMind AI helped me recognize patterns I was blind to for years. The red flag detection literally saved me from a toxic relationship.",
-                author: "Sarah K.",
-                role: "Marketing Professional",
-                rating: 5
-              },
-              {
-                quote: "The AI reply suggestions have transformed how I communicate. My partner noticed the difference within a week.",
-                author: "Michael R.",
-                role: "Software Engineer",
-                rating: 5
-              },
-              {
-                quote: "Finally, a relationship tool that feels professional and not like a silly dating app. The emotional intelligence insights are incredibly accurate.",
-                author: "Emma T.",
-                role: "Therapist",
-                rating: 5
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={testimonial.author}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass rounded-xl p-6"
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Sparkles key={i} className="w-4 h-4 text-primary" />
-                  ))}
-                </div>
-                <p className="text-foreground mb-6 italic">&ldquo;{testimonial.quote}&rdquo;</p>
-                <div>
-                  <p className="font-semibold">{testimonial.author}</p>
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Pricing Section */}
       <section id="pricing" className="py-20 px-4 relative">
@@ -515,23 +420,17 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeInUp} className="text-primary font-medium mb-4">
+          <div className="text-center mb-16">
+            <p className="text-primary font-medium mb-4">
               PRICING
-            </motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Choose Your Plan
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-muted-foreground text-lg">
+            </h2>
+            <p className="text-muted-foreground text-lg">
               Start free, upgrade when you need more
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
@@ -582,13 +481,9 @@ export default function LandingPage() {
                 cta: "Go Premium",
                 popular: false
               }
-            ].map((plan, index) => (
-              <motion.div
+            ].map((plan) => (
+              <div
                 key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
                 className={`relative glass rounded-2xl p-8 ${plan.popular ? 'neon-glow-pink border-2 border-primary' : ''}`}
               >
                 {plan.popular && (
@@ -620,7 +515,7 @@ export default function LandingPage() {
                     {plan.cta}
                   </Button>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -629,20 +524,14 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <section id="faq" className="py-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeInUp} className="text-primary font-medium mb-4">
+          <div className="text-center mb-16">
+            <p className="text-primary font-medium mb-4">
               FAQ
-            </motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Frequently Asked Questions
-            </motion.h2>
-          </motion.div>
+            </h2>
+          </div>
 
           <div className="space-y-4">
             {[
@@ -670,18 +559,14 @@ export default function LandingPage() {
                 question: "What platforms are supported for chat import?",
                 answer: "You can paste conversations from WhatsApp, Instagram, Telegram, Snapchat, iMessage, and any standard text format. We also support voice message analysis."
               }
-            ].map((faq, index) => (
-              <motion.div
+            ].map((faq) => (
+              <div
                 key={faq.question}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
                 className="glass rounded-xl p-6"
               >
                 <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
                 <p className="text-muted-foreground">{faq.answer}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -690,12 +575,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass rounded-3xl p-8 md:p-12 text-center neon-glow-pink"
-          >
+          <div className="glass rounded-3xl p-8 md:p-12 text-center neon-glow-pink">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Ready to Understand Your
               <span className="block gradient-text">Relationships Better?</span>
@@ -710,7 +590,7 @@ export default function LandingPage() {
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground mt-4">No credit card required. Start analyzing in seconds.</p>
-          </motion.div>
+          </div>
         </div>
       </section>
 

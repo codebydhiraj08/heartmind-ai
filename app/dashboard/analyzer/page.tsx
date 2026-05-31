@@ -225,6 +225,7 @@ function ChatAnalyzerInner() {
     message: string;
     description?: string;
   } | null>(null)
+  const [showMobileGuide, setShowMobileGuide] = useState(false)
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1011,21 +1012,74 @@ function ChatAnalyzerInner() {
                     </div>
 
                     {/* Upload Option */}
-                    <div className="relative group">
-                      <input
-                        type="file"
-                        accept=".txt,.json"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        id="chat-file-upload"
-                      />
-                      <label
-                        htmlFor="chat-file-upload"
-                        className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98]"
-                      >
-                        <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors animate-pulse" />
-                        <span>Upload Chat Export File (.txt, .json)</span>
-                      </label>
+                    <div className="space-y-3">
+                      <div className="relative group">
+                        <input
+                          type="file"
+                          accept=".txt,.json"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          id="chat-file-upload"
+                        />
+                        <label
+                          htmlFor="chat-file-upload"
+                          className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98]"
+                        >
+                          <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors animate-pulse" />
+                          <span>Upload Chat Export File (.txt, .json)</span>
+                        </label>
+                      </div>
+
+                      {/* Interactive Mobile Export Helper Guide Accordion */}
+                      <div className="rounded-xl border border-white/[0.04] bg-zinc-950/20 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setShowMobileGuide(!showMobileGuide)}
+                          className="w-full flex items-center justify-between p-3.5 text-left text-zinc-300 hover:text-white transition-colors cursor-pointer select-none"
+                        >
+                          <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                            <span>📱</span> Mobile User? How to Export Chats
+                          </span>
+                          <span className="text-zinc-500 text-xs font-bold font-mono">
+                            {showMobileGuide ? "Hide" : "Show"}
+                          </span>
+                        </button>
+                        
+                        <AnimatePresence>
+                          {showMobileGuide && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.25 }}
+                              className="border-t border-white/[0.04] p-3.5 bg-black/10 space-y-3.5 text-xs text-zinc-400 leading-relaxed"
+                            >
+                              <div>
+                                <h4 className="font-bold text-zinc-200 flex items-center gap-1.5 mb-1 text-[11px] uppercase tracking-wide">
+                                  <span className="text-green-500">✓</span> WhatsApp (Easy &amp; Fast ⚡)
+                                </h4>
+                                <ol className="list-decimal pl-4.5 space-y-1">
+                                  <li>Open your WhatsApp chat partner conversation.</li>
+                                  <li>Tap the contact name at the top (or tap the three-dots menu <span className="font-bold">⋮</span>).</li>
+                                  <li>Scroll down and select <span className="font-bold text-zinc-300">Export Chat</span>.</li>
+                                  <li>Select <span className="font-semibold text-primary">Without Media</span> (creates a clean compact text file).</li>
+                                  <li>Save the generated <span className="font-bold text-zinc-350">.txt</span> file to your device Files or share it.</li>
+                                  <li>Click the **Upload Chat Export File** button above, select that saved file, and you are done! 💥</li>
+                                </ol>
+                              </div>
+                              <div className="border-t border-white/[0.03] pt-3">
+                                <h4 className="font-bold text-zinc-200 flex items-center gap-1.5 mb-1 text-[11px] uppercase tracking-wide">
+                                  <span className="text-pink-500">✓</span> Instagram (Alt Option 📸)
+                                </h4>
+                                <ul className="list-disc pl-4.5 space-y-1">
+                                  <li>For short dialogue logs: Tap-and-hold to copy messages, and paste them directly in the text editor above.</li>
+                                  <li>For full archive exports: Open Instagram Settings ➡️ Account Center ➡️ Your Information ➡️ Download Your Information. Choose JSON format to upload here.</li>
+                                </ul>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
 
                     {notification && (

@@ -90,6 +90,7 @@ function VoiceAnalyzerInner() {
   const [errorMsg, setErrorMsg] = useState("")
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [copiedInsight, setCopiedInsight] = useState<number | null>(null)
+  const [micErrorMessage, setMicErrorMessage] = useState<string | null>(null)
   
   const [overallScore, setOverallScore] = useState<number>(70)
   const [playbackTime, setPlaybackTime] = useState<number>(0)
@@ -332,11 +333,33 @@ function VoiceAnalyzerInner() {
 
   const startRecording = async () => {
     try {
+      setMicErrorMessage(null)
       if (typeof window !== "undefined" && (!navigator.mediaDevices || !window.MediaRecorder)) {
         throw new Error("MediaRecorder not supported")
       }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
+
+      // Dynamically detect browser capability for WebM, MP4, AAC, and WAV audio containers
+      const mimeTypes = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+        "audio/mp4",
+        "audio/aac",
+        "audio/wav"
+      ]
+      let selectedMimeType = ""
+      for (const mime of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mime)) {
+          selectedMimeType = mime
+          break
+        }
+      }
+
+      const mediaRecorder = selectedMimeType
+        ? new MediaRecorder(stream, { mimeType: selectedMimeType })
+        : new MediaRecorder(stream)
+
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
 
@@ -347,8 +370,11 @@ function VoiceAnalyzerInner() {
       }
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
-        const file = new File([audioBlob], `recording-${Date.now()}.wav`, { type: "audio/wav" })
+        const mime = mediaRecorder.mimeType || "audio/wav"
+        const ext = mime.includes("webm") ? "webm" : mime.includes("mp4") ? "mp4" : mime.includes("aac") ? "aac" : mime.includes("ogg") ? "ogg" : "wav"
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: mime })
+        const file = new File([audioBlob], `recording-${Date.now()}.${ext}`, { type: mime })
         setAudioFile(file)
         
         const url = URL.createObjectURL(audioBlob)
@@ -386,8 +412,19 @@ function VoiceAnalyzerInner() {
         recordingTimeRef.current += 1
         setRecordingTime(recordingTimeRef.current)
       }, 1000)
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Microphone access error, falling back to simulator:", err)
+      
+      // Enforce direct descriptive troubleshooting message for permission overlays/bubbles
+      let errMsg = "Microphone permission was denied."
+      if (err.message && err.message.toLowerCase().includes("permission")) {
+        errMsg = "Microphone access blocked. If you are on Android/iOS, please close any floating bubbles, chat heads (like Facebook Messenger), screen recorders, or active overlays from other apps, then try again."
+      } else if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError" || err.message?.toLowerCase().includes("allow")) {
+        errMsg = "Microphone permission is blocked by your browser. Please close any background app overlays or chat bubbles, reset site settings, and allow mic permissions to record your real voice."
+      }
+      
+      setMicErrorMessage(errMsg)
+      
       // Fallback to high-fidelity simulated recording!
       setIsRecording(true)
       setIsSimulated(true)
@@ -987,6 +1024,16 @@ function VoiceAnalyzerInner() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      {micErrorMessage && (
+                        <div className="p-3.5 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
+                          <AlertCircle className="w-4.5 h-4.5 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-extrabold uppercase tracking-widest text-[9px] mb-1">Microphone Access Alert</p>
+                            <p className="leading-normal">{micErrorMessage}</p>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex flex-col items-center justify-center py-12">
                         <button
                           onClick={toggleRecording}

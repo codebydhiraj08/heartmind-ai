@@ -85,44 +85,76 @@ export function calculateCompatibility(
 export function calculateAttachmentBreakdown(attachmentStyle: string, positivityScore: number): IAttachmentBreakdown {
   const p = Math.max(0, Math.min(100, positivityScore));
   const style = String(attachmentStyle || "secure").toLowerCase();
-  const remaining = 100 - p;
 
   let secure = 0;
   let anxious = 0;
   let avoidant = 0;
   let fearful = 0;
 
+  // Let's assign the dominant score based on the style and positivity.
+  // Secure attachment grows with positivity. Insecure attachments grow as positivity falls (i.e. conflict rises).
   if (style === "secure") {
-    secure = p;
-    anxious = Math.round(remaining * 0.5);
+    secure = Math.max(45, Math.round(p)); // Secure is dominant, min 45%
+    const remaining = 100 - secure;
+    anxious = Math.round(remaining * 0.4);
     avoidant = Math.round(remaining * 0.35);
     fearful = Math.max(0, remaining - anxious - avoidant);
   } else if (style === "anxious") {
-    anxious = p;
-    secure = Math.round(remaining * 0.3);
-    avoidant = Math.round(remaining * 0.5);
-    fearful = Math.max(0, remaining - secure - avoidant);
+    // Insecure anxious is dominant, grows when positivity is lower
+    anxious = Math.max(45, Math.round(100 - p * 0.8));
+    secure = Math.round((100 - anxious) * 0.4);
+    avoidant = Math.round((100 - anxious) * 0.35);
+    fearful = Math.max(0, 100 - anxious - secure - avoidant);
   } else if (style === "avoidant") {
-    avoidant = p;
-    secure = Math.round(remaining * 0.35);
-    anxious = Math.round(remaining * 0.45);
-    fearful = Math.max(0, remaining - secure - anxious);
+    // Insecure avoidant is dominant, grows when positivity is lower
+    avoidant = Math.max(45, Math.round(100 - p * 0.8));
+    secure = Math.round((100 - avoidant) * 0.4);
+    anxious = Math.round((100 - avoidant) * 0.35);
+    fearful = Math.max(0, 100 - avoidant - secure - anxious);
   } else {
-    fearful = p;
-    secure = Math.round(remaining * 0.2);
-    anxious = Math.round(remaining * 0.5);
-    avoidant = Math.max(0, remaining - secure - anxious);
+    // Fearful is dominant, grows when positivity is lower
+    fearful = Math.max(45, Math.round(100 - p * 0.8));
+    secure = Math.round((100 - fearful) * 0.3);
+    anxious = Math.round((100 - fearful) * 0.4);
+    avoidant = Math.max(0, 100 - fearful - secure - anxious);
   }
 
-  // Ensure overall normalization so sum stays exactly 100%
-  const total = secure + anxious + avoidant + fearful;
-  if (total !== 100 && total > 0) {
-    const scale = 100 / total;
-    secure = Math.round(secure * scale);
-    anxious = Math.round(anxious * scale);
-    avoidant = Math.round(avoidant * scale);
-    fearful = Math.max(0, 100 - secure - anxious - avoidant);
+  // Double check that the selected primary style has the absolute maximum percentage
+  let secureVal = secure;
+  let anxiousVal = anxious;
+  let avoidantVal = avoidant;
+  let fearfulVal = fearful;
+
+  // Final sanity clamp: enforce that the dominant style is strictly greater than the others
+  if (style === "secure") {
+    const maxInsecure = Math.max(anxiousVal, avoidantVal, fearfulVal);
+    if (secureVal <= maxInsecure) {
+      secureVal = maxInsecure + 5;
+    }
+  } else if (style === "anxious") {
+    const maxOthers = Math.max(secureVal, avoidantVal, fearfulVal);
+    if (anxiousVal <= maxOthers) {
+      anxiousVal = maxOthers + 5;
+    }
+  } else if (style === "avoidant") {
+    const maxOthers = Math.max(secureVal, anxiousVal, fearfulVal);
+    if (avoidantVal <= maxOthers) {
+      avoidantVal = maxOthers + 5;
+    }
+  } else if (style === "fearful") {
+    const maxOthers = Math.max(secureVal, anxiousVal, avoidantVal);
+    if (fearfulVal <= maxOthers) {
+      fearfulVal = maxOthers + 5;
+    }
   }
+
+  const total = secureVal + anxiousVal + avoidantVal + fearfulVal;
+  const scale = total > 0 ? 100 / total : 1;
+  
+  secure = Math.round(secureVal * scale);
+  anxious = Math.round(anxiousVal * scale);
+  avoidant = Math.round(avoidantVal * scale);
+  fearful = Math.max(0, 100 - secure - anxious - avoidant);
 
   return {
     secure,

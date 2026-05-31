@@ -40,7 +40,9 @@ export async function GET(req: NextRequest) {
         return new NextResponse(buffer, {
           headers: {
             "Content-Type": contentType,
-            "Cache-Control": "public, max-age=86400, stale-while-revalidate=43200",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
           },
         });
       }

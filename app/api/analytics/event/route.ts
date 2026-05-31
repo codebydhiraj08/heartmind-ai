@@ -14,6 +14,7 @@ const VALID_EVENTS: AnalyticsEventName[] = [
   "subscription_activated",
   "feature_preview_viewed",
   "analysis_completed",
+  "voice_analysis_completed",
   "onboarding_banner_viewed",
   "trial_cta_viewed",
 ];
