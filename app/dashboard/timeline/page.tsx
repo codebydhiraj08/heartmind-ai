@@ -248,17 +248,14 @@ export default function TimelinePage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 self-start sm:self-center">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold py-0.5 px-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 uppercase">
-                          {event.sentiment || "positive"}
-                        </span>
-                        {event.score && (
-                          <span className="text-xs font-extrabold text-zinc-300">
-                            Score: {event.score}
-                          </span>
-                        )}
-                      </div>
+                     <div className="flex items-center gap-3 self-start sm:self-center">
+                       <div className="flex items-center gap-2">
+                         {event.score && (
+                           <span className="text-xs font-extrabold text-zinc-300">
+                             Score: {event.score}
+                           </span>
+                         )}
+                       </div>
                       <button
                         onClick={() => handleDeleteMemory(event._id)}
                         className="text-zinc-600 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors duration-200"
@@ -362,6 +359,8 @@ export default function TimelinePage() {
                       <option value="Milestone">Milestone</option>
                       <option value="Date Night">Date Night</option>
                       <option value="Conflict Resolved">Conflict Resolved</option>
+                      <option value="Birthday">Birthday</option>
+                      <option value="Anniversary">Anniversary</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
@@ -380,36 +379,21 @@ export default function TimelinePage() {
                   </div>
                 </div>
 
-                {/* Sentiment & Score */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-300">Sentiment</label>
-                    <select
-                      value={sentiment}
-                      onChange={(e) => setSentiment(e.target.value)}
-                      className="w-full rounded-xl border border-white/[0.06] bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all duration-200 [&>option]:bg-zinc-950"
-                    >
-                      <option value="highly positive">Highly Positive</option>
-                      <option value="positive">Positive</option>
-                      <option value="neutral">Neutral</option>
-                      <option value="negative">Negative</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-xs font-semibold text-zinc-300">Score (0-100)</label>
-                      <span className="text-[10px] text-zinc-400 font-bold bg-zinc-800 px-1.5 py-0.5 rounded">{score}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={score}
-                      onChange={(e) => setScore(Number(e.target.value))}
-                      className="w-full accent-primary bg-zinc-800 h-1.5 rounded-lg appearance-none cursor-pointer mt-3"
-                    />
-                  </div>
-                </div>
+                 {/* Score */}
+                 <div className="space-y-1.5">
+                   <div className="flex justify-between items-center">
+                     <label className="text-xs font-semibold text-zinc-300">Score (0-100)</label>
+                     <span className="text-[10px] text-zinc-400 font-bold bg-zinc-800 px-1.5 py-0.5 rounded">{score}</span>
+                   </div>
+                   <input
+                     type="range"
+                     min="0"
+                     max="100"
+                     value={score}
+                     onChange={(e) => setScore(Number(e.target.value))}
+                     className="w-full accent-primary bg-zinc-800 h-1.5 rounded-lg appearance-none cursor-pointer mt-3"
+                   />
+                 </div>
 
                 {/* Description */}
                 <div className="space-y-1.5">
