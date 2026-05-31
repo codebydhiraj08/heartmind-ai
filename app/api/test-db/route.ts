@@ -7,6 +7,40 @@ import path from "path";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  const retry = req.nextUrl.searchParams.get("retry") === "true";
+  
+  if (retry) {
+    // Dynamic Hot-Reload of .env file from disk!
+    try {
+      const envPath = path.join(process.cwd(), ".env");
+      if (fs.existsSync(envPath)) {
+        const envContent = fs.readFileSync(envPath, "utf8");
+        const lines = envContent.split("\n");
+        for (const line of lines) {
+          const match = line.match(/^\s*MONGODB_URI\s*=\s*(.+)$/);
+          if (match) {
+            let value = match[1].trim();
+            if (value.startsWith('"') && value.endsWith('"')) {
+              value = value.substring(1, value.length - 1);
+            }
+            if (value.startsWith("'") && value.endsWith("'")) {
+              value = value.substring(1, value.length - 1);
+            }
+            process.env.MONGODB_URI = value;
+            break;
+          }
+        }
+      }
+    } catch (envReadError) {
+      console.error("Failed to read .env dynamically during retry:", envReadError);
+    }
+
+    // Reset caching state
+    global.mongooseCache = { conn: null, promise: null };
+    global.useMockDatabase = undefined;
+    global.mongooseConnectionError = undefined;
+  }
+
   const diagnostics: Record<string, any> = {
     mongodb_uri_exists: false,
     mongodb_uri_masked: "Not found",
@@ -14,6 +48,7 @@ export async function GET(req: NextRequest) {
     connection_successful: false,
     connection_error: null,
     global_use_mock_db: false,
+    retry_executed: retry,
   };
 
   try {
@@ -31,6 +66,7 @@ export async function GET(req: NextRequest) {
       diagnostics.connection_successful = true;
     }
     diagnostics.global_use_mock_db = !!global.useMockDatabase;
+    diagnostics.connection_error = global.mongooseConnectionError || null;
 
     const targetEmails = ["dhirajwarangane@gmail.com", "dhirajwarangane2004@gmail.com"];
     const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now!

@@ -22,7 +22,12 @@ import {
   Sparkles,
   Compass,
   MessageSquare,
-  Volume2
+  Volume2,
+  Database,
+  RefreshCw,
+  AlertTriangle,
+  Terminal,
+  CheckCircle2
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -34,7 +39,43 @@ export default function SettingsPage() {
   const { subscription, usage, loading: subLoading, refreshSubscription } = useSubscription()
 
   // Active settings tab state
-  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "subscription">("profile")
+  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "subscription" | "diagnostics">("profile")
+
+  // Diagnostics Tab states
+  const [diagLoading, setDiagLoading] = useState(false)
+  const [diagRetrying, setDiagRetrying] = useState(false)
+  const [diagData, setDiagData] = useState<any>(null)
+  const [diagError, setDiagError] = useState<string | null>(null)
+
+  // Fetch diagnostics details from server
+  const fetchDiagnostics = async (isRetry = false) => {
+    if (isRetry) {
+      setDiagRetrying(true)
+    } else {
+      setDiagLoading(true)
+    }
+    setDiagError(null)
+
+    try {
+      const res = await fetch(`/api/test-db${isRetry ? "?retry=true" : ""}`)
+      const data = await res.json()
+      setDiagData(data)
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to load database diagnostics.")
+      }
+    } catch (err: any) {
+      setDiagError(err.message || "An unexpected diagnostics error occurred.")
+    } finally {
+      setDiagLoading(false)
+      setDiagRetrying(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "diagnostics") {
+      fetchDiagnostics(false)
+    }
+  }, [activeTab])
 
   // Form states - Personal Profile
   const [name, setName] = useState("")
@@ -314,7 +355,8 @@ export default function SettingsPage() {
         {[
           { id: "profile", label: "👤 Profile details", icon: User },
           { id: "preferences", label: "🧠 AI & Relationship Preferences", icon: Heart },
-          { id: "subscription", label: "👑 Plan & Billing Info", icon: Crown }
+          { id: "subscription", label: "👑 Plan & Billing Info", icon: Crown },
+          { id: "diagnostics", label: "🔌 DB Diagnostics", icon: Database }
         ].map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -904,6 +946,181 @@ export default function SettingsPage() {
                       <span className="text-[9px] text-zinc-400 leading-normal block pt-0.5">{res.desc}</span>
                     </a>
                   ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ========================================================== */}
+          {/* TAB 4: DATABASE & CONNECTION DIAGNOSTICS                   */}
+          {/* ========================================================== */}
+          {activeTab === "diagnostics" && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Connection Status Panel (Left/Main Column) */}
+              <div className="lg:col-span-8 rounded-2xl border border-white/[0.05] bg-zinc-950/40 p-6 space-y-6 glass-strong">
+                <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+                  <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
+                    <Database className="w-4 h-4 text-zinc-400" />
+                    Database Connection Diagnostics
+                  </h3>
+                  <Button
+                    type="button"
+                    disabled={diagLoading || diagRetrying}
+                    onClick={() => fetchDiagnostics(true)}
+                    className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 text-xs font-bold px-3 py-1.5 h-8 rounded-lg flex items-center gap-1.5 transition-all"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${diagRetrying ? "animate-spin" : ""}`} />
+                    Test & Retry Connection
+                  </Button>
+                </div>
+
+                {diagLoading ? (
+                  <div className="flex flex-col items-center justify-center py-16 space-y-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold">Scanning Database Access...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Glowing Connection Card */}
+                    {diagData && (
+                      <div className={`rounded-2xl border p-5 relative overflow-hidden bg-gradient-to-br ${
+                        diagData.diagnostics?.connection_successful 
+                          ? "from-emerald-500/10 via-emerald-500/5 to-transparent border-emerald-500/30"
+                          : "from-amber-500/10 via-amber-500/5 to-transparent border-amber-500/30"
+                      }`}>
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              {/* Pulsing Status Orb */}
+                              <span className="relative flex h-3 w-3 shrink-0">
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                  diagData.diagnostics?.connection_successful ? "bg-emerald-400" : "bg-amber-400"
+                                }`}></span>
+                                <span className={`relative inline-flex rounded-full h-3 w-3 ${
+                                  diagData.diagnostics?.connection_successful ? "bg-emerald-500" : "bg-amber-500"
+                                }`}></span>
+                              </span>
+                              
+                              <span className={`text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded border select-none ${
+                                diagData.diagnostics?.connection_successful 
+                                  ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                                  : "bg-amber-500/20 border-amber-500/30 text-amber-400 animate-pulse"
+                              }`}>
+                                {diagData.diagnostics?.connection_successful ? "Live MongoDB Atlas Connected" : "Local JSON Offline Fallback (db.json)"}
+                              </span>
+                            </div>
+
+                            <h4 className="text-base font-bold text-white pt-1">
+                              {diagData.diagnostics?.connection_successful 
+                                ? "Database connection active and synchronized!" 
+                                : "MongoDB Atlas connection is currently offline."}
+                            </h4>
+                            
+                            <p className="text-[10px] text-zinc-400 leading-normal max-w-lg">
+                              {diagData.diagnostics?.connection_successful
+                                ? "Your project is securely storing profiles, chats, timelines, and payment histories directly in your cloud-hosted MongoDB Atlas cluster."
+                                : "Database connection failed or MONGODB_URI is not configured properly. The application is running on an offline JSON fallback database (db.json) so features still work locally, but changes will NOT persist in production or on mobile deployments."}
+                            </p>
+                          </div>
+
+                          <div className="shrink-0">
+                            <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider block">Mode</span>
+                            <span className={`text-xs font-black uppercase ${
+                              diagData.diagnostics?.connection_successful ? "text-emerald-400" : "text-amber-400"
+                            }`}>
+                              {diagData.diagnostics?.connection_successful ? "Production Atlas" : "Local db.json"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Environment Details */}
+                    <div className="rounded-xl border border-white/[0.04] bg-zinc-950/40 p-4 space-y-4">
+                      <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-widest">Environment Setup Details</h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-zinc-500 uppercase tracking-wider font-semibold block">Configured Environment URI</span>
+                          <code className="text-[10px] font-mono text-zinc-300 bg-black/60 px-2 py-1 rounded border border-white/5 block truncate font-semibold">
+                            {diagData?.diagnostics?.mongodb_uri_masked || "No URI found"}
+                          </code>
+                        </div>
+
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-zinc-500 uppercase tracking-wider font-semibold block">Active Storage State</span>
+                          <span className="inline-flex items-center gap-1.5 text-xs text-zinc-300 font-bold bg-zinc-900 border border-white/[0.04] px-2.5 py-1 rounded-lg">
+                            <Database className="w-3.5 h-3.5 text-primary" />
+                            {diagData?.diagnostics?.global_use_mock_db ? "Offline JSON (db.json)" : "Live Cloud Cluster (MongoDB)"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Connection Error Message Visualizer (Console Block) */}
+                    {diagData?.diagnostics?.connection_error && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-rose-400 font-bold text-xs">
+                          <AlertTriangle className="w-4 h-4 shrink-0" />
+                          <span>Detailed Connection Error Message</span>
+                        </div>
+
+                        <div className="rounded-xl border border-rose-500/20 bg-rose-500/[0.02] p-4 font-mono text-[10px] leading-relaxed text-rose-300 overflow-x-auto relative">
+                          <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded border border-rose-500/30 bg-rose-500/10 text-[8px] uppercase tracking-wider font-bold">
+                            Mongoose Error Log
+                          </div>
+                          <span className="block text-zinc-500 select-none pb-1">$ npm run dev --db-verbose</span>
+                          <span className="block select-text white-space-pre-wrap">{diagData.diagnostics.connection_error}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Step-by-Step Whitelisting Guide (Right Column) */}
+              <div className="lg:col-span-4 rounded-2xl border border-white/[0.05] bg-zinc-950/40 p-6 space-y-6 glass-strong">
+                <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2 pb-2 border-b border-white/[0.04]">
+                  <HelpCircle className="w-4 h-4 text-zinc-400" />
+                  Atlas Connection Troubleshooting
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Whitelisting Steps Card */}
+                  <div className="p-4 rounded-xl bg-zinc-950/50 border border-white/[0.03] space-y-3">
+                    <span className="text-[10px] font-extrabold text-primary uppercase tracking-widest block">🔒 Step 1: Atlas IP Whitelisting</span>
+                    <p className="text-[9px] text-zinc-400 leading-relaxed font-normal">
+                      MongoDB Atlas strictly blocks unknown IPs. Because Vercel and some ISPs rotate client IPs constantly, you must allow connection access:
+                    </p>
+                    <ol className="list-decimal pl-4 text-[9px] text-zinc-300 space-y-1.5 leading-relaxed font-normal">
+                      <li>Log in to your <strong>MongoDB Atlas Console</strong>.</li>
+                      <li>Navigate to <strong>Security</strong> ➡️ <strong>Network Access</strong>.</li>
+                      <li>Click <strong>Add IP Address</strong>.</li>
+                      <li>Select <strong>Allow Access From Anywhere</strong> (inputs <code>0.0.0.0/0</code>).</li>
+                      <li>Click <strong>Confirm</strong> and wait 1 minute for updates.</li>
+                    </ol>
+                  </div>
+
+                  {/* Password Verification Card */}
+                  <div className="p-4 rounded-xl bg-zinc-950/50 border border-white/[0.03] space-y-3">
+                    <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-widest block">🔑 Step 2: Database Password</span>
+                    <p className="text-[9px] text-zinc-400 leading-relaxed font-normal">
+                      A common error is using your Atlas web account password instead of your <strong>Database User Password</strong> (created in Database Access tab).
+                    </p>
+                    <p className="text-[9px] text-zinc-400 leading-relaxed font-normal">
+                      Also ensure password does not contain special characters like <code>@</code>, <code>/</code>, or <code>:</code> unless they are properly URI-encoded.
+                    </p>
+                  </div>
+
+                  {/* Vercel Environment Variables Guide */}
+                  <div className="p-4 rounded-xl bg-zinc-950/50 border border-white/[0.03] space-y-3">
+                    <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block">🚀 Step 3: Vercel Deployments</span>
+                    <p className="text-[9px] text-zinc-400 leading-relaxed font-normal">
+                      Vercel builds are fully stateless. Ensure you copy your verified <code>MONGODB_URI</code> into the <strong>Vercel Project Settings ➡️ Environment Variables</strong> and trigger a redeployment!
+                    </p>
+                  </div>
                 </div>
               </div>
 
