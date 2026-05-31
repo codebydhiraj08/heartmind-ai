@@ -19,7 +19,21 @@ declare global {
 }
 
 export async function connectToDatabase() {
-  const MONGODB_URI = process.env.MONGODB_URI;
+  let MONGODB_URI = process.env.MONGODB_URI;
+
+  // Clean MONGODB_URI from any accidental copy-paste prefixes (like MONGODB_URI=) or quotes
+  if (MONGODB_URI) {
+    MONGODB_URI = MONGODB_URI.trim();
+    if (MONGODB_URI.startsWith("MONGODB_URI=")) {
+      MONGODB_URI = MONGODB_URI.substring("MONGODB_URI=".length).trim();
+    }
+    if (MONGODB_URI.startsWith('"') && MONGODB_URI.endsWith('"')) {
+      MONGODB_URI = MONGODB_URI.substring(1, MONGODB_URI.length - 1).trim();
+    }
+    if (MONGODB_URI.startsWith("'") && MONGODB_URI.endsWith("'")) {
+      MONGODB_URI = MONGODB_URI.substring(1, MONGODB_URI.length - 1).trim();
+    }
+  }
 
   // If MONGODB_URI is not set, or is the default template placeholder, trigger mock fallback immediately
   if (!MONGODB_URI || MONGODB_URI.includes("cluster.mongodb.net") || MONGODB_URI.includes("<username>")) {
