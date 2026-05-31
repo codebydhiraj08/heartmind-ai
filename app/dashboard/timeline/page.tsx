@@ -249,13 +249,6 @@ export default function TimelinePage() {
                       </div>
                     </div>
                      <div className="flex items-center gap-3 self-start sm:self-center">
-                       <div className="flex items-center gap-2">
-                         {event.score && (
-                           <span className="text-xs font-extrabold text-zinc-300">
-                             Score: {event.score}
-                           </span>
-                         )}
-                       </div>
                       <button
                         onClick={() => handleDeleteMemory(event._id)}
                         className="text-zinc-600 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors duration-200"
@@ -377,25 +370,9 @@ export default function TimelinePage() {
                       <option value="Peaceful">Peaceful</option>
                     </select>
                   </div>
-                </div>
-
-                 {/* Score */}
-                 <div className="space-y-1.5">
-                   <div className="flex justify-between items-center">
-                     <label className="text-xs font-semibold text-zinc-300">Score (0-100)</label>
-                     <span className="text-[10px] text-zinc-400 font-bold bg-zinc-800 px-1.5 py-0.5 rounded">{score}</span>
-                   </div>
-                   <input
-                     type="range"
-                     min="0"
-                     max="100"
-                     value={score}
-                     onChange={(e) => setScore(Number(e.target.value))}
-                     className="w-full accent-primary bg-zinc-800 h-1.5 rounded-lg appearance-none cursor-pointer mt-3"
-                   />
                  </div>
-
-                {/* Description */}
+ 
+                 {/* Description */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-zinc-300">Description</label>
                   <textarea
