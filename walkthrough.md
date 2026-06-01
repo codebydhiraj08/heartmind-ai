@@ -25,6 +25,12 @@ We have successfully built and integrated the **Database Connection Diagnostics 
   3. Designed a sleek, console-themed terminal logs viewer displaying precise Mongoose connection error logs when the connection is offline.
   4. Embedded a comprehensive whitelisting, password, and deployment troubleshooting guide.
   5. Implemented a **"Test & Retry Connection"** spinner action that initiates a real-time hot-reloaded database access check.
+### 4. Premium Password Show/Hide Toggle
+* **Files**: [login/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/login/page.tsx) & [signup/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/signup/page.tsx)
+* **Accomplishment**:
+  1. Added a sleek, absolute-positioned eye icon toggler to the password fields in both login and signup screens.
+  2. Leveraged `lucide-react`'s `Eye` and `EyeOff` components for a native, premium micro-interactive visual response.
+  3. Integrated proper input right-padding (`pr-10`) to prevent long text from clipping under the button.
 
 ---
 
@@ -33,3 +39,4 @@ We have successfully built and integrated the **Database Connection Diagnostics 
 1. **Local Offline State**: Checked by starting on the local fallback database. Clicking `🔌 DB Diagnostics` immediately renders the offline warning and masks the configured URI.
 2. **Error Visualizer**: If the username or password contains placeholders or is incorrect, the terminal console log displays the exact reason (e.g., placeholder warnings or credential rejections).
 3. **Hot-Reload Retry**: Verified that modifying `.env` and clicking **"Test & Retry Connection"** clears cache, reads new configs, and attempts active reconnections successfully!
+4. **Password Visibility**: Verified that clicking the Eye icon on the password field toggles between showing cleartext password and masked password characters instantly on both pages.
