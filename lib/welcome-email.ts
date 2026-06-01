@@ -114,11 +114,12 @@ export async function sendWelcomeEmail(name: string, email: string) {
           <tr>
             <td align="center">
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 540px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); border: 1px solid #e5e7eb;">
-                <!-- Header with Brand Gradient -->
+                <!-- Header with Brand Logo -->
                 <tr>
-                  <td style="background: linear-gradient(135deg, #e72a6b 0%, #8b5cf6 100%); padding: 32px 24px; text-align: center;">
-                    <h1 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 26px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.5px;">HeartMind AI</h1>
-                    <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 13px; color: rgba(255, 255, 255, 0.85); margin: 6px 0 0 0; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;">Relationship Intelligence Suite</p>
+                  <td style="background-color: #ffffff; padding: 24px; text-align: center; border-bottom: 1px solid #f3f4f6;">
+                    <a href="${nextAuthUrl}" target="_blank" style="text-decoration: none; display: inline-block;">
+                      <img src="${nextAuthUrl}/logo.png" alt="HeartMind AI" width="220" style="display: block; border: 0; max-width: 220px; height: auto; margin: 0 auto;" />
+                    </a>
                   </td>
                 </tr>
                 <!-- Body Content -->
