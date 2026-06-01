@@ -522,40 +522,9 @@ export default function DashboardPage() {
           }
         }
 
-        // Onboarding Banner: Not Yet Activated Trial
+        // Onboarding Banner: Not Yet Activated Trial (Disabled as per request)
         if (!hasUsedTrial && activeTier === "free") {
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-accent/5 to-transparent relative overflow-hidden shadow-lg shadow-primary/5 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-primary flex-shrink-0 animate-pulse">
-                  <Crown className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                    Unlock Full Emotional Visibility
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest bg-primary/20 border border-primary/30 text-primary py-0.5 px-1.5 rounded-full">New Flow</span>
-                  </h4>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-2xl leading-normal">
-                    Manual activation gives you a focused 24 hours of complete HeartMind Premium access on your terms. No credit card required. Explore coach dialogues, compatibility mapping, and emotional pattern analytics completely unlocked.
-                  </p>
-                </div>
-              </div>
-              <Link href="/dashboard/trial" className="relative z-10 flex-shrink-0 w-full md:w-auto">
-                <Button
-                  onClick={() => sendClientEvent("upgrade_cta_clicked", { from: "onboarding_banner" })}
-                  className="w-full md:w-auto bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white text-xs font-bold h-9 px-5 rounded-lg border border-white/5 shadow-md shadow-primary/10 transition-all duration-300"
-                >
-                  Explore Full Relationship Intelligence
-                  <ArrowRight className="w-4 h-4 ml-1.5" />
-                </Button>
-              </Link>
-            </motion.div>
-          )
+          return null;
         }
 
         // Active Trial Banners with smooth messaging
@@ -607,39 +576,9 @@ export default function DashboardPage() {
           )
         }
 
-        // Expired Banner
+        // Expired Banner (Disabled as per request)
         if (hasUsedTrial && !isTrialActive && activeTier === "free") {
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-2xl border border-white/[0.04] bg-zinc-950/40 relative overflow-hidden shadow-inner flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-md"
-            >
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-850 flex items-center justify-center text-zinc-500 flex-shrink-0">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-zinc-350 flex items-center gap-1.5">
-                    Your Premium Trial has ended
-                    <span className="text-[9px] font-bold uppercase tracking-widest bg-zinc-800 border border-zinc-700 text-zinc-400 py-0.5 px-1.5 rounded-full">Expired</span>
-                  </h4>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-2xl leading-normal">
-                    Your previous insights remain available. Continue exploring deeper relationship intelligence anytime to chart your emotional growth and attachment pathways.
-                  </p>
-                </div>
-              </div>
-              <Link href="/dashboard/upgrade" className="relative z-10 flex-shrink-0 w-full md:w-auto">
-                <Button
-                  onClick={() => sendClientEvent("upgrade_cta_clicked", { from: "expired_banner" })}
-                  className="w-full md:w-auto bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white text-xs font-bold h-9 px-5 rounded-lg border border-white/5 shadow-md shadow-primary/10 transition-all duration-300"
-                >
-                  Explore deeper relationship intelligence
-                  <ArrowRight className="w-4 h-4 ml-1.5" />
-                </Button>
-              </Link>
-            </motion.div>
-          )
+          return null;
         }
 
         return null

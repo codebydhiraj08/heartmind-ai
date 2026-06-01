@@ -832,12 +832,10 @@ function SidebarContent({
             ? "Full emotional intelligence suite active."
             : activeTier === "pro"
             ? "Unlock AI Coach, memory timeline, and compatibility alignment."
-            : !hasUsedTrial
-            ? "Get 24 hours of completely unlocked Premium insights on your terms. No credit card required."
-            : "Get unlimited analyses, voice emotional sentiment, and smart AI reply recommendations."}
+            : "Get 1 initial relationship analysis session for free. Upgrade to unlock full insights."}
         </p>
 
-        <Link href={isTrialActive ? "/dashboard/upgrade" : activeTier === "premium" && premiumAccessSource === "subscription" ? "/dashboard/upgrade" : activeTier === "pro" ? "/dashboard/upgrade" : !hasUsedTrial ? "/dashboard/trial" : "/dashboard/upgrade"}>
+        <Link href="/dashboard/upgrade">
           <Button
             className={cn(
               "w-full text-xs font-semibold py-1.5 h-8 rounded-lg border transition-all duration-300",
@@ -847,8 +845,6 @@ function SidebarContent({
                 ? "bg-zinc-900 border-white/[0.06] hover:bg-zinc-800 text-white"
                 : activeTier === "pro"
                 ? "bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white border-white/5 shadow-md shadow-primary/10"
-                : !hasUsedTrial
-                ? "bg-primary hover:bg-primary/95 text-white border border-white/5 shadow-md shadow-primary/10"
                 : "bg-primary hover:bg-primary/95 text-white border border-white/5 shadow-md shadow-primary/10"
             )}
             size="sm"
@@ -859,8 +855,6 @@ function SidebarContent({
               ? "Manage Subscription" 
               : activeTier === "pro"
               ? "Go Premium" 
-              : !hasUsedTrial 
-              ? "Explore Full Intelligence" 
               : "Upgrade Now"}
           </Button>
         </Link>
