@@ -33,7 +33,8 @@ export async function POST(req: Request) {
     await user.save();
 
     // Trigger the beautiful welcome email dynamically!
-    sendWelcomeEmail(user.name, user.email);
+    // MUST AWAIT in serverless environments (Vercel) to prevent container shutdown during SMTP handshake!
+    await sendWelcomeEmail(user.name, user.email);
 
     return NextResponse.json(
       { message: "Your email has been successfully verified! You can now log in." },

@@ -51,11 +51,11 @@ export async function POST(req: Request) {
       emailVerified: null, // Marked unverified initially
     });
 
-    // 6. Send the real verification email (will fallback to console log if no SMTP creds)
+    // 6. Send the real verification email
     const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify-email?token=${verificationToken}`;
     
-    // We don't await this because we don't want the user to wait for the email to send before getting a response
-    sendVerificationEmail(name, email, verifyUrl).catch(console.error);
+    // MUST AWAIT in serverless environments (Vercel) to prevent container shutdown during SMTP handshake!
+    await sendVerificationEmail(name, email, verifyUrl);
 
     return NextResponse.json(
       {
