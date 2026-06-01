@@ -1,64 +1,47 @@
-# Implementation Plan — MongoDB Atlas Database Diagnostics Suite
+# Implementation Plan — HeartMind Free Plan Refinement & Gating Sync
 
-This plan details the implementation of an interactive **Database Connection Diagnostics Suite** directly inside the HeartMind AI Settings control panel. This will allow you to troubleshoot, debug, and resolve the MongoDB Atlas connection issue instantly from the web interface, showing the exact error message (e.g. whitelisting, invalid credentials, placeholders) and offering a hot-reload retry button.
+This plan details the changes to configure the **HeartMind Free** tier to exactly **1 chat analysis session**. Once a user utilizes this 1st session, further analyses are blocked, while the **Dashboard overview** and **Red Flag Detection** page and widget remain fully unlocked forever. All other advanced features (like AI Coach, Smart Replies, Voice Sentiment, Compatibility, etc.) will remain locked under the Pro and Premium tiers.
 
 ---
 
 ## User Review Required
 
 > [!IMPORTANT]
-> This plan introduces a new tab **"🔌 DB Diagnostics"** in the **Account & Preference Settings** dashboard. This tab fetches live database status from the server and outputs precise MongoDB connection errors. It also provides a **"Retry Connection"** action which hot-reloads `.env` from disk on the fly, allowing local developers to fix their connection without restarting the terminal.
-
----
-
-## Open Questions
-
-None. The design builds upon existing Next.js APIs and is non-intrusive.
+> - **Monthly Analysis Limit**: Set to exactly `1` for the free plan.
+> - **Red Flag Detection Widget**: Unlocked on the main dashboard for `free` users, allowing them to view stress pattern results from their 1st analysis.
+> - **Landing Page & Upgrade Screen Sync**: Align the Free features list across the public landing page and inside the dashboard upgrade page to consistently display `"1 initial relationship insight session"`.
 
 ---
 
 ## Proposed Changes
 
-We will modify three components to implement this end-to-end diagnostics dashboard.
+We will modify two UI pages to fully align with this feature access rule:
 
-### 1. Database Connection Layer
+### 1. Dashboard View Gating
 
-#### [MODIFY] [mongodb.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/mongodb.ts)
-* Declare a global `mongooseConnectionError` variable.
-* When the connection is successful, clear `global.mongooseConnectionError`.
-* If placeholder credentials (like `<username>`, `<password>`) are detected, set `global.mongooseConnectionError` to a descriptive configuration error.
-* In the `.catch((err))` block, cache the error message inside `global.mongooseConnectionError`.
+#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/page.tsx)
+* Locate the `<PremiumGate>` component wrapping the **Red Flag Alerts (Stress Pattern Insights)** widget (around line 887).
+* Update `allowedTiers` from `["pro", "premium"]` to `["free", "pro", "premium"]` so that free tier users can see their detected red flags directly on the main dashboard home page.
 
-### 2. Diagnostics API Layer
+---
 
-#### [MODIFY] [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/test-db/route.ts)
-* Add a `retry=true` URL query parameter check.
-* If `retry=true` is requested:
-  1. Synchronously parse `.env` from the project directory on disk to update `process.env.MONGODB_URI` (enables hot-reloads of local credentials without terminal restarts).
-  2. Clear the cached connection promise (`global.mongooseCache = { conn: null, promise: null }`).
-  3. Reset the fallback flag (`global.useMockDatabase = undefined`).
-  4. Reset the connection error cache (`global.mongooseConnectionError = undefined`).
-* Read `global.mongooseConnectionError` and include it in the `diagnostics.connection_error` response field.
-* Return database status, masked URI, and verification info.
+### 2. Pricing & Upgrades Features Sync
 
-### 3. User Interface Layer
-
-#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/settings/page.tsx)
-* Add the **🔌 DB Diagnostics** tab to the Settings navigation bar.
-* Build a premium diagnostics dashboard that:
-  - Displays a high-fidelity glowing orb status (Green for connected Atlas, Amber for local file fallback).
-  - Shows masked `MONGODB_URI` environment settings.
-  - Displays the exact error string in a sleek dark coding-terminal interface if the connection fails.
-  - Integrates an interactive Hinglish/English step-by-step troubleshooting companion.
-  - Integrates a **"Test & Retry Connection"** button with a loading spinner that triggers the dynamic retry API route.
+#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/upgrade/page.tsx)
+* Locate the `PLANS.free.features` array (around line 41).
+* Change `"✔ 3 initial relationship insight sessions"` to `"✔ 1 initial relationship insight session"` to match the landing page pricing grid and server-side rate limits.
 
 ---
 
 ## Verification Plan
 
+### Automated / API Verification
+* Ensure `/api/analyze-chat` returns `UPGRADE_REQUIRED` and `limitExceeded: true` once the user's `monthlyAnalysisCount` reaches `1`.
+
 ### Manual Verification
-1. Open settings in the browser at `/dashboard/settings`.
-2. Click the new **DB Diagnostics** tab.
-3. Observe the connection status. If it failed, check the exact error message in the console widget.
-4. Modify `.env` to fix the issue (e.g. correcting a database username/password or IP access).
-5. Click **"Test & Retry Connection"** to verify that it connects to MongoDB Atlas live without restarting the server!
+1. Log in as a new user with the `free` tier plan.
+2. Conduct the **1st chat analysis**. Verify that results are displayed successfully.
+3. Return to the main **Dashboard** (`/dashboard`). Verify that the **Stress Pattern Insights (Red Flags)** widget is fully visible (not blurred/gated).
+4. Go to **Red Flag Detection** page (`/dashboard/red-flags`). Verify that it is fully open and shows the scanned patterns.
+5. Verify that other components (e.g. AI Coach, Smart Replies, Voice Emotion, Attachment Style, Compatibility) remain locked/gated under their respective plans.
+6. Try to submit a **2nd chat analysis** inside `/dashboard/analyzer`. Verify that a gorgeous error block displays, warning that the limit has been reached, and offers an easy link to `/dashboard/upgrade`.

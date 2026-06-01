@@ -24,7 +24,7 @@ export const razorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_
 
 export const FREE_PLAN = {
   name: "HeartMind Free",
-  monthlyLimit: 5,
+  monthlyLimit: 1,
 };
 
 export const PLANS = {

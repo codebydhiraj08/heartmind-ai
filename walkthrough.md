@@ -1,42 +1,31 @@
-# Walkthrough — Database Connection Diagnostics Suite
+# Walkthrough — HeartMind Free Plan Refinement & Gating Sync
 
-We have successfully built and integrated the **Database Connection Diagnostics Suite**! This solves the persistent MongoDB Atlas connection issues by exposing live database connection states, caching precise Mongoose error outputs, and providing a dynamic dashboard settings tab to test and resolve connection problems instantly.
+We have successfully refined the HeartMind Free tier features, set the monthly limits to exactly 1 analysis session, unlocked the main Dashboard and Red Flag Detection widgets forever for free users, and locked all other premium tools.
 
 ---
 
 ## 🛠️ Summary of Accomplishments
 
-### 1. Global Mongoose Error Caching Layer
-* **File**: [mongodb.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/mongodb.ts)
-* **Accomplishment**: Extended the TypeScript global scope with a cached error handler `global.mongooseConnectionError`. It clears on successful connections, formats friendly errors for credential placeholders (like `<db_password>` or `<username>`), and stores standard raw Mongoose/MongoDB connection rejection messages dynamically.
+### 1. Unlocked Red Flag Alerts Widget on Dashboard
+* **File**: [app/dashboard/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/page.tsx)
+* **Accomplishment**: Changed the `<PremiumGate>` wrapper for the **Red Flag Alerts (Stress Pattern Insights)** dashboard widget to include `"free"` in its `allowedTiers` list. This enables free-tier users to view their detected stress patterns directly from their main dashboard page.
 
-### 2. Live Diagnostics & Hot-Reload Reset Endpoint
-* **File**: [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/test-db/route.ts)
-* **Accomplishment**:
-  1. Integrated a `retry=true` handler to dynamically parse the `.env` file directly from the filesystem on-demand, enabling immediate hot-reloads of newly saved credentials in local development without terminal restarts.
-  2. Resets the cached connection promises (`global.mongooseCache`) and offline fallback database flags on retry, forcing a clean reconnection attempt.
-  3. Exposes the cached global Mongoose error string directly to the API consumer payload.
-
-### 3. Premium settings Diagnostics Dashboard UI
-* **File**: [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/settings/page.tsx)
-* **Accomplishment**:
-  1. Added a **🔌 DB Diagnostics** navigation tab inside the control center settings page.
-  2. Built a responsive connection monitor widget displaying a pulsing health indicator orb (Green for active Atlas cluster, Amber for local file fallback).
-  3. Designed a sleek, console-themed terminal logs viewer displaying precise Mongoose connection error logs when the connection is offline.
-  4. Embedded a comprehensive whitelisting, password, and deployment troubleshooting guide.
-  5. Implemented a **"Test & Retry Connection"** spinner action that initiates a real-time hot-reloaded database access check.
-### 4. Premium Password Show/Hide Toggle
-* **Files**: [login/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/login/page.tsx) & [signup/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/signup/page.tsx)
-* **Accomplishment**:
-  1. Added a sleek, absolute-positioned eye icon toggler to the password fields in both login and signup screens.
-  2. Leveraged `lucide-react`'s `Eye` and `EyeOff` components for a native, premium micro-interactive visual response.
-  3. Integrated proper input right-padding (`pr-10`) to prevent long text from clipping under the button.
+### 2. Synced Free Plan Descriptions
+* **File**: [app/dashboard/upgrade/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/upgrade/page.tsx)
+* **Accomplishment**: Updated the feature description list for the Free plan to show `"✔ 1 initial relationship insight session"` instead of 3. This matches the backend limits and the landing page pricing grids perfectly.
 
 ---
 
 ## 🧪 Verification & Validation
 
-1. **Local Offline State**: Checked by starting on the local fallback database. Clicking `🔌 DB Diagnostics` immediately renders the offline warning and masks the configured URI.
-2. **Error Visualizer**: If the username or password contains placeholders or is incorrect, the terminal console log displays the exact reason (e.g., placeholder warnings or credential rejections).
-3. **Hot-Reload Retry**: Verified that modifying `.env` and clicking **"Test & Retry Connection"** clears cache, reads new configs, and attempts active reconnections successfully!
-4. **Password Visibility**: Verified that clicking the Eye icon on the password field toggles between showing cleartext password and masked password characters instantly on both pages.
+1. **Dashboard Widget Access**: 
+   - Log in as a Free tier user.
+   - Access the main dashboard at `/dashboard`. The **Red Flag Alerts (Stress Pattern Insights)** widget is fully visible, responsive, and functional, displaying detected patterns cleanly.
+   - Other widgets, such as the Emotional Analytics and AI Coach Suggestion, remain blurred and locked until an upgrade is purchased.
+
+2. **Red Flag Detection Page**:
+   - Navigate to `/dashboard/red-flags`. The page loads and operates seamlessly for Free tier users, matching the layout shown in the main dashboard.
+
+3. **Monthly Limit Block**:
+   - A user on the Free tier is allowed exactly `1` chat analysis session.
+   - If they try to analyze a second conversation, the server endpoint `/api/analyze-chat` blocks it and returns a clean, detailed rate-limit message with an upgrade link to `/dashboard/upgrade`.

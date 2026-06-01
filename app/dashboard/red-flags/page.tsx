@@ -249,7 +249,7 @@ function RedFlagsPageInner() {
 
   if (loading) {
     return (
-      <PremiumGate allowedTiers={["pro", "premium"]} featureName="Red Flag Detection">
+      <PremiumGate allowedTiers={["free", "pro", "premium"]} featureName="Red Flag Detection">
         <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
@@ -264,7 +264,7 @@ function RedFlagsPageInner() {
   }
 
   return (
-    <PremiumGate allowedTiers={["pro", "premium"]} featureName="Red Flag Detection">
+    <PremiumGate allowedTiers={["free", "pro", "premium"]} featureName="Red Flag Detection">
       <div className="space-y-6">
       {/* Header */}
       <motion.div

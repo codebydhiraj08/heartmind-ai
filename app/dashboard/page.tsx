@@ -884,7 +884,7 @@ export default function DashboardPage() {
           variants={itemVariants}
           whileHover={{ y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
         >
-          <PremiumGate allowedTiers={["pro", "premium"]} featureName="Red Flag Detection" fallbackMode="blur">
+          <PremiumGate allowedTiers={["free", "pro", "premium"]} featureName="Red Flag Detection" fallbackMode="blur">
             <div
               onMouseMove={handleMouseMove}
               className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] shadow-xl p-5"

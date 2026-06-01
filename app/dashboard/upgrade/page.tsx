@@ -39,7 +39,7 @@ const PLANS: Record<"free" | "pro" | "premium", PlanInfo> = {
     priceINR: 0,
     priceUSD: 0,
     features: [
-      "✔ 3 initial relationship insight sessions",
+      "✔ 1 initial relationship insight session",
       "✔ Basic communication tone detection",
       "✔ Baseline attachment pattern outline",
       "✔ Partial dashboard visibility preview",
