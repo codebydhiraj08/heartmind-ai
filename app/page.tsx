@@ -53,8 +53,11 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong">
         <div className="w-full mx-auto px-4 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center ml-[-4px] md:ml-[-12px]">
-              <img src="/logo.png" alt="HeartMind AI" className="h-10 w-auto object-contain" />
+            <Link href="/" className="flex items-center gap-2 ml-[-4px] md:ml-[-12px]">
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center neon-glow-pink">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold gradient-text">HeartMind AI</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
@@ -596,8 +599,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center mb-4">
-                <img src="/logo.png" alt="HeartMind AI" className="h-10 w-auto object-contain" />
+              <Link href="/" className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xl font-bold gradient-text">HeartMind AI</span>
               </Link>
               <p className="text-sm text-muted-foreground">
                 AI-powered relationship intelligence for healthier connections.
