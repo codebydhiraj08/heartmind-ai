@@ -435,81 +435,109 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
               {
-                name: "Free",
-                price: "FREE",
-                period: "forever",
-                description: "Perfect for trying out HeartMind AI",
+                name: "HeartMind Free",
+                price: "Free",
+                period: "",
+                description: "Begin exploring your relationship dynamics and understanding core communication patterns.",
                 features: [
-                  "5 chat analyses per month",
-                  "Basic red flag detection",
-                  "Simple AI replies",
-                  "Email support"
+                  { text: "1 initial relationship insight session", locked: false },
+                  { text: "Basic communication tone detection", locked: false },
+                  { text: "Baseline attachment pattern outline", locked: false },
+                  { text: "Partial dashboard visibility preview", locked: false },
+                  { text: "Voice emotional sentiment decoding", locked: true },
+                  { text: "Shared relationship timeline mapping", locked: true },
+                  { text: "Live AI coaching & compatibility charts", locked: true }
                 ],
                 cta: "Get Started",
-                popular: false
+                popular: false,
+                pill: ""
               },
               {
-                name: "Pro",
+                name: "HeartMind Pro",
                 price: "$29",
-                period: "per month",
-                description: "For those serious about relationship growth",
+                period: "MONTH",
+                description: "Step into profound clarity. Uncover underlying communication trends, map subtle emotional patterns, and receive naturally aligned AI guidance for everyday connections.",
                 features: [
-                  "Unlimited chat analyses",
-                  "Advanced red flag detection",
-                  "Voice emotion analysis",
-                  "Relationship dashboard",
-                  "Attachment style analysis",
-                  "Priority support"
+                  { text: "Continuous relationship insight sessions", locked: false },
+                  { text: "Sub-surface emotional behavior & pattern detection", locked: false },
+                  { text: "Subtle voice sentiment & tone stress decoding", locked: false },
+                  { text: "Naturally aligned, empathetic AI communication reframing", locked: false },
+                  { text: "Meaningful long-term communication trends & visibility", locked: false }
                 ],
                 cta: "Start Pro Trial",
-                popular: true
+                popular: true,
+                pill: "COMPLETE EXPERIENCE"
               },
               {
-                name: "Premium",
+                name: "HeartMind Premium 👑",
                 price: "$49",
-                period: "per month",
-                description: "Complete relationship intelligence suite",
+                period: "MONTH",
+                description: "For conscious couples seeking ultimate alignment. Map your shared emotional timeline, engage with your personal AI Relationship Coach, and chart deep relationship dynamics.",
                 features: [
-                  "Everything in Pro",
-                  "Couple compatibility analysis",
-                  "AI relationship coach",
-                  "Timeline memory system",
-                  "Dating profile optimizer",
-                  "1-on-1 expert sessions",
-                  "API access"
+                  { text: "Expanded relationship coaching sessions", locked: false },
+                  { text: "Live, emotionally intelligent guidance with your AI Relationship Coach", locked: false },
+                  { text: "Full relationship picture compatibility & alignment charting", locked: false },
+                  { text: "Shared emotional growth timeline & memory logs", locked: false },
+                  { text: "Advanced behavioral mapping & interaction style analysis", locked: false },
+                  { text: "Expanded long-term relationship insights", locked: false }
                 ],
                 cta: "Go Premium",
-                popular: false
+                popular: false,
+                pill: "DEEPEST UNDERSTANDING"
               }
             ].map((plan) => (
               <div
                 key={plan.name}
-                className={`relative glass rounded-2xl p-8 ${plan.popular ? 'neon-glow-pink border-2 border-primary' : ''}`}
+                className={`relative glass rounded-2xl p-8 flex flex-col justify-between ${plan.popular ? 'neon-glow-pink border-2 border-primary' : 'border border-white/[0.04]'}`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary to-accent rounded-full text-sm font-medium text-white">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary to-accent rounded-full text-[10px] font-bold text-white uppercase tracking-wider">
                     Most Popular
                   </div>
                 )}
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">/{plan.period}</span>
+                <div>
+                  {/* Card Header (Matches Dashboard Upgrade Cards) */}
+                  <div className="flex items-center justify-between mb-4 text-[9px] font-extrabold uppercase tracking-wider text-zinc-500 select-none">
+                    <span>SUBSCRIPTION PLAN</span>
+                    {plan.pill && (
+                      <span className="px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400 font-semibold tracking-normal text-[8.5px] uppercase">
+                        {plan.pill}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
+
+                  <div className="text-left mb-6">
+                    <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                    <p className="text-xs text-zinc-400 leading-relaxed mb-6 h-12 overflow-hidden text-pretty">{plan.description}</p>
+                    <div className="flex items-baseline gap-1 border-t border-white/[0.04] pt-6 mb-6">
+                      <span className="text-4xl font-extrabold text-white">{plan.price}</span>
+                      {plan.period && (
+                        <span className="text-xs font-semibold text-zinc-500">/ {plan.period}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Features List */}
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature.text}
+                        className={`flex items-start gap-2.5 text-[11px] leading-relaxed ${feature.locked ? 'text-zinc-600' : 'text-zinc-300'}`}
+                      >
+                        {feature.locked ? (
+                          <Lock className="w-3.5 h-3.5 text-zinc-700 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <Check className="w-3.5 h-3.5 text-success flex-shrink-0 mt-0.5" />
+                        )}
+                        <span>{feature.text}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm">
-                      <Check className="w-5 h-5 text-success flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+
                 <Link href="/dashboard">
                   <Button
-                    className={`w-full ${plan.popular ? 'bg-gradient-to-r from-primary to-accent text-white' : ''}`}
+                    className={`w-full text-xs font-semibold h-9 rounded-lg ${plan.popular ? 'bg-gradient-to-r from-primary to-accent text-white border-none shadow-md shadow-primary/10 hover:opacity-90' : 'bg-transparent hover:bg-white/[0.02] text-white border border-white/[0.08]'}`}
                     variant={plan.popular ? "default" : "outline"}
                   >
                     {plan.cta}
