@@ -855,35 +855,57 @@ function VoiceAnalyzerInner() {
                       ))}
                     </CardContent>
                   </Card>
-
-                  {/* Red Flag Quick Action */}
-                  {historyId && (
-                    <Link href={`/dashboard/red-flags?voiceId=${historyId}`} className="block">
-                      <Button
-                        className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-semibold text-xs py-5 rounded-xl border border-white/5 shadow-md shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2"
-                      >
-                        <Shield className="w-4 h-4 animate-pulse" />
-                        Scan Voice for Red Flags &amp; Safety Cues
-                      </Button>
-                    </Link>
-                  )}
-
-                  {/* Return/Info Box */}
-                  <Card className="glass border-border bg-accent/[0.01]">
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                        <div>
-                          <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-300 mb-1">Acoustic Cues Summary</h4>
-                          <p className="text-[11px] text-zinc-400 leading-relaxed">
-                            Voice analysis isolates pitch variations, pauses, and frequencies. For past logs, you can click back to list, re-record, or compare summaries to track your emotional baseline over time.
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
                 </div>
               </div>
+
+              {/* Bottom Navigation Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col sm:flex-row justify-center gap-3 pt-4"
+              >
+                <Link href={`/dashboard/red-flags?voiceId=${historyId}`}>
+                  <Button
+                    className="bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-semibold text-xs h-10 px-6 rounded-xl border border-white/5 shadow-md shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    <Shield className="w-4 h-4 animate-pulse" />
+                    View Red Flag Detection
+                  </Button>
+                </Link>
+                <Button
+                  onClick={() => {
+                    router.refresh()
+                    router.push("/dashboard")
+                  }}
+                  className="bg-zinc-900 border border-white/[0.04] hover:bg-zinc-800 text-zinc-300 font-semibold text-xs h-10 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Return to Dashboard Overview
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </motion.div>
+
+              {/* Disclaimer Note */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-6"
+              >
+                <Card className="glass border-border bg-accent/5">
+                  <CardContent className="p-5">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-sm text-zinc-200 mb-1">Important Disclaimer &amp; Acoustic Summary</h4>
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                          This analysis isolates pitch variations, pacing, and stress frequencies. Voice characteristics represent possible indicators at a specific moment in time; they are not a definitive medical or relationship assessment. Use these insights for reflection and awareness. If you&apos;re experiencing genuine concerns about your relationship, consider speaking with a licensed therapist or counselor.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </motion.div>
           ) : activeTab === "new" ? (
             /* TAB 1: WORKSPACE VIEW (RECORD & UPLOAD) */

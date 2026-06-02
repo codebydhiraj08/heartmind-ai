@@ -99,6 +99,9 @@ export async function POST(req: NextRequest) {
     // 4. Extract scores and map sentiment
     const stressObj = emotions.find((e: any) => e.name === "Stress Level") || { value: 30 };
     const excitementObj = emotions.find((e: any) => e.name === "Excitement") || { value: 50 };
+    const hesitationObj = emotions.find((e: any) => e.name === "Hesitation") || { value: 20 };
+    const sadnessObj = emotions.find((e: any) => e.name === "Sadness") || { value: 10 };
+    const angerObj = emotions.find((e: any) => e.name === "Anger") || { value: 5 };
     
     // Overall positivity score based on voice excitement and lower stress
     const overallScore = Math.min(100, Math.max(0, Math.round((excitementObj.value + (100 - stressObj.value)) / 2)));
@@ -110,19 +113,81 @@ export async function POST(req: NextRequest) {
       sentimentBucket = "negative";
     }
 
+    // Construct dynamic red flags array
+    const redFlagsList = [];
+
+    if (stressObj.value > 40) {
+      redFlagsList.push({
+        type: "stress_escalation",
+        severity: stressObj.value > 70 ? ("high" as const) : ("medium" as const),
+        title: "Acoustic Stress Escalation",
+        description: `Voice analysis detected elevated acoustic stress indicators at ${stressObj.value}% intensity.`,
+        confidence: Math.round(stressObj.value * 0.9),
+        evidence: `Micro-tremor amplitude shifts in vocal harmonics indicate heightened emotional arousal.`
+      });
+    }
+
+    if (hesitationObj.value > 45) {
+      redFlagsList.push({
+        type: "avoidance_pattern",
+        severity: "medium" as const,
+        title: "Acoustic Evasion & Hesitation",
+        description: `High hesitation rates (${hesitationObj.value}%) hint at emotional guarding or active topic evasion.`,
+        confidence: Math.round(hesitationObj.value * 0.95),
+        evidence: `Processing delays and silent interval clusters measured at ${hesitationObj.value}% severity.`
+      });
+    }
+
+    if (sadnessObj.value > 35) {
+      redFlagsList.push({
+        type: "emotional_withdrawal",
+        severity: "medium" as const,
+        title: "Vocal Tone Flattening",
+        description: `Subtle vocal energy flattening suggests mild emotional withdrawal or fatigue (${sadnessObj.value}% sadness).`,
+        confidence: Math.round(sadnessObj.value * 0.9),
+        evidence: `Loss of pitch resonance and flattened frequency contour lines observed.`
+      });
+    }
+
+    if (angerObj.value > 15) {
+      redFlagsList.push({
+        type: "defensive_behavior",
+        severity: "high" as const,
+        title: "Acoustic Defense Posture",
+        description: `Sharp syllabic energy spikes suggest defensive tone adjustments during verbal sharing (${angerObj.value}% anger).`,
+        confidence: Math.round(angerObj.value * 0.9),
+        evidence: `Sudden bursts in acoustic volume and compression of pitch ranges.`
+      });
+    }
+
+    if (excitementObj.value < 30) {
+      redFlagsList.push({
+        type: "emotional_distance",
+        severity: "medium" as const,
+        title: "Emotional Distance Detected",
+        description: `Low vocal excitement and low acoustic involvement (${excitementObj.value}%) suggest potential emotional distance.`,
+        confidence: Math.round((100 - excitementObj.value) * 0.85),
+        evidence: `Subtle dampening of voice dynamics and lack of verbal excitement resonance.`
+      });
+    }
+
+    if (overallScore < 50 && redFlagsList.length === 0) {
+      redFlagsList.push({
+        type: "communication_breakdown",
+        severity: "high" as const,
+        title: "Communication Asymmetry",
+        description: "The overall acoustic scoring indicates low voice resonance alignment and poor connection parameters.",
+        confidence: 80,
+        evidence: "Cumulative acoustic cues suggest high tension and low emotional safety."
+      });
+    }
+
     const fullResult = {
       positivityScore: overallScore,
       stressScore: stressObj.value,
       communicationBalance: 50,
       attachmentStyle: "secure" as const,
-      redFlags: stressObj.value > 60 ? [
-        {
-          type: "stress_escalation",
-          severity: "medium" as const,
-          title: "Vocal Stress Response",
-          description: `Voice analysis indicates elevated stress signals (${stressObj.value}% intensity) during vocal expression.`
-        }
-      ] : [],
+      redFlags: redFlagsList,
       suggestions: Array.isArray(insights) ? insights.map((ins: any) => ins.description || ins.title) : [
         "Maintain a steady, relaxed pacing when communicating high-emotion topics.",
         "Practice deep breathing exercises before sharing vulnerable thoughts."

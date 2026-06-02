@@ -1,19 +1,14 @@
-# Chat Analyzer Screenshot OCR Integration Checklist
+# Voice Analyzer and Chat Analyzer Layout Refinements Checklist
 
-- `[x]` 1. Create `/api/analyze-image` Route
-  - `[x]` Write `app/api/analyze-image/route.ts` to transcribe screenshots using Gemini 2.5 Flash.
+- `[x]` 1. Dynamic Red-Flag Mapping for Voice Analysis
+  - `[x]` Update `app/api/analyze-voice/route.ts` to map `Stress Level`, `Hesitation`, `Sadness`, `Anger`, and `Excitement` to corresponding red flag objects.
+  
+- `[x]` 2. "View All" Patterns in Chat Analyzer
+  - `[x]` Add `showAllPatterns` state hook in `app/dashboard/analyzer/page.tsx`.
+  - `[x]` Update CardHeader layout for patterns section to include a toggle button.
+  - `[x]` Slice displayed patterns list to 1 items by default.
 
-- `[x]` 2. Update Chat Analyzer UI
-  - `[x]` Add `useSubscription` hook import and hook call in `app/dashboard/analyzer/page.tsx`.
-  - `[x]` Define `isExtractingScreenshot` state and `handleScreenshotUpload` method.
-  - `[x]` Remove the outdated mobile export accordion helper.
-  - `[x]` Add the screenshot upload button and hook it to the handler.
-
-- `[x]` 3. Verify
-  - `[x]` Verify screenshot uploads are read, transcribed, and parsed properly by Gemini.
-
-- `[x]` 4. Refine Gemini OCR parser for Right/Left chat bubbles and ignore quoted replies
-  - `[x]` Update API route prompt with specific instructions for right/left layouts, header name matching, and reply-quote filtering.
-  - `[x]` Rename UI button and loading overlay states to show "Uploading..." instead of "Reading Chat Screenshot via Gemini AI...".
-- `[x]` 5. Remove user-facing brand/model name leaks
-  - `[x]` Modify frontend notifications, API route errors, and placeholders to replace "Gemini AI" and "Gemini" with generic terms.
+- `[x]` 3. Voice Analyzer Layout & Alignment
+  - `[x]` Remove the inline Red Flag button and summary note in `app/dashboard/voice/page.tsx`.
+  - `[x]` Add bottom navigation button row matching Chat Analyzer style.
+  - `[x]` Add new footer disclaimer note with `bg-accent/5` styling.

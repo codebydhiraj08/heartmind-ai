@@ -230,6 +230,7 @@ function ChatAnalyzerInner() {
     description?: string;
   } | null>(null)
   const [showMobileGuide, setShowMobileGuide] = useState(false)
+  const [showAllPatterns, setShowAllPatterns] = useState(false)
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -840,18 +841,30 @@ function ChatAnalyzerInner() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Communication Patterns */}
               <Card className="glass border-border shadow-xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-primary" />
-                    Detected Communication Patterns
-                  </CardTitle>
-                  <p className="text-[10px] text-zinc-500">
-                    Behavioral rhythms observed in the uploaded text log
-                  </p>
+                <CardHeader className="pb-2 flex flex-row items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-primary" />
+                      Detected Communication Patterns
+                    </CardTitle>
+                    <p className="text-[10px] text-zinc-500">
+                      Behavioral rhythms observed in the uploaded text log
+                    </p>
+                  </div>
+                  {(dynamicAnalysis.patterns && dynamicAnalysis.patterns.length > 1) && (
+                    <button
+                      onClick={() => setShowAllPatterns(!showAllPatterns)}
+                      className="text-[10px] font-extrabold uppercase text-primary hover:text-primary/80 transition-colors border border-primary/20 bg-primary/5 px-2 py-1 rounded-md shrink-0"
+                    >
+                      {showAllPatterns ? "View Less" : `View All (${dynamicAnalysis.patterns.length})`}
+                    </button>
+                  )}
                 </CardHeader>
                 <CardContent className="pt-2">
                   <div className="space-y-3">
-                    {(Array.isArray(dynamicAnalysis.patterns) ? dynamicAnalysis.patterns : []).map((pattern: any, index: number) => {
+                    {(Array.isArray(dynamicAnalysis.patterns) ? dynamicAnalysis.patterns : [])
+                      .slice(0, showAllPatterns ? undefined : 1)
+                      .map((pattern: any, index: number) => {
                       const isTense = pattern.type === "warning" || pattern.type === "danger";
                       const isPositive = pattern.type === "positive";
                       return (
