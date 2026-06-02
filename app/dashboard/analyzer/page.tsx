@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSubscription } from "@/hooks/use-subscription"
 import {
   PieChart,
   Pie as OriginalPie,
@@ -209,8 +210,11 @@ function ChatAnalyzerInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const historyId = searchParams.get("id")
+  const { subscription } = useSubscription()
+  const activeTier = subscription?.tier || "free"
 
   const [chatText, setChatText] = useState("")
+  const [isExtractingScreenshot, setIsExtractingScreenshot] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState("WhatsApp")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showResults, setShowResults] = useState(false)
@@ -268,6 +272,59 @@ function ChatAnalyzerInner() {
     };
 
     reader.readAsText(file);
+  };
+
+  const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setErrorMsg("");
+    setNotification(null);
+    setIsExtractingScreenshot(true);
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64Data = event.target?.result as string;
+      if (!base64Data) {
+        setErrorMsg("Failed to read the image file.");
+        setIsExtractingScreenshot(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/analyze-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageBase64: base64Data }),
+        });
+
+        const data = await response.json();
+        if (data.success && data.text) {
+          setChatText(data.text);
+          setNotification({
+            type: "success",
+            message: "Successfully extracted chat text from screenshot!",
+            description: "Gemini AI has transcribed the screenshot text into clean chat log format. Feel free to review it and click 'Analyze Conversation' to get your report."
+          });
+        } else {
+          setErrorMsg(data.error || "Failed to extract text from screenshot. Please try pasting the text or uploading a standard export file.");
+        }
+      } catch (err: any) {
+        console.error(err);
+        setErrorMsg("Connection error while calling the Gemini image parser.");
+      } finally {
+        setIsExtractingScreenshot(false);
+      }
+    };
+
+    reader.onerror = () => {
+      setErrorMsg("Failed to read the image file.");
+      setIsExtractingScreenshot(false);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   // Auto-switch tab based on URL search params
@@ -1011,8 +1068,9 @@ function ChatAnalyzerInner() {
                       />
                     </div>
 
-                    {/* Upload Option */}
-                    <div className="space-y-3">
+                    {/* Upload Options */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Text/JSON file upload */}
                       <div className="relative group">
                         <input
                           type="file"
@@ -1020,65 +1078,34 @@ function ChatAnalyzerInner() {
                           onChange={handleFileUpload}
                           className="hidden"
                           id="chat-file-upload"
+                          disabled={isExtractingScreenshot || isAnalyzing}
                         />
                         <label
                           htmlFor="chat-file-upload"
-                          className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98]"
+                          className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98] select-none"
                         >
-                          <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors animate-pulse" />
-                          <span>Upload Chat Export File (.txt, .json)</span>
+                          <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors" />
+                          <span>Upload Export (.txt, .json)</span>
                         </label>
                       </div>
 
-                      {/* Interactive Mobile Export Helper Guide Accordion */}
-                      <div className="rounded-xl border border-white/[0.04] bg-zinc-950/20 overflow-hidden">
-                        <button
-                          type="button"
-                          onClick={() => setShowMobileGuide(!showMobileGuide)}
-                          className="w-full flex items-center justify-between p-3.5 text-left text-zinc-300 hover:text-white transition-colors cursor-pointer select-none"
+                      {/* Screenshot upload */}
+                      <div className="relative group">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleScreenshotUpload}
+                          className="hidden"
+                          id="chat-screenshot-upload"
+                          disabled={isExtractingScreenshot || isAnalyzing}
+                        />
+                        <label
+                          htmlFor="chat-screenshot-upload"
+                          className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98] select-none"
                         >
-                          <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                            <span>📱</span> Mobile User? How to Export Chats
-                          </span>
-                          <span className="text-zinc-500 text-xs font-bold font-mono">
-                            {showMobileGuide ? "Hide" : "Show"}
-                          </span>
-                        </button>
-                        
-                        <AnimatePresence>
-                          {showMobileGuide && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.25 }}
-                              className="border-t border-white/[0.04] p-3.5 bg-black/10 space-y-3.5 text-xs text-zinc-400 leading-relaxed"
-                            >
-                              <div>
-                                <h4 className="font-bold text-zinc-200 flex items-center gap-1.5 mb-1 text-[11px] uppercase tracking-wide">
-                                  <span className="text-green-500">✓</span> WhatsApp (Easy &amp; Fast ⚡)
-                                </h4>
-                                <ol className="list-decimal pl-4.5 space-y-1">
-                                  <li>Open your WhatsApp chat partner conversation.</li>
-                                  <li>Tap the contact name at the top (or tap the three-dots menu <span className="font-bold">⋮</span>).</li>
-                                  <li>Scroll down and select <span className="font-bold text-zinc-300">Export Chat</span>.</li>
-                                  <li>Select <span className="font-semibold text-primary">Without Media</span> (creates a clean compact text file).</li>
-                                  <li>Save the generated <span className="font-bold text-zinc-350">.txt</span> file to your device Files or share it.</li>
-                                  <li>Click the **Upload Chat Export File** button above, select that saved file, and you are done! 💥</li>
-                                </ol>
-                              </div>
-                              <div className="border-t border-white/[0.03] pt-3">
-                                <h4 className="font-bold text-zinc-200 flex items-center gap-1.5 mb-1 text-[11px] uppercase tracking-wide">
-                                  <span className="text-pink-500">✓</span> Instagram (Alt Option 📸)
-                                </h4>
-                                <ul className="list-disc pl-4.5 space-y-1">
-                                  <li>For short dialogue logs: Tap-and-hold to copy messages, and paste them directly in the text editor above.</li>
-                                  <li>For full archive exports: Open Instagram Settings ➡️ Account Center ➡️ Your Information ➡️ Download Your Information. Choose JSON format to upload here.</li>
-                                </ul>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                          <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors" />
+                          <span>{isExtractingScreenshot ? "Extracting text..." : "Upload Screenshot (PNG/JPG)"}</span>
+                        </label>
                       </div>
                     </div>
 
@@ -1119,13 +1146,18 @@ function ChatAnalyzerInner() {
                     {/* Analyze Button */}
                     <Button
                       onClick={handleAnalyze}
-                      disabled={!chatText.trim() || isAnalyzing}
+                      disabled={!chatText.trim() || isAnalyzing || isExtractingScreenshot}
                       className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white py-6 text-sm font-semibold rounded-xl border border-white/5 shadow-md shadow-primary/10 transition-all duration-300"
                     >
                       {isAnalyzing ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                           Analyzing Conversation...
+                        </>
+                      ) : isExtractingScreenshot ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                          Reading Chat Screenshot via Gemini AI...
                         </>
                       ) : (
                         <>
