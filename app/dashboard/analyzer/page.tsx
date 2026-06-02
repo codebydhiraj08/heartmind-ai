@@ -306,14 +306,14 @@ function ChatAnalyzerInner() {
           setNotification({
             type: "success",
             message: "Successfully extracted chat text from screenshot!",
-            description: "Gemini AI has transcribed the screenshot text into clean chat log format. Feel free to review it and click 'Analyze Conversation' to get your report."
+            description: "Our AI model has transcribed the screenshot text into clean chat log format. Feel free to review it and click 'Analyze Conversation' to get your report."
           });
         } else {
           setErrorMsg(data.error || "Failed to extract text from screenshot. Please try pasting the text or uploading a standard export file.");
         }
       } catch (err: any) {
         console.error(err);
-        setErrorMsg("Connection error while calling the Gemini image parser.");
+        setErrorMsg("Connection error while calling the image parser.");
       } finally {
         setIsExtractingScreenshot(false);
       }

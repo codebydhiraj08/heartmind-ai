@@ -34,4 +34,5 @@ We have successfully integrated a fully functional **AI-powered Screenshot OCR**
 3. **Gemini OCR Refinements (Left/Right Layout & Replies)**:
    - **Left/Right Layout Identification**: Senders are matched based on bubble positions. Messages on the right side of the screen are sent by "Me", and messages on the left side are sent by the person whose name is shown in the top header bar of the screenshot (defaults to "Partner" if name is unidentifiable).
    - **Quoted Replies Filtered**: The prompt now explicitly instructs Gemini to bypass quoted copy segments (replies inside boxes), capturing only the actual new reply message written by the sender.
-
+4. **Hiding AI Model & Brand Leaks**:
+   - Replaced all user-facing instances of "Gemini AI" and "Gemini" with generic/neutral branding words (like "Our AI model", "image parser", or "AI API key") in success banners, upload notifications, and API route error messages.

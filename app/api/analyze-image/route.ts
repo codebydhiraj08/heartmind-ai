@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     const apiKey = getApiKey();
     if (!apiKey) {
       return NextResponse.json(
-        { success: false, error: "Gemini API key is not configured on the server." },
+        { success: false, error: "AI API key is not configured on the server." },
         { status: 500 }
       );
     }
@@ -73,7 +73,7 @@ Rules:
     const responseText = result.response.text();
 
     if (!responseText || !responseText.trim()) {
-      throw new Error("Gemini was unable to read text from this image. Please ensure the chat log is clearly visible.");
+      throw new Error("The image parser was unable to read text from this image. Please ensure the chat log is clearly visible.");
     }
 
     return NextResponse.json({

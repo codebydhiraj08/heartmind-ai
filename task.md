@@ -15,4 +15,5 @@
 - `[x]` 4. Refine Gemini OCR parser for Right/Left chat bubbles and ignore quoted replies
   - `[x]` Update API route prompt with specific instructions for right/left layouts, header name matching, and reply-quote filtering.
   - `[x]` Rename UI button and loading overlay states to show "Uploading..." instead of "Reading Chat Screenshot via Gemini AI...".
-
+- `[x]` 5. Remove user-facing brand/model name leaks
+  - `[x]` Modify frontend notifications, API route errors, and placeholders to replace "Gemini AI" and "Gemini" with generic terms.
