@@ -1,24 +1,28 @@
-# Walkthrough — Reverted Premium Gating Layout
+# Walkthrough — Dashboard Gating Clean-up & Vercel URL Info
 
-We have successfully reverted the simplified premium gating overlay design, fully restoring the original premium UI with its high-fidelity icons, benefits, preview blocks, and spacious overlay structure.
+We have successfully cleaned up the dashboard to only show a single premium lock card for free tier users (hiding the bottom duplicate locked AI Coach suggestion widget) and clarified the usage of your Vercel deployment URLs.
 
 ---
 
 ## 🛠️ Summary of Accomplishments
 
-### 1. Restored Premium Gating Fallback UI
-* **File**: [components/premium-gate.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/components/premium-gate.tsx)
+### 1. Dashboard Lock Simplification
+* **File**: [app/dashboard/page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/page.tsx)
 * **Accomplishment**: 
-  - Restored `min-h-[500px]` container height and card parameters to let the blurred skeleton overlay fit beautifully.
-  - Restored the animated status badges (Pulsing Crown/Lock).
-  - Restored the interactive **Insight Preview** snippet box displaying dynamic snippets per locked feature.
-  - Restored the bulleted features lists explaining what is enabled under the Pro and Premium tiers.
-  - Re-enabled both "Back to my insights" and "Explore/Upgrade" button choices.
+  - Defined `activeTier` dynamically inside the dashboard page component.
+  - Wrapped the bottom gated widget (**AI Coach suggestion box**) in an `{activeTier !== "free" && ( ... )}` rendering check.
+  - Free users will now see only a single premium lock card (on the Emotional Analytics chart) instead of two identical lock cards stacked on top of each other, resolving the layout bloat. When they upgrade to Pro or Premium, the bottom coach daily tip will automatically unlock and render on their dashboard.
+
+### 2. Vercel URL Clarification
+* **Concept**: Clarified the difference between preview subdomains and production subdomains on Vercel:
+  - **`https://heartmind-ai.vercel.app/`** is the main, official production link.
+  - The others with random endings (like `-eby3` and `-i67h`) are preview URLs generated automatically by Vercel for older commits to test and preview them. They are safe to ignore.
 
 ---
 
 ## 🧪 Verification & Validation
 
-1. **Dashboard UI**:
-   - Log in as a Free tier user and verify that locked cards display the full high-fidelity layout.
-   - The lock cards present the original premium design seamlessly.
+1. **Dashboard Clean-up**:
+   - Log in as a Free tier user.
+   - Go to `/dashboard`. Verify that only the top Emotional Intelligence chart shows the premium card block, and the bottom daily coach card is hidden, keeping the dashboard clean.
+   - Verify that the Red Flag alerts widget remains fully open and operational.

@@ -71,6 +71,7 @@ export default function DashboardPage() {
   const { data: session, status: sessionStatus } = useSession()
   const userName = session?.user?.name || "Guest"
   const { subscription, usage, loading: subscriptionLoading, refreshSubscription } = useSubscription()
+  const activeTier = subscription?.tier || "free"
 
   const [analyses, setAnalyses] = useState<any[]>([])
   const [latestAnalysis, setLatestAnalysis] = useState<any>(null)
@@ -955,38 +956,40 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* AI Coach Tip */}
-      <motion.div
-        variants={itemVariants}
-        initial="hidden"
-        animate="show"
-        whileHover={{ y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
-      >
-        <PremiumGate allowedTiers={["pro", "premium"]} featureName="AI Relationship Coach" fallbackMode="blur">
-          <div
-            onMouseMove={handleMouseMove}
-            className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] shadow-xl p-5 relative overflow-hidden bg-gradient-to-r from-zinc-950 to-zinc-900/40"
-          >
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-primary to-accent rounded-l-full" />
-          <div className="flex flex-col md:flex-row md:items-center gap-4 pl-2 relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/10 flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
+      {activeTier !== "free" && (
+        <motion.div
+          variants={itemVariants}
+          initial="hidden"
+          animate="show"
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
+        >
+          <PremiumGate allowedTiers={["pro", "premium"]} featureName="AI Relationship Coach" fallbackMode="blur">
+            <div
+              onMouseMove={handleMouseMove}
+              className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] shadow-xl p-5 relative overflow-hidden bg-gradient-to-r from-zinc-950 to-zinc-900/40"
+            >
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-primary to-accent rounded-l-full" />
+            <div className="flex flex-col md:flex-row md:items-center gap-4 pl-2 relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/10 flex-shrink-0">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xs font-semibold text-zinc-200 tracking-wide uppercase mb-1">Daily Reflective Suggestion</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
+                  {dynamicCoachTip}
+                </p>
+              </div>
+              <Link href="/dashboard/coach">
+                <Button variant="outline" className="flex-shrink-0 border-white/[0.06] hover:bg-white/[0.02] text-xs font-semibold px-4 h-8 rounded-lg transition-colors">
+                  More Tips
+                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                </Button>
+              </Link>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-xs font-semibold text-zinc-200 tracking-wide uppercase mb-1">Daily Reflective Suggestion</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl">
-                {dynamicCoachTip}
-              </p>
-            </div>
-            <Link href="/dashboard/coach">
-              <Button variant="outline" className="flex-shrink-0 border-white/[0.06] hover:bg-white/[0.02] text-xs font-semibold px-4 h-8 rounded-lg transition-colors">
-                More Tips
-                <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
-              </Button>
-            </Link>
           </div>
-        </div>
-        </PremiumGate>
-      </motion.div>
+          </PremiumGate>
+        </motion.div>
+      )}
 
       {/* All Past Analyses History Modal */}
       <AnimatePresence>
