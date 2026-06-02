@@ -28,5 +28,10 @@ We have successfully integrated a fully functional **AI-powered Screenshot OCR**
 
 2. **How Screenshot Upload Works**:
    - Click **Upload Screenshot (PNG/JPG)**, select a screenshot image of a WhatsApp, Instagram, or iMessage conversation.
-   - The screen shows a loader saying `"Reading Chat Screenshot via Gemini AI..."`.
+   - The screen shows a loader saying `"Uploading..."`.
    - Gemini transcribes the image and populates the text area with the conversation text. You can then review/edit the text and click **Analyze Conversation** to complete the analysis.
+
+3. **Gemini OCR Refinements (Left/Right Layout & Replies)**:
+   - **Left/Right Layout Identification**: Senders are matched based on bubble positions. Messages on the right side of the screen are sent by "Me", and messages on the left side are sent by the person whose name is shown in the top header bar of the screenshot (defaults to "Partner" if name is unidentifiable).
+   - **Quoted Replies Filtered**: The prompt now explicitly instructs Gemini to bypass quoted copy segments (replies inside boxes), capturing only the actual new reply message written by the sender.
+

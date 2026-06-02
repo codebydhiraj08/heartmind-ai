@@ -43,17 +43,24 @@ export async function POST(req: NextRequest) {
 
     const prompt = `
 You are a specialized chat transcriber for HeartMind AI.
-Analyze this chat conversation screenshot and extract the message text exactly as it appears.
-Format the output as a clean, chronological plain text conversation log using sender names, like:
-Sender A: Message text
-Sender B: Message text
+Analyze this mobile chat conversation screenshot (which could be from WhatsApp, Instagram, Telegram, iMessage, etc.) and extract the message logs in chronological order.
+
+Identify the senders based on the layout and header:
+1. **Me / You (The user who took the screenshot)**: All message bubbles aligned on the RIGHT side of the screen are sent by "Me". Use "Me" as the sender name.
+2. **The Other Person (Partner)**: Identify the name/emoji of the other person shown in the top header bar of the screenshot (next to the back arrow/profile picture). If you can identify this name (e.g., "👰🏻‍♀️", "Priya", "Rahul"), use it as their sender name. If no clear name is found in the header, default to "Partner".
+3. **Left-aligned messages**: All message bubbles aligned on the LEFT side of the screen are sent by the other person (use their header name or "Partner").
 
 Rules:
-1. Identify the different senders in the image. Use their exact names if visible, or "Sender A" / "Sender B" consistently.
-2. DO NOT include timestamp headers, date bubbles, status badges (e.g. read, typing), or UI text. Keep only the raw sender name and message content.
-3. If the screenshot contains system messages (e.g., "Messages are encrypted"), ignore them.
-4. Output only the plain text log. Do not add markdown backticks, intros, or summaries.
+- **Chronological Order**: Output the conversation from top to bottom.
+- **Handling Reply Quotes (Quoted Messages)**: If a message bubble contains a nested preview box (representing a reply to a previous message, often marked with "You" or a contact name and a vertical line indicating a quote), DO NOT transcribe the quoted message text. Ignore the quote completely and only transcribe the actual new reply message text at the bottom of the bubble.
+- **Ignore Timestamps & Statuses**: DO NOT include any timestamps (e.g. "11:41 pm", "11:42 pm"), checkmarks/ticks, read receipts, or date dividers.
+- **No System Messages**: Ignore messages like "Messages are end-to-end encrypted", "Security code changed", etc.
+- **Format**: Output ONLY the plain text conversation log, with each line in the format:
+  SenderName: message content
+  (Where SenderName is "Me" for right-side messages, and the header name/Partner for left-side messages).
+  Do not wrap in markdown code blocks (\`\`\`), do not add intros or extra descriptions.
 `;
+
 
     const imagePart = {
       inlineData: {

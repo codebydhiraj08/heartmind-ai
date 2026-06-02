@@ -1104,7 +1104,7 @@ function ChatAnalyzerInner() {
                           className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98] select-none"
                         >
                           <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors" />
-                          <span>{isExtractingScreenshot ? "Extracting text..." : "Upload Screenshot (PNG/JPG)"}</span>
+                          <span>{isExtractingScreenshot ? "Uploading..." : "Upload Screenshot (PNG/JPG)"}</span>
                         </label>
                       </div>
                     </div>
@@ -1157,7 +1157,7 @@ function ChatAnalyzerInner() {
                       ) : isExtractingScreenshot ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                          Reading Chat Screenshot via Gemini AI...
+                          Uploading...
                         </>
                       ) : (
                         <>

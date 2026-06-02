@@ -11,3 +11,8 @@
 
 - `[x]` 3. Verify
   - `[x]` Verify screenshot uploads are read, transcribed, and parsed properly by Gemini.
+
+- `[x]` 4. Refine Gemini OCR parser for Right/Left chat bubbles and ignore quoted replies
+  - `[x]` Update API route prompt with specific instructions for right/left layouts, header name matching, and reply-quote filtering.
+  - `[x]` Rename UI button and loading overlay states to show "Uploading..." instead of "Reading Chat Screenshot via Gemini AI...".
+
