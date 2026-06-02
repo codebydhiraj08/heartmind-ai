@@ -216,45 +216,102 @@ export function PremiumGate({
   const isPremiumRequired = allowedTiers.includes("premium") && !allowedTiers.includes("pro");
   const requiredTierName = isPremiumRequired ? "Premium" : "Pro";
 
+  // Curated premium benefits aligned to emotional intelligence positioning
+  const benefits = isPremiumRequired
+    ? [
+        "Live, emotionally intelligent guidance with your AI Relationship Coach",
+        "Full relationship picture compatibility & alignment charting",
+        "Shared emotional growth timeline & memory logs",
+        "Advanced behavioral mapping & interaction style analysis",
+        "Expanded long-term relationship insights",
+      ]
+    : [
+        "Continuous relationship insight sessions",
+        "Sub-surface emotional behavior & pattern detection",
+        "Subtle voice sentiment & tone stress decoding",
+        "Naturally aligned, empathetic AI communication reframing",
+        "Meaningful long-term communication trends & visibility",
+      ];
+
+  const previewSnippet = PREVIEW_SNIPPETS[featureName] || "Uncover deeper communication patterns and subtle relationship trends.";
+
   const LockCard = () => (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 350, damping: 25 }}
-      className="w-full max-w-sm mx-auto overflow-hidden rounded-xl border border-white/[0.05] bg-zinc-950/90 p-5 shadow-2xl relative glass-strong backdrop-blur-xl text-center"
+      className="w-full max-w-lg mx-auto overflow-hidden rounded-2xl border border-white/[0.05] bg-zinc-950/80 p-6 md:p-8 shadow-2xl relative glass-strong backdrop-blur-xl"
     >
-      {/* Visual glowing border accent */}
+      {/* Visual glowing border accents */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
       
-      <div className="flex flex-col items-center space-y-4 relative z-10">
-        {/* Compact lock/crown badge */}
-        <div className="w-10 h-10 rounded-full bg-gradient-to-b from-zinc-900 to-zinc-950 border border-white/5 flex items-center justify-center shadow-lg">
+      <div className="flex flex-col items-center text-center space-y-5 relative z-10">
+        {/* Animated Icon badge */}
+        <div className="w-12 h-12 rounded-full bg-gradient-to-b from-zinc-900 to-zinc-950 border border-white/5 flex items-center justify-center shadow-lg shadow-black/50">
           {isPremiumRequired ? (
-            <Crown className="w-5 h-5 text-primary animate-pulse" />
+            <Crown className="w-5.5 h-5.5 text-primary animate-pulse" />
           ) : (
-            <Lock className="w-4 h-4 text-accent" />
+            <Lock className="w-5.5 h-5.5 text-accent" />
           )}
         </div>
 
-        <div className="space-y-1">
-          <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">
-            HeartMind {requiredTierName} Feature
-          </h3>
-          <p className="text-[11px] text-zinc-400 max-w-xs mx-auto leading-relaxed">
-            Upgrade to the **{requiredTierName}** plan to unlock {featureName}.
+        <div className="space-y-2 w-full">
+          <span className="text-[9px] font-bold tracking-widest text-primary uppercase bg-primary/10 border border-primary/20 py-1 px-3 rounded-full">
+            Advanced Emotional Intelligence
+          </span>
+          <h2 className="text-xl md:text-2xl font-extrabold tracking-tight text-white mt-2">
+            Expand your relationship intelligence
+          </h2>
+          <p className="text-xs md:text-sm text-zinc-400 max-w-md mx-auto leading-relaxed mt-1">
+            Your core insights and analysis data are always accessible. Advanced intelligence layers like AI coaching, compatibility mapping, and deep emotional analytics are available with **HeartMind {requiredTierName}**.
           </p>
+
+          {/* Suggestive and Reflective Preview Box */}
+          <div className="w-full bg-primary/5 border border-primary/10 rounded-xl p-4 mt-4 space-y-1.5 backdrop-blur-md">
+            <div className="flex items-center justify-center gap-1.5 text-[9px] font-extrabold uppercase tracking-widest text-primary">
+              <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+              Insight Preview
+            </div>
+            <p className="text-xs text-zinc-300 italic leading-relaxed font-medium">
+              "{previewSnippet}"
+            </p>
+          </div>
         </div>
 
-        {/* Action Button */}
-        <Link href="/dashboard/upgrade" className="w-full">
-          <Button
-            onClick={() => sendClientEvent("upgrade_cta_clicked", { feature: featureName, from: "premium_gate" })}
-            className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white text-xs font-semibold h-9 rounded-lg border border-white/5 shadow-md shadow-primary/10 transition-all duration-300 flex items-center justify-center gap-1"
-          >
-            Upgrade Now
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
-        </Link>
+        {/* Benefits list bullet box */}
+        <div className="w-full bg-white/[0.01] border border-white/[0.03] rounded-xl p-4 text-left space-y-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+            What is enabled on {requiredTierName}:
+          </p>
+          <ul className="space-y-2">
+            {benefits.map((benefit, idx) => (
+              <li key={idx} className="flex items-start gap-2.5 text-xs text-zinc-300">
+                <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Sparkles className="w-2.5 h-2.5 text-primary" />
+                </div>
+                <span className="leading-relaxed">{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Action Call to Action */}
+        <div className="w-full pt-2 flex flex-col sm:flex-row gap-3">
+          <Link href="/dashboard" className="flex-1">
+            <Button variant="outline" className="w-full text-xs font-semibold h-10 border-white/[0.06] hover:bg-white/[0.02]">
+              Back to my insights
+            </Button>
+          </Link>
+          <Link href="/dashboard/upgrade" className="flex-1">
+            <Button
+              onClick={() => sendClientEvent("upgrade_cta_clicked", { feature: featureName, from: "premium_gate" })}
+              className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white text-xs font-semibold h-10 border border-white/5 shadow-md shadow-primary/10 transition-all duration-300"
+            >
+              {isPremiumRequired ? "Explore deeper relationship intelligence" : "Explore full emotional visibility"}
+              <ArrowRight className="ml-1.5 w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </motion.div>
   );
@@ -262,14 +319,14 @@ export function PremiumGate({
   // We always use the beautiful backdrop blurring overlay, even for fallbackMode === "lock"
   // If children is provided, we blur the children. If not, we render MockDashboardSkeleton.
   return (
-    <div className="relative min-h-[260px] w-full h-full rounded-2xl overflow-hidden py-6 px-4 flex items-center justify-center">
+    <div className="relative min-h-[500px] w-full rounded-2xl overflow-hidden py-12 px-4 flex items-center justify-center">
       {/* Obscured background layer */}
-      <div className={`absolute inset-0 filter ${fallbackMode === "blur" ? "blur-md" : "blur-lg"} select-none pointer-events-none opacity-20`}>
+      <div className={`absolute inset-0 filter ${fallbackMode === "blur" ? "blur-xl" : "blur-2xl"} select-none pointer-events-none opacity-25`}>
         {children ? children : <MockDashboardSkeleton />}
       </div>
       
       {/* Glassmorphic lock card overlay centered */}
-      <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
         <LockCard />
       </div>
     </div>

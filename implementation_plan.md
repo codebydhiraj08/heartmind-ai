@@ -1,20 +1,20 @@
-# Implementation Plan — Premium Gate Gating Simplicity & Layout Refinement
+# Implementation Plan — Restore Premium Gating Layout & Spacing
 
-This plan details the changes to simplify the premium access lock layout (`PremiumGate`) across the dashboard. We will replace the bulky preview snippets, benefits lists, and huge spacing wrappers with a clean, compact, and elegant glass card containing just the lock icon, feature name, plan requirement, and a direct upgrade button.
+This plan details the changes to revert the simplified lock layout and restore the original high-fidelity Premium Gating UI overlay. This preserves the animated icon badges, details of benefits included in Pro/Premium, and suggestive/reflective preview snippets.
 
 ---
 
 ## Proposed Changes
 
-### 1. Simplify Premium Gating Fallback UI
+### 1. Revert to Premium Gating Layout UI
 
-#### [MODIFY] [premium-gate.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/components/premium-gate.tsx)
-* Redesign `LockCard` to be super compact:
-  - Remove the large suggestive preview box and `PREVIEW_SNIPPETS` metadata.
-  - Remove the bulleted benefits list.
-  - Remove the redundant "Back to my insights" button.
-  - Display a sleek badge, lock/crown icon, and a single "Upgrade Now" action button.
-* Refactor the outer wrapper container to reduce unnecessary spacing and minimum height (reducing `min-h-[500px]` to a dynamic `min-h-[250px]`), preventing widgets on the dashboard from stretching/distorting the grid layouts.
+#### [MODIFY] [premium-gate.tsx](file:///c:/Users/DhirajWarangane\OneDrive\Desktop\Heartmind\components\premium-gate.tsx)
+* Revert `LockCard` and container styling to the original high-fidelity design:
+  - Restore `min-h-[500px]` container height wrapper to ensure correct glass overlay styling.
+  - Restore animated lock/crown status badges.
+  - Re-enable the suggestive/reflective preview box showcasing preview snippets for each feature.
+  - Restore the comprehensive benefits bullet points list for each tier.
+  - Restore both "Back to my insights" and "Upgrade" button groups.
 
 ---
 
@@ -22,5 +22,4 @@ This plan details the changes to simplify the premium access lock layout (`Premi
 
 ### Manual Verification
 1. Log in as a Free tier user.
-2. Visit the main dashboard `/dashboard`. Verify that the locked widgets (Emotional Analytics, AI Coach) render in a sleek, compact card matching their natural layout size, without stretching the page.
-3. Click any locked tab in the sidebar (e.g., AI Coach, Smart Replies). Verify that it displays a clean, elegant lock card stating "HeartMind Pro/Premium Feature" and an "Upgrade Now" button, with no unnecessary preview noise or spacing issues.
+2. Visit any locked feature or widget. Verify that it renders the gorgeous, high-fidelity lock screen with the badge, description, preview box, and button layout.
