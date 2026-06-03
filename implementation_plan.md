@@ -1,30 +1,26 @@
-# Implementation Plan — Voice Analyzer Dynamic Red-Flag Threshold Adjustment
+# Implementation Plan — Make Support & Resources Section Fully Functional
 
-This plan details the changes to solve the voice analysis red-flag detection issue where scores like 63 show 0 patterns and 10 healthy patterns. We will adjust the threshold limits dynamically based on the overall emotional safety score.
-
----
+This plan details the changes required to address the non-functional "Support & Resources" cards inside the Settings page (`app/dashboard/settings/page.tsx`).
 
 ## Proposed Changes
 
-### 1. Dynamic Threshold Tuning for Vocal Red-Flag Detection
+### 1. Remove Platform User Manual & Bind Modals to Resources
+- Remove the first card: **Platform User Manual** as requested.
+- Bind click events for the remaining three cards (**Sensitive Data Privacy Guard**, **Relationship Conflict Science**, and **Dispatch Support Ticket**) to state hooks that trigger beautiful modals, instead of mock alerts.
 
-#### [MODIFY] [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-voice/route.ts)
-* Change how threshold parameters (`stressThreshold`, `hesitationThreshold`, `sadnessThreshold`, `angerThreshold`, `excitementThreshold`) are evaluated.
-* Since the simulated vocal metrics have limited ranges (e.g., Sadness maxes out at 27%, Anger at 13%), absolute high thresholds like `sadness > 35` and `anger > 15` never trigger.
-* Implement a dynamic scaling system for thresholds depending on the `overallScore`:
-  * **If score is healthy (>= 85):** Keep absolute high thresholds to keep it clean (0 patterns).
-  * **If score has concerns (55 - 84):** Lower thresholds so minor cues are detected as warnings (1-2 concern patterns).
-    * `stressThreshold` = 30
-    * `hesitationThreshold` = 30
-    * `sadnessThreshold` = 12
-    * `angerThreshold` = 5
-    * `excitementThreshold` = 45
-  * **If score is high-risk (< 55):** Lower thresholds further to capture multiple concerns (3-4 patterns).
-    * `stressThreshold` = 20
-    * `hesitationThreshold` = 20
-    * `sadnessThreshold` = 8
-    * `angerThreshold` = 3
-    * `excitementThreshold` = 60
+### 2. Implement Interactive Modals
+
+#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/settings/page.tsx)
+- Import `X`, `Lock`, and `Send` from `lucide-react`.
+- Declare state variables for managing modals:
+  - `isPrivacyModalOpen`, `isScienceModalOpen`, `isSupportModalOpen`.
+  - `inputText`, `hashedText` (for live SHA-256 privacy sandbox).
+  - `criticismLevel`, `listeningLevel` (for relationship conflict simulator).
+  - `ticketCategory`, `ticketMessage`, `ticketStatus` (for dispatch support ticket form).
+- Implement dynamic React state modals using `AnimatePresence` and `motion.div` for a premium glassmorphic feel matching the app aesthetics:
+  1. **Sensitive Data Privacy Guard Modal**: Contains explanations for local-first sanitization, SHA-256 fingerprint hashing, zero-log policies, and a **live client-side SHA-256 hashing input sandbox** so the user can experience the cryptographic protection in real-time.
+  2. **Relationship Conflict Science Modal**: Explains Dr. Gottman's "Four Horsemen", positive-to-negative linguistic ratios (5:1/20:1), and includes an **interactive Relational Health Simulator** slider dashboard.
+  3. **Dispatch Support Ticket Modal**: Provides an interactive form allowing the user to select a department (Emotional Dispatch, Billing Issue, App Bug, Feature Feedback), write their message, and submit it with a realistic animated loader state and automated assessment feedback.
 
 ---
 
@@ -32,7 +28,14 @@ This plan details the changes to solve the voice analysis red-flag detection iss
 
 ### Manual Verification
 1. Run local dev server (`npm run dev -p 3005`).
-2. Run a voice analysis that scores around 63.
-3. Open the **Red Flag Detection** page for that voice record.
-4. Verify that patterns (like Vocal Stress, Acoustic Evasion, or Vocal Tone Flattening) are now correctly listed under "Require Attention", and the corresponding healthy patterns count decreases.
-5. Run a voice analysis with a very low score (< 50) and verify that multiple severe patterns are flagged.
+2. Go to **Settings** -> **Plan & Billing Info**.
+3. Verify that "Platform User Manual" is removed.
+4. Click on **Sensitive Data Privacy Guard**:
+   - Verify modal opens with high-fidelity styles.
+   - Try typing in the Live SHA-256 sandbox to confirm client-side SHA-256 hashing works.
+5. Click on **Relationship Conflict Science**:
+   - Verify modal opens.
+   - Adjust the criticism and supportiveness sliders to see the computed health score and recommendation update dynamically.
+6. Click on **Dispatch Support Ticket**:
+   - Try sending a ticket under each department.
+   - Verify the loading spinner and matching assessment messages display correctly.

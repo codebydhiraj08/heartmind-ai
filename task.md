@@ -1,5 +1,9 @@
-# Voice Analyzer Dynamic Threshold Refinement Checklist
+# Task Checklist - Functional Settings Support Modals
 
-- [x] 1. Dynamic Threshold Tuning in Voice Route
-  - [x] Implement dynamic threshold scaling based on overallScore in `app/api/analyze-voice/route.ts`.
-  - [x] Map Stress, Hesitation, Sadness, Anger, and Excitement correctly using these scaled thresholds.
+- `[x]` Update `lucide-react` imports in `app/dashboard/settings/page.tsx`
+- `[x]` Declare state hooks for Modals & Form states in `SettingsPage` component
+- `[x]` Replace the mapping array of cards (remove Platform User Manual, bind onClick to state functions)
+- `[x]` Implement Sensitive Data Privacy Guard Modal rendering inside `AnimatePresence`
+- `[x]` Implement Relationship Conflict Science Modal rendering with Interactive Simulator sliders
+- `[x]` Implement Dispatch Support Ticket Modal rendering with input form, category selection, and submission simulation
+- `[x]` Verify modal functionality and design styling locally

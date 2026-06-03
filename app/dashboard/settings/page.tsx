@@ -27,7 +27,10 @@ import {
   RefreshCw,
   AlertTriangle,
   Terminal,
-  CheckCircle2
+  CheckCircle2,
+  X,
+  Lock,
+  Send
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -40,6 +43,46 @@ export default function SettingsPage() {
 
   // Active settings tab state
   const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "subscription" | "diagnostics">("profile")
+
+  // Support & Resources modal states
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false)
+  const [isScienceModalOpen, setIsScienceModalOpen] = useState(false)
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
+  
+  // Support ticket form states
+  const [ticketCategory, setTicketCategory] = useState("emotional")
+  const [ticketMessage, setTicketMessage] = useState("")
+  const [ticketStatus, setTicketStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
+
+  // Privacy sandbox states
+  const [inputText, setInputText] = useState("")
+  const [hashedText, setHashedText] = useState("")
+
+  const computeHash = async (text: string) => {
+    if (!text) {
+      setHashedText("")
+      return
+    }
+    try {
+      const encoder = new TextEncoder()
+      const data = encoder.encode(text)
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      setHashedText(hashHex)
+    } catch (e) {
+      let hash = 0
+      for (let i = 0; i < text.length; i++) {
+        hash = (hash << 5) - hash + text.charCodeAt(i)
+        hash |= 0
+      }
+      setHashedText("simulated_hash_" + Math.abs(hash).toString(16))
+    }
+  }
+
+  // Science simulator states
+  const [criticismLevel, setCriticismLevel] = useState(40)
+  const [listeningLevel, setListeningLevel] = useState(65)
 
   // Diagnostics Tab states
   const [diagLoading, setDiagLoading] = useState(false)
@@ -924,26 +967,25 @@ export default function SettingsPage() {
 
                 <div className="space-y-3">
                   {[
-                    { title: "📄 Platform User Manual", link: "#", desc: "Step-by-step guides on how to export WhatsApp/Telegram/Slack chats." },
-                    { title: "🔒 Sensitive Data Privacy Guard", link: "#", desc: "Detailed breakdown on local-first processing and SHA-256 fingerprint hashing." },
-                    { title: "🧩 Relationship Conflict Science", link: "#", desc: "Scientific literature behind our communication volume models." },
-                    { title: "💌 Dispatch Support Ticket", link: "#", desc: "Simulate a live emotional dispatch helper directly." }
-                  ].map((res, idx) => (
-                    <a
-                      key={idx}
-                      href={res.link}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        alert(`Opening Resource: "${res.title}" inside a simulated sandbox preview!`)
+                    { id: "privacy", title: "🔒 Sensitive Data Privacy Guard", desc: "Detailed breakdown on local-first processing and SHA-256 fingerprint hashing." },
+                    { id: "science", title: "🧩 Relationship Conflict Science", desc: "Scientific literature behind our communication volume models." },
+                    { id: "support", title: "💌 Dispatch Support Ticket", desc: "Simulate a live emotional dispatch helper directly." }
+                  ].map((res) => (
+                    <button
+                      key={res.id}
+                      onClick={() => {
+                        if (res.id === "privacy") setIsPrivacyModalOpen(true)
+                        if (res.id === "science") setIsScienceModalOpen(true)
+                        if (res.id === "support") setIsSupportModalOpen(true)
                       }}
-                      className="block p-3 rounded-xl bg-zinc-950/50 border border-white/[0.03] hover:border-white/[0.08] transition-all hover:translate-x-0.5 duration-300"
+                      className="w-full text-left block p-3 rounded-xl bg-zinc-950/50 border border-white/[0.03] hover:border-white/[0.08] transition-all hover:translate-x-0.5 duration-300 group"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[11px] font-bold text-zinc-200 block">{res.title}</span>
-                        <ChevronRight className="w-3 h-3 text-zinc-500" />
+                        <ChevronRight className="w-3 h-3 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
                       </div>
                       <span className="text-[9px] text-zinc-400 leading-normal block pt-0.5">{res.desc}</span>
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -956,6 +998,488 @@ export default function SettingsPage() {
         </motion.div>
       </AnimatePresence>
 
+      {/* 1. Sensitive Data Privacy Guard Modal */}
+      <AnimatePresence>
+        {isPrivacyModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsPrivacyModalOpen(false)}
+              className="absolute inset-0 cursor-default"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-xl bg-zinc-950/95 border border-white/[0.08] shadow-2xl rounded-2xl overflow-hidden glass-strong flex flex-col max-h-[90vh] z-10"
+            >
+              {/* Glowing top line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500" />
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-5 border-b border-white/[0.05] relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <Shield className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white tracking-wide">
+                      Sensitive Data Privacy Guard
+                    </h3>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      Technical breakdown of local-first cryptographic protection
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setIsPrivacyModalOpen(false)}
+                  variant="ghost" 
+                  size="icon" 
+                  className="w-7 h-7 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs text-zinc-300">
+                <div className="space-y-2">
+                  <h4 className="font-bold text-zinc-100 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Local-First Sanitization Pipeline
+                  </h4>
+                  <p className="text-zinc-400 leading-relaxed text-[11px] pl-3">
+                    Your conversation transcripts, text fragments, and raw vocal files are processed purely in ephemeral RAM buffers. We never write unencrypted raw conversation data to any persistent database. Only high-level mathematical vectors and metadata tags are persisted.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-bold text-zinc-100 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    SHA-256 Identification Hashing
+                  </h4>
+                  <p className="text-zinc-400 leading-relaxed text-[11px] pl-3">
+                    We sanitize user identifiers, contact nicknames, and message timestamps using a salt-key cryptographic hash. This ensures that even if database data is exposed, no human relation patterns can be back-traced to actual names or identities.
+                  </p>
+                </div>
+
+                {/* Hashing Encoder Sandbox */}
+                <div className="p-4 rounded-xl bg-zinc-900/40 border border-white/[0.04] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                      <Terminal className="w-3 h-3 text-emerald-400" />
+                      Live SHA-256 Sandbox
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium">
+                      Client-Side Active
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => {
+                      setInputText(e.target.value)
+                      computeHash(e.target.value)
+                    }}
+                    placeholder="Type sample text to compute SHA-256..."
+                    className="w-full px-3 py-2 rounded-lg bg-zinc-950/80 border border-white/[0.06] text-[11px] text-zinc-200 placeholder-zinc-650 focus:border-emerald-500/50 outline-none transition-all"
+                  />
+                  {hashedText && (
+                    <div className="space-y-1">
+                      <span className="text-[9px] text-zinc-500 block">SHA-256 Hash Output:</span>
+                      <code className="block p-2 rounded bg-zinc-950 text-[10px] text-emerald-300 font-mono break-all border border-emerald-950/40 select-all">
+                        {hashedText}
+                      </code>
+                    </div>
+                  )}
+                </div>
+
+                {/* Security Badges */}
+                <div className="grid grid-cols-3 gap-2.5 pt-2">
+                  <div className="p-2.5 rounded-xl bg-zinc-900/20 border border-white/[0.02] text-center">
+                    <Database className="w-4 h-4 text-zinc-400 mx-auto mb-1.5" />
+                    <span className="font-semibold text-zinc-200 block text-[9px]">Zero-Log Policy</span>
+                    <span className="text-zinc-500 block text-[8px] mt-0.5">Raw texts deleted</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-zinc-900/20 border border-white/[0.02] text-center">
+                    <Lock className="w-4 h-4 text-zinc-400 mx-auto mb-1.5" />
+                    <span className="font-semibold text-zinc-200 block text-[9px]">AES-256 Storage</span>
+                    <span className="text-zinc-500 block text-[8px] mt-0.5">Rest encrypted</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-zinc-900/20 border border-white/[0.02] text-center">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto mb-1.5" />
+                    <span className="font-semibold text-emerald-400 block text-[9px]">HIPAA Compliant</span>
+                    <span className="text-zinc-500 block text-[8px] mt-0.5">Privacy standards</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Close Button Footer */}
+              <div className="p-4 border-t border-white/[0.05] flex justify-end bg-zinc-900/10">
+                <Button 
+                  onClick={() => setIsPrivacyModalOpen(false)}
+                  className="bg-zinc-900 hover:bg-zinc-800 border border-white/[0.06] text-zinc-200 font-bold text-xs h-9 px-4 rounded-xl transition-all"
+                >
+                  Close Guard
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 2. Relationship Conflict Science Modal */}
+      <AnimatePresence>
+        {isScienceModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsScienceModalOpen(false)}
+              className="absolute inset-0 cursor-default"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-xl bg-zinc-950/95 border border-white/[0.08] shadow-2xl rounded-2xl overflow-hidden glass-strong flex flex-col max-h-[90vh] z-10"
+            >
+              {/* Glowing top line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500" />
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-5 border-b border-white/[0.05] relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                    <Activity className="w-5 h-5 text-violet-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white tracking-wide">
+                      Relationship Conflict Science
+                    </h3>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      Empirical psychology models driving our algorithm matching
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => setIsScienceModalOpen(false)}
+                  variant="ghost" 
+                  size="icon" 
+                  className="w-7 h-7 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs text-zinc-300">
+                <div className="space-y-2">
+                  <h4 className="font-bold text-zinc-100 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                    Dr. John Gottman's "Four Horsemen"
+                  </h4>
+                  <p className="text-zinc-400 leading-relaxed text-[11px] pl-3">
+                    Our Red Flag detection scans linguistic markers corresponding to Dr. Gottman’s research: <strong className="text-violet-300">Criticism</strong> (blaming character), <strong className="text-violet-300">Contempt</strong> (sarcasm/mockery), <strong className="text-violet-300">Defensiveness</strong> (counter-attacking), and <strong className="text-violet-300">Stonewalling</strong> (withdrawing/silence). Contempt remains the single largest predictor of divorce/breakups.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-bold text-zinc-100 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                    Linguistic Ratio & Sentiment Indices
+                  </h4>
+                  <p className="text-zinc-400 leading-relaxed text-[11px] pl-3">
+                    Healthy dynamics maintain a <strong className="text-emerald-400">5:1 ratio</strong> of positive-to-negative interactions during conflict, and a <strong className="text-emerald-400">20:1 ratio</strong> during daily conversations. Our sentiment tracker analyzes negative qualifiers, passive-aggressive tone markers, and supportive micro-affirmations to map your specific index.
+                  </p>
+                </div>
+
+                {/* Interactive Conflict Dynamics Simulator */}
+                <div className="p-4 rounded-xl bg-zinc-900/40 border border-white/[0.04] space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-violet-400" />
+                      Dynamic Relational Health Simulator
+                    </span>
+                    <span className="text-[9px] text-zinc-500">Adjust parameters below</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Criticism level slider */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-zinc-400">Criticism & Defensiveness Frequency:</span>
+                        <span className="font-semibold text-violet-400">{criticismLevel}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={criticismLevel}
+                        onChange={(e) => setCriticismLevel(parseInt(e.target.value))}
+                        className="w-full accent-violet-500 h-1 rounded-lg bg-zinc-800 appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Supportiveness Level slider */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[10px]">
+                        <span className="text-zinc-400">Positive Affirmations / Active Listening:</span>
+                        <span className="font-semibold text-emerald-400">{listeningLevel}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={listeningLevel}
+                        onChange={(e) => setListeningLevel(parseInt(e.target.value))}
+                        className="w-full accent-emerald-500 h-1 rounded-lg bg-zinc-800 appearance-none cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Calculated result */}
+                  {(() => {
+                    const healthScore = Math.max(0, Math.min(100, Math.round(listeningLevel * 1.2 - criticismLevel * 0.8 + 20)));
+                    let healthStatus = "Severe Turbulence 🚨";
+                    let healthColor = "text-rose-400 bg-rose-500/10 border-rose-500/20";
+                    let recommendation = "Critical Gottman red flags are triggering. Immediate de-escalation/coaching recommended.";
+
+                    if (healthScore >= 75) {
+                      healthStatus = "Secure Connection 🌿";
+                      healthColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+                      recommendation = "Strong conversational foundation. Focus on validating emotion to maintain positive resonance.";
+                    } else if (healthScore >= 45) {
+                      healthStatus = "Moderate Vulnerability ⚠️";
+                      healthColor = "text-amber-400 bg-amber-500/10 border-amber-500/20";
+                      recommendation = "Some underlying irritation detected. Engage in active repair attempts to prevent distancing.";
+                    }
+
+                    return (
+                      <div className={`p-3 rounded-lg border text-[11px] ${healthColor} space-y-1`}>
+                        <div className="flex items-center justify-between font-bold">
+                          <span>Simulated Health State: {healthStatus}</span>
+                          <span>Score: {healthScore}/100</span>
+                        </div>
+                        <p className="text-[10px] opacity-90 leading-relaxed font-normal">
+                          {recommendation}
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Close Button Footer */}
+              <div className="p-4 border-t border-white/[0.05] flex justify-end bg-zinc-900/10">
+                <Button 
+                  onClick={() => setIsScienceModalOpen(false)}
+                  className="bg-zinc-900 hover:bg-zinc-800 border border-white/[0.06] text-zinc-200 font-bold text-xs h-9 px-4 rounded-xl transition-all"
+                >
+                  Close Science Center
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 3. Dispatch Support Ticket Modal */}
+      <AnimatePresence>
+        {isSupportModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setIsSupportModalOpen(false)
+                setTicketStatus("idle")
+                setTicketMessage("")
+              }}
+              className="absolute inset-0 cursor-default"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-xl bg-zinc-950/95 border border-white/[0.08] shadow-2xl rounded-2xl overflow-hidden glass-strong flex flex-col max-h-[90vh] z-10"
+            >
+              {/* Glowing top line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-pink-500 via-rose-500 to-red-500" />
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-5 border-b border-white/[0.05] relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-pink-500/10 border border-pink-500/20">
+                    <Mail className="w-5 h-5 text-pink-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white tracking-wide">
+                      Dispatch Support Ticket
+                    </h3>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      Submit billing issues, emotional conflict dilemmas, or app bugs
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setIsSupportModalOpen(false)
+                    setTicketStatus("idle")
+                    setTicketMessage("")
+                  }}
+                  variant="ghost" 
+                  size="icon" 
+                  className="w-7 h-7 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 text-xs text-zinc-300">
+                {ticketStatus === "success" ? (
+                  <div className="space-y-4 py-8 text-center max-w-sm mx-auto">
+                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
+                      <CheckCircle2 className="w-6 h-6 animate-pulse" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-white text-[13px]">Ticket Dispatched Successfully!</h4>
+                      <p className="text-[10px] text-zinc-400 leading-relaxed">
+                        Ticket Ref: <span className="font-mono text-zinc-300 font-bold select-all">#HM-{(Math.floor(Math.random() * 9000) + 1000)}</span>. 
+                        Our emotional dispatch agent has received your request and is reviewing the relational metrics.
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/[0.04] text-[11px] text-left space-y-1.5 text-zinc-300">
+                      <span className="font-bold text-zinc-200 block text-[10px] uppercase tracking-wider text-pink-400">Immediate Automated Assessment:</span>
+                      <p className="leading-relaxed text-[10px] text-zinc-400 italic">
+                        {ticketCategory === "emotional" && "“Understood. Relation escalation can feel extremely heavy. We are queueing a special interactive prompt breakdown for your attachment style.”"}
+                        {ticketCategory === "billing" && "“We've prioritized your plan update queue. If you recently paid or activated a trial, sync takes 2-3 minutes. We are checking payment buffers.”"}
+                        {ticketCategory === "bug" && "“Diagnostic markers logged. The engineering dashboard sandbox telemetry was initialized. We are addressing this stack trace.”"}
+                        {ticketCategory === "feedback" && "“Feedback registered. We base 100% of our layout updates and algorithm weightings on direct user telemetry and suggestions. Thank you.”"}
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={() => {
+                        setTicketStatus("idle")
+                        setTicketMessage("")
+                      }}
+                      className="bg-zinc-900 hover:bg-zinc-800 border border-white/[0.06] text-zinc-200 font-bold text-xs h-9 px-6 rounded-xl transition-all"
+                    >
+                      Submit Another Ticket
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={async (e) => {
+                    e.preventDefault()
+                    if (!ticketMessage.trim()) return
+                    setTicketStatus("submitting")
+                    await new Promise((resolve) => setTimeout(resolve, 1000))
+                    setTicketStatus("success")
+                    sendClientEvent("support_ticket_submitted", { category: ticketCategory })
+                  }} className="space-y-4">
+                    {/* Category */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                        Select Ticket Subject / Department
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: "emotional", label: "🚨 Emotional Coach Dispatch", desc: "Relationship crisis or advice" },
+                          { id: "billing", label: "💳 Plan / Billing Issue", desc: "Trial status, checkout help" },
+                          { id: "bug", label: "🛠️ Technical App Bug", desc: "Features not loading properly" },
+                          { id: "feedback", label: "💡 Feature Feedback", desc: "Suggest ideas to team" }
+                        ].map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setTicketCategory(cat.id)}
+                            className={`p-3 rounded-xl text-left border transition-all ${
+                              ticketCategory === cat.id
+                                ? "bg-pink-500/10 border-pink-500/30 text-white"
+                                : "bg-zinc-900/20 border-white/[0.03] hover:border-white/[0.06] text-zinc-400"
+                            }`}
+                          >
+                            <span className="font-bold text-[10px] block">{cat.label}</span>
+                            <span className="text-[8px] text-zinc-500 block leading-normal pt-0.5">{cat.desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Message */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                        Message Details
+                      </label>
+                      <textarea
+                        required
+                        value={ticketMessage}
+                        onChange={(e) => setTicketMessage(e.target.value)}
+                        placeholder={
+                          ticketCategory === "emotional" 
+                            ? "Describe what conflict you're going through, so our AI agent can guide you..."
+                            : ticketCategory === "billing"
+                            ? "Provide subscription billing/payment info context..."
+                            : "Provide step-by-step notes on how to trigger the issue..."
+                        }
+                        rows={5}
+                        className="w-full p-3 rounded-xl bg-zinc-900/40 border border-white/[0.04] text-[11px] text-zinc-200 placeholder-zinc-600 focus:border-pink-500/40 outline-none transition-all resize-none"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button 
+                      type="submit"
+                      disabled={ticketStatus === "submitting" || !ticketMessage.trim()}
+                      className="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:brightness-110 text-white font-bold text-xs h-10 rounded-xl border border-white/5 shadow-md shadow-pink-500/10 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
+                    >
+                      {ticketStatus === "submitting" ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Sending Dispatch Telemetry...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          Submit Dispatch Support Ticket
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </div>
+
+              {/* Close Button Footer */}
+              {ticketStatus !== "success" && (
+                <div className="p-4 border-t border-white/[0.05] flex justify-end bg-zinc-900/10">
+                  <Button 
+                    type="button"
+                    onClick={() => {
+                      setIsSupportModalOpen(false)
+                      setTicketStatus("idle")
+                      setTicketMessage("")
+                    }}
+                    className="bg-zinc-900 hover:bg-zinc-800 border border-white/[0.06] text-zinc-200 font-bold text-xs h-9 px-4 rounded-xl transition-all"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

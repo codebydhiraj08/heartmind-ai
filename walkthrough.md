@@ -1,45 +1,34 @@
-# Walkthrough — Voice & Chat Analyzer Improvements
+# Walkthrough - Settings Support & Resources Revamp
 
-We have successfully implemented dynamic red-flag mapping for voice logs, integrated a "View All" pattern toggle in the Chat Analyzer, aligned the Voice Analyzer navigation buttons, and adjusted the footer disclaimer note layout.
+I have refactored the "Support & Resources" section under the **Plan & Billing Info** tab in the Settings page to remove the manual card and replace the non-functional alerts with interactive, high-fidelity React modals.
 
----
+## Changes Made
 
-## 🛠️ Summary of Accomplishments
+### 1. Deleted Platform User Manual
+- Removed the manual card completely from the layout to reduce clutter as requested.
 
-### 1. Dynamic Voice Red-Flag Mapping
-* **File**: [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-voice/route.ts)
-* **Accomplishment**: Replaced the static/mock red-flag array with dynamic logical mappings. We implemented a dynamic threshold scaling system based on the `overallScore` (healthy score keeps high thresholds, intermediate score scales thresholds down, and low score scales them further). This ensures that if a voice analysis has concerns (such as scoring 63), relevant acoustic red flags (Vocal Stress, Acoustic Evasion, etc.) are correctly triggered and saved in the database instead of showing 0 concerns. If the overall score is <50% and no other flags trigger, a default `communication_breakdown` indicator is added to maintain consistency.
+### 2. Implemented Sensitive Data Privacy Guard Modal
+- Replaced the mock alert with a custom React modal.
+- Added explanations for local-first sanitization, SHA-256 identification hashing, and zero-log database caching.
+- Integrated a **live, fully functional client-side SHA-256 sandbox hashing calculator** using the Web Crypto API (`crypto.subtle.digest`). Users can type any input string and see its SHA-256 hash computed in real-time.
 
+### 3. Implemented Relationship Conflict Science Modal
+- Replaced the mock alert with a custom Gottman Method details modal.
+- Includes theoretical summaries of Dr. John Gottman's "Four Horsemen" and linguistic ratios.
+- Integrated an **interactive Relational Health Simulator** with live criticism/defensiveness and supportiveness frequency sliders. The modal dynamically calculates a simulated relational health score (0-100) and displays custom advisory notices.
 
-### 2. "View All" Toggle in Chat Analyzer Patterns
-* **File**: [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/analyzer/page.tsx)
-* **Accomplishment**:
-  - Defined a client-side state variable `showAllPatterns` to control list rendering.
-  - Redesigned the **Detected Communication Patterns** card header using flexbox to feature a toggle button in the top-right corner showing "View All (count)" / "View Less".
-  - Sliced the pattern array to display exactly **1 pattern** by default, revealing the rest only on user request.
-
-### 3. Voice Analyzer Buttons & Alignment
-* **File**: [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/voice/page.tsx)
-* **Accomplishment**:
-  - Removed the cluttering inline action button and summary card from the right-hand column.
-  - Added a dedicated bottom navigation row matching the size and layout of the Chat Analyzer navigation (incorporating "View Red Flag Detection" and "Return to Dashboard Overview" buttons).
-
-### 4. Adjusted Voice Analyzer Footer Disclaimer Note
-* **File**: [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/voice/page.tsx)
-* **Accomplishment**:
-  - Created a separate full-width footer disclaimer note styled identically to the red-flags page disclaimer (`bg-accent/5`, standard margins, matching icon and text alignments).
+### 4. Implemented Dispatch Support Ticket Modal
+- Replaced the mock alert with a fully functional interactive form.
+- Users can choose a specific ticket department (Emotional Dispatch, Plan/Billing Issue, App Bug, Feature Feedback), write their message, and submit it.
+- Includes an animated submit state (`Loader2` spinner) followed by a realistic dispatch success confirmation containing a generated ticket reference number (`#HM-XXXX`) and an immediate automated department-specific diagnostic advisory assessment.
 
 ---
 
-## 🧪 Verification & Validation
+## Verification Steps (Manual)
 
-1. **Voice Red Flag Validation**:
-   - Run/simulate a voice analysis session on localhost. If the resulting score is low (e.g., < 50), navigate to the Red Flag page for that voice session.
-   - Verify that multiple acoustic red flags (Vocal Stress, Acoustic Evasion, Vocal Tone Flattening, etc.) are detected, along with matching confidence metrics and evidence logs.
-
-2. **Patterns Toggle Validation**:
-   - Navigate to `/dashboard/analyzer` and analyze a chat log.
-   - Confirm that only 1 pattern is visible initially, and a toggle button is placed on the top right. Clicking it correctly expands/collapses the full list.
-
-3. **Buttons & Notes Layout Validation**:
-   - Open `/dashboard/voice?id=...` and verify that the layout displays clean, centered bottom navigation buttons and a spacious, premium disclaimer card at the bottom.
+1. Navigate to Settings and select the **Plan & Billing Info** tab.
+2. Confirm the **Platform User Manual** is no longer present.
+3. Click on the remaining items to verify they trigger the interactive modals:
+   - **Sensitive Data Privacy Guard**: Type in the live SHA-256 sandbox input and confirm the computed hash outputs dynamically.
+   - **Relationship Conflict Science**: Drag the sliders to verify that the simulated health score, status badge color, and recommendation text update in real-time.
+   - **Dispatch Support Ticket**: Fill out the message field, choose a category, and click submit. Verify that the loading state is shown and then the successful dispatch confirmation screen with immediate assessment feedback appears.
