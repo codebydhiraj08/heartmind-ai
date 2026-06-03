@@ -22,8 +22,8 @@ I have refactored the "Support & Resources" section under the **Plan & Billing I
 - Created the [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/support/ticket/route.ts) API handler to save tickets to the active database.
 - Users can choose a specific ticket department (Emotional Dispatch, Plan/Billing Issue, App Bug, Feature Feedback), write their message, and submit it.
 - Connected the frontend submission to perform a real POST request to `/api/support/ticket`, storing user tickets persistently.
-- Includes an animated submit state (`Loader2` spinner showing "Sending Support Ticket...") followed by a realistic dispatch success confirmation containing the generated and saved ticket reference number (`#HM-XXXX`) and an automated department-specific review ("Initial Assessment of Your Issue").
-- Clicking "Submitted (Close)" closes the modal and returns the user to the Settings page.
+- Includes an animated submit state (`Loader2` spinner showing "Sending Support Ticket...") followed by a realistic dispatch success confirmation containing the generated and saved ticket reference number (`#HM-XXXX`) and an automated user-issue-specific review ("Initial Assessment of Your Issue") generated dynamically using keywords-based parsing of the user's submitted message.
+- Clicking "Submitted (Close)" closes the modal and returns the user directly back to the Settings page.
 
 ---
 

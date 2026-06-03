@@ -81,6 +81,56 @@ export default function SettingsPage() {
     }
   }
 
+  const getDynamicAssessment = (category: string, message: string) => {
+    const msgLower = message.toLowerCase();
+    
+    if (category === "emotional") {
+      let concernDetail = "your relationship dynamics";
+      if (msgLower.includes("red flag") || msgLower.includes("pattern")) {
+        concernDetail = "your red flag patterns not showing up";
+      } else if (msgLower.includes("fight") || msgLower.includes("argument") || msgLower.includes("conflict")) {
+        concernDetail = "the conflict escalation you are facing";
+      } else if (msgLower.includes("voice") || msgLower.includes("speech") || msgLower.includes("audio")) {
+        concernDetail = "your vocal analysis concerns";
+      }
+      return `“Understood. Relational issues like ${concernDetail} can feel extremely heavy. Our coach team is reviewing this concern and queueing a special prompt breakdown tailored for your attachment style.”`;
+    }
+    
+    if (category === "billing") {
+      let billingDetail = "your plan subscription";
+      if (msgLower.includes("stripe") || msgLower.includes("razorpay") || msgLower.includes("payment")) {
+        billingDetail = "your payment transaction sync";
+      } else if (msgLower.includes("cancel") || msgLower.includes("refund")) {
+        billingDetail = "your cancellation request";
+      } else if (msgLower.includes("pro") || msgLower.includes("premium") || msgLower.includes("trial")) {
+        billingDetail = "your upgrade to premium status";
+      }
+      return `“We've prioritized your request regarding ${billingDetail}. If you recently processed a transaction or activated a trial, sync takes 2-3 minutes. We are checking payment logs.”`;
+    }
+    
+    if (category === "bug") {
+      let bugDetail = "the interface behavior";
+      if (msgLower.includes("loading") || msgLower.includes("slow") || msgLower.includes("freeze")) {
+        bugDetail = "loading speed and freeze issues";
+      } else if (msgLower.includes("voice") || msgLower.includes("record") || msgLower.includes("microphone")) {
+        bugDetail = "voice recording metrics processing";
+      } else if (msgLower.includes("chat") || msgLower.includes("upload") || msgLower.includes("export")) {
+        bugDetail = "chat history export parsing";
+      } else if (msgLower.includes("red flag") || msgLower.includes("not working") || msgLower.includes("pattern") || msgLower.includes("woring")) {
+        bugDetail = "red flag detection displaying correctly";
+      }
+      return `“Diagnostic markers logged. The engineering telemetry for '${bugDetail}' was initialized. Our team is addressing this concern.”`;
+    }
+    
+    let feedbackDetail = "our features";
+    if (msgLower.includes("ui") || msgLower.includes("design") || msgLower.includes("layout")) {
+      feedbackDetail = "the layout aesthetics and design settings";
+    } else if (msgLower.includes("voice") || msgLower.includes("ai")) {
+      feedbackDetail = "voice models and AI coaching features";
+    }
+    return `“Feedback registered regarding ${feedbackDetail}. We base 100% of our updates on direct user suggestions like yours. Thank you for helping us improve.”`;
+  };
+
 
 
   // Diagnostics Tab states
@@ -1289,10 +1339,7 @@ export default function SettingsPage() {
                     <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/[0.04] text-[11px] text-left space-y-1.5 text-zinc-300">
                       <span className="font-bold text-zinc-200 block text-[10px] uppercase tracking-wider text-pink-400">Initial Assessment of Your Issue:</span>
                       <p className="leading-relaxed text-[10px] text-zinc-400 italic">
-                        {ticketCategory === "emotional" && "“Understood. Relation escalation can feel extremely heavy. We are queueing a special interactive prompt breakdown for your attachment style.”"}
-                        {ticketCategory === "billing" && "“We've prioritized your plan update queue. If you recently paid or activated a trial, sync takes 2-3 minutes. We are checking payment buffers.”"}
-                        {ticketCategory === "bug" && "“Diagnostic markers logged. The engineering dashboard sandbox telemetry was initialized. We are addressing this stack trace.”"}
-                        {ticketCategory === "feedback" && "“Feedback registered. We base 100% of our layout updates and algorithm weightings on direct user telemetry and suggestions. Thank you.”"}
+                        {getDynamicAssessment(ticketCategory, ticketMessage)}
                       </p>
                     </div>
                     <Button 
