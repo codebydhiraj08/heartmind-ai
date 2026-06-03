@@ -80,9 +80,7 @@ export default function SettingsPage() {
     }
   }
 
-  // Science simulator states
-  const [criticismLevel, setCriticismLevel] = useState(40)
-  const [listeningLevel, setListeningLevel] = useState(65)
+
 
   // Diagnostics Tab states
   const [diagLoading, setDiagLoading] = useState(false)
@@ -1201,80 +1199,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                {/* Interactive Conflict Dynamics Simulator */}
-                <div className="p-4 rounded-xl bg-zinc-900/40 border border-white/[0.04] space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-violet-400" />
-                      Dynamic Relational Health Simulator
-                    </span>
-                    <span className="text-[9px] text-zinc-500">Adjust parameters below</span>
-                  </div>
 
-                  <div className="space-y-3">
-                    {/* Criticism level slider */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-zinc-400">Criticism & Defensiveness Frequency:</span>
-                        <span className="font-semibold text-violet-400">{criticismLevel}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={criticismLevel}
-                        onChange={(e) => setCriticismLevel(parseInt(e.target.value))}
-                        className="w-full accent-violet-500 h-1 rounded-lg bg-zinc-800 appearance-none cursor-pointer"
-                      />
-                    </div>
-
-                    {/* Supportiveness Level slider */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-[10px]">
-                        <span className="text-zinc-400">Positive Affirmations / Active Listening:</span>
-                        <span className="font-semibold text-emerald-400">{listeningLevel}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={listeningLevel}
-                        onChange={(e) => setListeningLevel(parseInt(e.target.value))}
-                        className="w-full accent-emerald-500 h-1 rounded-lg bg-zinc-800 appearance-none cursor-pointer"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Calculated result */}
-                  {(() => {
-                    const healthScore = Math.max(0, Math.min(100, Math.round(listeningLevel * 1.2 - criticismLevel * 0.8 + 20)));
-                    let healthStatus = "Severe Turbulence 🚨";
-                    let healthColor = "text-rose-400 bg-rose-500/10 border-rose-500/20";
-                    let recommendation = "Critical Gottman red flags are triggering. Immediate de-escalation/coaching recommended.";
-
-                    if (healthScore >= 75) {
-                      healthStatus = "Secure Connection 🌿";
-                      healthColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
-                      recommendation = "Strong conversational foundation. Focus on validating emotion to maintain positive resonance.";
-                    } else if (healthScore >= 45) {
-                      healthStatus = "Moderate Vulnerability ⚠️";
-                      healthColor = "text-amber-400 bg-amber-500/10 border-amber-500/20";
-                      recommendation = "Some underlying irritation detected. Engage in active repair attempts to prevent distancing.";
-                    }
-
-                    return (
-                      <div className={`p-3 rounded-lg border text-[11px] ${healthColor} space-y-1`}>
-                        <div className="flex items-center justify-between font-bold">
-                          <span>Simulated Health State: {healthStatus}</span>
-                          <span>Score: {healthScore}/100</span>
-                        </div>
-                        <p className="text-[10px] opacity-90 leading-relaxed font-normal">
-                          {recommendation}
-                        </p>
-                      </div>
-                    );
-                  })()}
-                </div>
               </div>
 
               {/* Close Button Footer */}

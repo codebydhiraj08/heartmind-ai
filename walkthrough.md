@@ -15,7 +15,6 @@ I have refactored the "Support & Resources" section under the **Plan & Billing I
 ### 3. Implemented Relationship Conflict Science Modal
 - Replaced the mock alert with a custom Gottman Method details modal.
 - Includes theoretical summaries of Dr. John Gottman's "Four Horsemen" and linguistic ratios.
-- Integrated an **interactive Relational Health Simulator** with live criticism/defensiveness and supportiveness frequency sliders. The modal dynamically calculates a simulated relational health score (0-100) and displays custom advisory notices.
 
 ### 4. Implemented Dispatch Support Ticket Modal
 - Replaced the mock alert with a fully functional interactive form.
@@ -30,5 +29,5 @@ I have refactored the "Support & Resources" section under the **Plan & Billing I
 2. Confirm the **Platform User Manual** is no longer present.
 3. Click on the remaining items to verify they trigger the interactive modals:
    - **Sensitive Data Privacy Guard**: Type in the live SHA-256 sandbox input and confirm the computed hash outputs dynamically.
-   - **Relationship Conflict Science**: Drag the sliders to verify that the simulated health score, status badge color, and recommendation text update in real-time.
+   - **Relationship Conflict Science**: Verify the modal shows details of Gottman's method and linguistic ratios.
    - **Dispatch Support Ticket**: Fill out the message field, choose a category, and click submit. Verify that the loading state is shown and then the successful dispatch confirmation screen with immediate assessment feedback appears.
