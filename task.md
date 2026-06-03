@@ -7,3 +7,6 @@
 - `[x]` Implement Relationship Conflict Science Modal rendering with Interactive Simulator sliders
 - `[x]` Implement Dispatch Support Ticket Modal rendering with input form, category selection, and submission simulation
 - `[x]` Verify modal functionality and design styling locally
+- `[x]` Create SupportTicket mongoose database model with fallback local json storage
+- `[x]` Create support ticket API endpoint `/api/support/ticket` to save and retrieve tickets
+- `[x]` Connect Support Ticket modal form to the API endpoint to persist user tickets

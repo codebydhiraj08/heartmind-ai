@@ -53,6 +53,7 @@ export default function SettingsPage() {
   const [ticketCategory, setTicketCategory] = useState("emotional")
   const [ticketMessage, setTicketMessage] = useState("")
   const [ticketStatus, setTicketStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
+  const [lastGeneratedTicketId, setLastGeneratedTicketId] = useState("")
 
   // Privacy sandbox states
   const [inputText, setInputText] = useState("")
@@ -1281,7 +1282,7 @@ export default function SettingsPage() {
                     <div className="space-y-1">
                       <h4 className="font-bold text-white text-[13px]">Ticket Dispatched Successfully!</h4>
                       <p className="text-[10px] text-zinc-400 leading-relaxed">
-                        Ticket Ref: <span className="font-mono text-zinc-300 font-bold select-all">#HM-{(Math.floor(Math.random() * 9000) + 1000)}</span>. 
+                        Ticket Ref: <span className="font-mono text-zinc-300 font-bold select-all">{lastGeneratedTicketId}</span>. 
                         Our emotional dispatch agent has received your request and is reviewing the relational metrics.
                       </p>
                     </div>
@@ -1309,9 +1310,30 @@ export default function SettingsPage() {
                     e.preventDefault()
                     if (!ticketMessage.trim()) return
                     setTicketStatus("submitting")
-                    await new Promise((resolve) => setTimeout(resolve, 1000))
-                    setTicketStatus("success")
-                    sendClientEvent("support_ticket_submitted", { category: ticketCategory })
+                    const generatedId = "#HM-" + (Math.floor(Math.random() * 9000) + 1000);
+                    try {
+                      const res = await fetch("/api/support/ticket", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          category: ticketCategory,
+                          message: ticketMessage,
+                          ticketId: generatedId,
+                        }),
+                      });
+                      const data = await res.json();
+                      if (res.ok && data.success) {
+                        setLastGeneratedTicketId(generatedId);
+                        setTicketStatus("success");
+                        sendClientEvent("support_ticket_submitted", { category: ticketCategory });
+                      } else {
+                        throw new Error(data.error || "Failed to submit ticket");
+                      }
+                    } catch (err) {
+                      setTicketStatus("error");
+                    }
                   }} className="space-y-4">
                     {/* Category */}
                     <div className="space-y-1.5">
@@ -1362,6 +1384,12 @@ export default function SettingsPage() {
                         className="w-full p-3 rounded-xl bg-zinc-900/40 border border-white/[0.04] text-[11px] text-zinc-200 placeholder-zinc-600 focus:border-pink-500/40 outline-none transition-all resize-none"
                       />
                     </div>
+
+                    {ticketStatus === "error" && (
+                      <p className="text-[10px] text-rose-400 text-center font-semibold pb-1.5">
+                        ⚠️ Error submitting ticket. Please try again.
+                      </p>
+                    )}
 
                     {/* Submit Button */}
                     <Button 

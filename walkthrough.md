@@ -17,9 +17,12 @@ I have refactored the "Support & Resources" section under the **Plan & Billing I
 - Includes theoretical summaries of Dr. John Gottman's "Four Horsemen" and linguistic ratios.
 
 ### 4. Implemented Dispatch Support Ticket Modal
-- Replaced the mock alert with a fully functional interactive form.
+- Replaced the mock alert with a fully functional interactive form connected to a real database.
+- Created the [SupportTicket](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/models/SupportTicket.ts) Mongoose model with full fallback layer to local JSON storage (`db.json`) for smooth offline/development operations.
+- Created the [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/support/ticket/route.ts) API handler to save tickets to the active database.
 - Users can choose a specific ticket department (Emotional Dispatch, Plan/Billing Issue, App Bug, Feature Feedback), write their message, and submit it.
-- Includes an animated submit state (`Loader2` spinner) followed by a realistic dispatch success confirmation containing a generated ticket reference number (`#HM-XXXX`) and an immediate automated department-specific diagnostic advisory assessment.
+- Connected the frontend submission to perform a real POST request to `/api/support/ticket`, storing user tickets persistently.
+- Includes an animated submit state (`Loader2` spinner) followed by a realistic dispatch success confirmation containing the generated and saved ticket reference number (`#HM-XXXX`) and an immediate automated department-specific diagnostic advisory assessment.
 
 ---
 
