@@ -8,7 +8,8 @@ We have successfully implemented dynamic red-flag mapping for voice logs, integr
 
 ### 1. Dynamic Voice Red-Flag Mapping
 * **File**: [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-voice/route.ts)
-* **Accomplishment**: Replaced the static/mock red-flag array with dynamic logical mappings. Senders' voice characteristics are evaluated across all parsed indicators (Stress Level, Hesitation, Sadness, Anger, and Excitement) to output corresponding relationship pattern signals (e.g. `stress_escalation`, `avoidance_pattern`, `emotional_withdrawal`, `defensive_behavior`, `emotional_distance`). If the overall score is poor (<50%) and no other flags trigger, a default `communication_breakdown` indicator is added to maintain consistency.
+* **Accomplishment**: Replaced the static/mock red-flag array with dynamic logical mappings. We implemented a dynamic threshold scaling system based on the `overallScore` (healthy score keeps high thresholds, intermediate score scales thresholds down, and low score scales them further). This ensures that if a voice analysis has concerns (such as scoring 63), relevant acoustic red flags (Vocal Stress, Acoustic Evasion, etc.) are correctly triggered and saved in the database instead of showing 0 concerns. If the overall score is <50% and no other flags trigger, a default `communication_breakdown` indicator is added to maintain consistency.
+
 
 ### 2. "View All" Toggle in Chat Analyzer Patterns
 * **File**: [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/analyzer/page.tsx)

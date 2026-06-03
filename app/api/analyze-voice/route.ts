@@ -113,10 +113,35 @@ export async function POST(req: NextRequest) {
       sentimentBucket = "negative";
     }
 
+    // Define dynamic thresholds based on overallScore
+    let stressThreshold = 55;
+    let hesitationThreshold = 50;
+    let sadnessThreshold = 35;
+    let angerThreshold = 20;
+    let excitementThreshold = 30;
+
+    if (overallScore < 85) {
+      // Moderate concerns: scale down thresholds to capture subtle signals
+      stressThreshold = 30;
+      hesitationThreshold = 30;
+      sadnessThreshold = 12;
+      angerThreshold = 5;
+      excitementThreshold = 45;
+    }
+    
+    if (overallScore < 55) {
+      // High concerns: scale down thresholds further
+      stressThreshold = 20;
+      hesitationThreshold = 20;
+      sadnessThreshold = 8;
+      angerThreshold = 3;
+      excitementThreshold = 60;
+    }
+
     // Construct dynamic red flags array
     const redFlagsList = [];
 
-    if (stressObj.value > 40) {
+    if (stressObj.value > stressThreshold) {
       redFlagsList.push({
         type: "stress_escalation",
         severity: stressObj.value > 70 ? ("high" as const) : ("medium" as const),
@@ -127,7 +152,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (hesitationObj.value > 45) {
+    if (hesitationObj.value > hesitationThreshold) {
       redFlagsList.push({
         type: "avoidance_pattern",
         severity: "medium" as const,
@@ -138,18 +163,18 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (sadnessObj.value > 35) {
+    if (sadnessObj.value > sadnessThreshold) {
       redFlagsList.push({
         type: "emotional_withdrawal",
         severity: "medium" as const,
         title: "Vocal Tone Flattening",
-        description: `Subtle vocal energy flattening suggests mild emotional withdrawal or fatigue (${sadnessObj.value}% sadness).`,
+        description: `Subtle vocal energy flattening suggests emotional withdrawal or fatigue (${sadnessObj.value}% sadness).`,
         confidence: Math.round(sadnessObj.value * 0.9),
         evidence: `Loss of pitch resonance and flattened frequency contour lines observed.`
       });
     }
 
-    if (angerObj.value > 15) {
+    if (angerObj.value > angerThreshold) {
       redFlagsList.push({
         type: "defensive_behavior",
         severity: "high" as const,
@@ -160,7 +185,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (excitementObj.value < 30) {
+    if (excitementObj.value < excitementThreshold) {
       redFlagsList.push({
         type: "emotional_distance",
         severity: "medium" as const,

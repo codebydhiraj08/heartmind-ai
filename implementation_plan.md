@@ -1,51 +1,38 @@
-# Implementation Plan — Voice Analyzer Improvements and Chat Analyzer Layout Refinements
+# Implementation Plan — Voice Analyzer Dynamic Red-Flag Threshold Adjustment
 
-This plan details the steps to solve the voice analyzer red-flag detection bug, add "View All" functionality for communication patterns in the chat analyzer, align the navigation buttons, and improve the voice analyzer's footer disclaimer layout.
+This plan details the changes to solve the voice analysis red-flag detection issue where scores like 63 show 0 patterns and 10 healthy patterns. We will adjust the threshold limits dynamically based on the overall emotional safety score.
 
 ---
 
 ## Proposed Changes
 
-### 1. Dynamic Red-Flag Mapping for Voice Analysis
+### 1. Dynamic Threshold Tuning for Vocal Red-Flag Detection
 
 #### [MODIFY] [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-voice/route.ts)
-* Read all dynamic vocal metrics (`Stress Level`, `Hesitation`, `Sadness`, `Anger`, `Excitement`) from the request.
-* Construct the `redFlags` array dynamically based on specific emotion values:
-  * **Stress Level** (>40%) mapping to `stress_escalation` pattern.
-  * **Hesitation** (>45%) mapping to `avoidance_pattern` pattern.
-  * **Sadness** (>35%) mapping to `emotional_withdrawal` pattern.
-  * **Anger** (>15%) mapping to `defensive_behavior` pattern.
-  * **Excitement** (<30%) mapping to `emotional_distance` pattern.
-* Ensure these flags are saved inside the database object (`VoiceAnalysis`) so that the `/dashboard/red-flags?voiceId=...` page can retrieve and display the correct patterns and evidence.
-
----
-
-### 2. "View All" Patterns in Chat Analyzer
-
-#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/analyzer/page.tsx)
-* Define a state variable `showAllPatterns` (boolean, defaulting to `false`).
-* In the **Detected Communication Patterns** section, update the `CardHeader` layout using flexbox (`flex-row justify-between items-start`) to support a "View All" toggle button on the right top corner.
-* Modify the rendering inside `CardContent` to slice `dynamicAnalysis.patterns` to only `1` item by default, or all items when toggled.
-
----
-
-### 3. Navigation Buttons & Footer Disclaimer Note in Voice Analyzer
-
-#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/voice/page.tsx)
-* Clean up the old inline Red Flag action button and Acoustic Summary card from the right-hand sub-grid in the results view.
-* Add a bottom navigation button row at the end of the results view (matching the position, alignment, and size from the Chat Analyzer):
-  * **"View Red Flag Detection"** button linking to `/dashboard/red-flags?voiceId=${historyId || ...}`.
-  * **"Return to Dashboard Overview"** button.
-* Create a dedicated footer disclaimer card at the very bottom, styled exactly like the red-flags disclaimer (`bg-accent/5`, full width, styled alert).
+* Change how threshold parameters (`stressThreshold`, `hesitationThreshold`, `sadnessThreshold`, `angerThreshold`, `excitementThreshold`) are evaluated.
+* Since the simulated vocal metrics have limited ranges (e.g., Sadness maxes out at 27%, Anger at 13%), absolute high thresholds like `sadness > 35` and `anger > 15` never trigger.
+* Implement a dynamic scaling system for thresholds depending on the `overallScore`:
+  * **If score is healthy (>= 85):** Keep absolute high thresholds to keep it clean (0 patterns).
+  * **If score has concerns (55 - 84):** Lower thresholds so minor cues are detected as warnings (1-2 concern patterns).
+    * `stressThreshold` = 30
+    * `hesitationThreshold` = 30
+    * `sadnessThreshold` = 12
+    * `angerThreshold` = 5
+    * `excitementThreshold` = 45
+  * **If score is high-risk (< 55):** Lower thresholds further to capture multiple concerns (3-4 patterns).
+    * `stressThreshold` = 20
+    * `hesitationThreshold` = 20
+    * `sadnessThreshold` = 8
+    * `angerThreshold` = 3
+    * `excitementThreshold` = 60
 
 ---
 
 ## Verification Plan
 
 ### Manual Verification
-1. Run local dev server (`npm run dev -p 3005`) or test on live branch.
-2. Record or upload a voice log. Verify that the score shows up correctly.
-3. Click the new **View Red Flag Detection** button at the bottom of the voice results page.
-4. Verify that the Red Flag Detection page shows the correct acoustic red flag patterns corresponding to the voice metrics (e.g., if stress is high, Vocal Stress should be detected).
-5. Open the Chat Analyzer results page. Check the **Detected Communication Patterns** section. Confirm that by default only `1` pattern is shown, and clicking **View All** in the top-right corner shows all other patterns.
-6. Verify the navigation buttons and disclaimer card layout at the bottom of the Voice Analyzer page match the design specifications.
+1. Run local dev server (`npm run dev -p 3005`).
+2. Run a voice analysis that scores around 63.
+3. Open the **Red Flag Detection** page for that voice record.
+4. Verify that patterns (like Vocal Stress, Acoustic Evasion, or Vocal Tone Flattening) are now correctly listed under "Require Attention", and the corresponding healthy patterns count decreases.
+5. Run a voice analysis with a very low score (< 50) and verify that multiple severe patterns are flagged.
