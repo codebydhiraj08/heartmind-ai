@@ -29,7 +29,8 @@ export type AnalyticsEventName =
   | "onboarding_banner_viewed"
   | "trial_cta_viewed"
   | "profile_updated"
-  | "preferences_updated";
+  | "preferences_updated"
+  | "support_ticket_submitted";
 
 export interface AnalyticsEvent {
   event: AnalyticsEventName;

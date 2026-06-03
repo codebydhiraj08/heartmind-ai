@@ -17,6 +17,7 @@ const VALID_EVENTS: AnalyticsEventName[] = [
   "voice_analysis_completed",
   "onboarding_banner_viewed",
   "trial_cta_viewed",
+  "support_ticket_submitted",
 ];
 
 export async function POST(req: NextRequest) {

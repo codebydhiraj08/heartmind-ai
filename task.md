@@ -10,3 +10,4 @@
 - `[x]` Create SupportTicket mongoose database model with fallback local json storage
 - `[x]` Create support ticket API endpoint `/api/support/ticket` to save and retrieve tickets
 - `[x]` Connect Support Ticket modal form to the API endpoint to persist user tickets
+- `[x]` Fix AnalyticsEventName TS type issue by declaring support_ticket_submitted event in lib/analytics.ts and app/api/analytics/event/route.ts
