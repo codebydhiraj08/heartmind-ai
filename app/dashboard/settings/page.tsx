@@ -1287,7 +1287,7 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/[0.04] text-[11px] text-left space-y-1.5 text-zinc-300">
-                      <span className="font-bold text-zinc-200 block text-[10px] uppercase tracking-wider text-pink-400">Immediate Automated Assessment:</span>
+                      <span className="font-bold text-zinc-200 block text-[10px] uppercase tracking-wider text-pink-400">Initial Assessment of Your Issue:</span>
                       <p className="leading-relaxed text-[10px] text-zinc-400 italic">
                         {ticketCategory === "emotional" && "“Understood. Relation escalation can feel extremely heavy. We are queueing a special interactive prompt breakdown for your attachment style.”"}
                         {ticketCategory === "billing" && "“We've prioritized your plan update queue. If you recently paid or activated a trial, sync takes 2-3 minutes. We are checking payment buffers.”"}
@@ -1297,12 +1297,13 @@ export default function SettingsPage() {
                     </div>
                     <Button 
                       onClick={() => {
+                        setIsSupportModalOpen(false)
                         setTicketStatus("idle")
                         setTicketMessage("")
                       }}
                       className="bg-zinc-900 hover:bg-zinc-800 border border-white/[0.06] text-zinc-200 font-bold text-xs h-9 px-6 rounded-xl transition-all"
                     >
-                      Submit Another Ticket
+                      Submitted (Close)
                     </Button>
                   </div>
                 ) : (
@@ -1400,12 +1401,12 @@ export default function SettingsPage() {
                       {ticketStatus === "submitting" ? (
                         <>
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Sending Dispatch Telemetry...
+                          Sending Support Ticket...
                         </>
                       ) : (
                         <>
                           <Send className="w-3.5 h-3.5" />
-                          Submit Dispatch Support Ticket
+                          Submit Support Ticket
                         </>
                       )}
                     </Button>
