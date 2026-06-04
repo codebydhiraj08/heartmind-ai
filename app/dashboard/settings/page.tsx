@@ -39,6 +39,9 @@ export default function SettingsPage() {
   const { data: session, update: updateSession } = useSession()
   const { subscription, usage, loading: subLoading, refreshSubscription } = useSubscription()
 
+  const adminEmails = ["official.heartmindai@gmail.com", "dhirajwarangane@gmail.com"]
+  const isAdmin = session?.user?.email && adminEmails.includes(session.user.email)
+
   // Active settings tab state
   const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "subscription">("profile")
 
@@ -426,14 +429,21 @@ export default function SettingsPage() {
         {[
           { id: "profile", label: "👤 Profile details", icon: User },
           { id: "preferences", label: "🧠 AI & Relationship Preferences", icon: Heart },
-          { id: "subscription", label: "👑 Plan & Billing Info", icon: Crown }
-        ].map((tab) => {
+          { id: "subscription", label: "👑 Plan & Billing Info", icon: Crown },
+          ...(isAdmin ? [{ id: "diagnostics", label: "🛠️ Admin Diagnostics", icon: Terminal, isLink: true, href: "/admin/diagnostics" }] : [])
+        ].map((tab: any) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => {
+                if (tab.isLink && tab.href) {
+                  window.location.href = tab.href
+                } else {
+                  setActiveTab(tab.id)
+                }
+              }}
               className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wider relative transition-all duration-300 border-b-2 whitespace-nowrap ${
                 isActive 
                   ? "text-primary border-primary font-bold" 
