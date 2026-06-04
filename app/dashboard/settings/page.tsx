@@ -199,6 +199,8 @@ export default function SettingsPage() {
 
   // Form states - AI Psychology & Preferences
   const [coachTone, setCoachTone] = useState("empathetic")
+  const [banterLevel, setBanterLevel] = useState("medium")
+  const [conflictBaseline, setConflictBaseline] = useState("calm")
   const [partnerName, setPartnerName] = useState("")
   const [relationshipStatus, setRelationshipStatus] = useState("dating")
   const [anniversaryDate, setAnniversaryDate] = useState("")
@@ -232,6 +234,8 @@ export default function SettingsPage() {
       setTipsEnabled((session.user as any).tipsEnabled !== false)
       setAnalysisAlerts((session.user as any).analysisAlerts !== false)
       setMarketingEmails((session.user as any).marketingEmails === true)
+      setBanterLevel((session.user as any).banterLevel || "medium")
+      setConflictBaseline((session.user as any).conflictBaseline || "calm")
     }
   }, [session])
 
@@ -317,6 +321,8 @@ export default function SettingsPage() {
           tipsEnabled,
           analysisAlerts,
           marketingEmails,
+          banterLevel,
+          conflictBaseline,
         }),
       })
 
@@ -339,6 +345,8 @@ export default function SettingsPage() {
         tipsEnabled,
         analysisAlerts,
         marketingEmails,
+        banterLevel,
+        conflictBaseline,
         user: {
           name,
           email,
@@ -352,6 +360,8 @@ export default function SettingsPage() {
           tipsEnabled,
           analysisAlerts,
           marketingEmails,
+          banterLevel,
+          conflictBaseline,
         }
       })
 
@@ -710,6 +720,73 @@ export default function SettingsPage() {
                           </div>
                         )
                       })}
+                    </div>
+                  </div>
+
+                  {/* Relationship Baseline Calibration */}
+                  <div className="space-y-4 pt-4 border-t border-white/[0.04]">
+                    <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2 pb-2 border-b border-white/[0.04]">
+                      <Shield className="w-4 h-4 text-zinc-400" />
+                      Relationship Baseline Calibration
+                    </h3>
+                    <p className="text-[10px] text-zinc-400">Calibrate how the AI should interpret your conversational dynamics. Sarcastic banter or heated pacing won't trigger false flags if configured below.</p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Playfulness / Banter Level */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                          Playful Banter & Teasing Level
+                        </label>
+                        <div className="flex gap-2">
+                          {[
+                            { id: "low", label: "Low 🌿", desc: "Literal tone" },
+                            { id: "medium", label: "Medium ⚖️", desc: "Balanced humor" },
+                            { id: "high", label: "High 🎭", desc: "Frequent teasing" }
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => setBanterLevel(opt.id)}
+                              className={`flex-1 p-2.5 rounded-xl border text-center transition-all ${
+                                banterLevel === opt.id
+                                  ? "bg-primary/10 border-primary text-white text-[11px] font-bold"
+                                  : "bg-zinc-950/40 border-white/[0.03] text-zinc-400 text-[10px] hover:border-white/[0.06]"
+                              }`}
+                            >
+                              <span className="block">{opt.label}</span>
+                              <span className="block text-[8px] opacity-60 leading-normal">{opt.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Conflict Baseline */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                          Normal Conflict Pacing Style
+                        </label>
+                        <div className="flex gap-2">
+                          {[
+                            { id: "calm", label: "Calm 🍃", desc: "Low voice/text shifts" },
+                            { id: "expressive", label: "Expressive 📣", desc: "Excitable, vocal" },
+                            { id: "heated", label: "Heated 🔥", desc: "High emotion disputes" }
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => setConflictBaseline(opt.id)}
+                              className={`flex-1 p-2.5 rounded-xl border text-center transition-all ${
+                                conflictBaseline === opt.id
+                                  ? "bg-primary/10 border-primary text-white text-[11px] font-bold"
+                                  : "bg-zinc-950/40 border-white/[0.03] text-zinc-400 text-[10px] hover:border-white/[0.06]"
+                              }`}
+                            >
+                              <span className="block">{opt.label}</span>
+                              <span className="block text-[8px] opacity-60 leading-normal">{opt.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

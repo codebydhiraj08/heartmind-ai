@@ -14,6 +14,8 @@ export interface IUser extends Document {
   tipsEnabled?: boolean;
   analysisAlerts?: boolean;
   marketingEmails?: boolean;
+  banterLevel?: "low" | "medium" | "high";
+  conflictBaseline?: "calm" | "expressive" | "heated";
   emailVerified: Date | null;
   verificationToken?: string | null;
   resetPasswordToken?: string | null;
@@ -101,6 +103,16 @@ const UserSchema: Schema<IUser> = new Schema(
     marketingEmails: {
       type: Boolean,
       default: false,
+    },
+    banterLevel: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
+    },
+    conflictBaseline: {
+      type: String,
+      enum: ["calm", "expressive", "heated"],
+      default: "calm",
     },
     emailVerified: {
       type: Date,
@@ -271,6 +283,8 @@ class MockUserDocument {
   tipsEnabled?: boolean;
   analysisAlerts?: boolean;
   marketingEmails?: boolean;
+  banterLevel?: "low" | "medium" | "high";
+  conflictBaseline?: "calm" | "expressive" | "heated";
   emailVerified: Date | null;
   verificationToken?: string | null;
   resetPasswordToken?: string | null;
@@ -322,6 +336,8 @@ class MockUserDocument {
     this.tipsEnabled = data.tipsEnabled !== false && data.tipsEnabled !== "false";
     this.analysisAlerts = data.analysisAlerts !== false && data.analysisAlerts !== "false";
     this.marketingEmails = data.marketingEmails === true || data.marketingEmails === "true";
+    this.banterLevel = data.banterLevel || "medium";
+    this.conflictBaseline = data.conflictBaseline || "calm";
     
     // Parse Dates properly - Auto-verify emails in local JSON DB for frictionless development
     this.emailVerified = data.emailVerified ? new Date(data.emailVerified) : new Date();

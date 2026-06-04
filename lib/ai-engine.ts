@@ -439,10 +439,17 @@ export function runRuleEngine(chatText: string): IRuleEngineResult {
 
   // Parse lines to extract exact quote evidence
   const lines = chatText.split("\n");
+  const playfulnessRegex = /😂|😜|🤣|😉|🥰|❤️|haha|hehe|lol|laugh|masti|joke|sorry|love/i;
+
   for (const line of lines) {
     const cleanLine = line.trim();
     if (!cleanLine) continue;
     const lowerLine = cleanLine.toLowerCase();
+
+    // Context-sensitive bypass: skip line if it contains playful emojis or repair keywords
+    if (playfulnessRegex.test(cleanLine)) {
+      continue;
+    }
 
     for (const term of gaslightingTerms) {
       if (lowerLine.includes(term) && !matchedGaslight.includes(cleanLine)) {
@@ -588,7 +595,15 @@ export function mergePipeline(
  * Analyzes chat text locally using a score-locked pattern detection engine.
  * The number of red flag patterns ALWAYS matches the positivity score range.
  */
-export function analyzeChatLocally(chatText: string): IAIAnalysisResult {
+export function analyzeChatLocally(
+  chatText: string,
+  preferences?: {
+    coachTone?: string;
+    banterLevel?: string;
+    conflictBaseline?: string;
+    pastSummary?: string;
+  }
+): IAIAnalysisResult {
   const stats = preprocessChatText(chatText);
   const lowerText = chatText.toLowerCase();
   const seed = getChatHash(chatText);
@@ -617,18 +632,76 @@ export function analyzeChatLocally(chatText: string): IAIAnalysisResult {
   const repairWords = /\b(sorry|apologize|maafi|haha|hehe|lol|laugh|masti|joke|😂|🤣|😜|😉|🥰|❤️)\b/gi;
   const repairCount = (lowerText.match(repairWords) || []).length;
 
-  // Offset the negative impact of conflicts based on repair frequency (representing relationship resilience)
-  const mitigatedConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / 1.5));
+  // Scan for Love Languages
+  const wordsOfAffirmation = /\b(proud of you|appreciate you|thank you for|so kind|love how you|thank you|love you|best partner|support you)\b/gi;
+  const qualityTime = /\b(trip together|date night|spend time|our evening|alone time|dinner together|weekend plans|spend the day)\b/gi;
+  const actsOfService = /\b(helped me|cooked|cleaned|took care of|fixed the|made you|do it for you|help you)\b/gi;
+  const gifts = /\b(bought you|gift|present|surprise|flowers|chocolates)\b/gi;
+  const physicalTouch = /\b(hug|kiss|cuddle|hold your hand|hold you|kissed|cuddling)\b/gi;
+
+  const affirmationCount = (lowerText.match(wordsOfAffirmation) || []).length;
+  const qualityTimeCount = (lowerText.match(qualityTime) || []).length;
+  const actsOfServiceCount = (lowerText.match(actsOfService) || []).length;
+  const giftsCount = (lowerText.match(gifts) || []).length;
+  const physicalTouchCount = (lowerText.match(physicalTouch) || []).length;
+  
+  const loveLanguageSignals = affirmationCount + qualityTimeCount + actsOfServiceCount + giftsCount + physicalTouchCount;
+
+  // Scan for Shared History & Inside Jokes
+  const sharedHistory = /\b(remember when|last year|that trip|remember that laugh|inside joke|our joke|last time we|back then)\b/gi;
+  const sharedHistoryCount = (lowerText.match(sharedHistory) || []).length;
+
+  // Scan for Future Planning
+  const futurePlanning = /\b(future|next year|when we move|our house|marriage|kids|planning to|goals together|next summer)\b/gi;
+  const futurePlanningCount = (lowerText.match(futurePlanning) || []).length;
+
+  const banterLevel = preferences?.banterLevel || "medium";
+  const conflictBaseline = preferences?.conflictBaseline || "calm";
+  const pastSummary = preferences?.pastSummary || "";
+
+  // Offset the negative impact of conflicts based on repair frequency and banter level calibration
+  let repairFactor = 1.5;
+  let conflictMultiplier = 1.0;
+  let stressMultiplier = 1.0;
+  let positivityBaseBoost = 0;
+
+  if (banterLevel === "high") {
+    repairFactor = 1.0;          // repair indicators cancel out conflict indicators faster
+    conflictMultiplier = 0.6;    // high banter baseline means heated/playful words are part of normal banter
+    positivityBaseBoost += 6;
+  } else if (banterLevel === "low") {
+    repairFactor = 2.0;          // repair indicators cancel out conflicts slower
+    conflictMultiplier = 1.25;   // literal tone baseline means conflicts have higher weight
+    positivityBaseBoost -= 4;
+  }
+
+  if (conflictBaseline === "expressive") {
+    conflictMultiplier *= 0.85;
+    stressMultiplier *= 0.85;
+    positivityBaseBoost += 3;
+  } else if (conflictBaseline === "heated") {
+    conflictMultiplier *= 0.7;
+    stressMultiplier *= 0.75;
+    positivityBaseBoost += 5;
+  }
+
+  // Reward Love Languages, Memories, and Future Orientation
+  positivityBaseBoost += loveLanguageSignals * 3.5;
+  positivityBaseBoost += sharedHistoryCount * 4;
+  positivityBaseBoost += futurePlanningCount * 3.5;
+
+  const mitigatedConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / repairFactor));
   
   // Compute Positivity Score (adding bonus points for constructive repair attempts)
-  const positivityBase = 68 + totalPositives * 4 - mitigatedConflicts * 5 - manipCount * 12 + Math.min(12, repairCount * 2.5);
+  const positivityBase = 68 + totalPositives * 4 - (mitigatedConflicts * 5 * conflictMultiplier) - manipCount * 12 + Math.min(12, repairCount * 2.5) + positivityBaseBoost;
   const positivityVariance = (seed % 19) - 9;
   let positivityScore = positivityBase + positivityVariance;
   positivityScore = Math.max(30, Math.min(97, positivityScore));
 
-  // Compute Stress Score (relieved by repair attempts)
+  // Compute Stress Score (relieved by repair attempts, love languages, and shared history)
   const mitigatedStressConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / 1.2));
-  const stressBase = 100 - positivityScore + mitigatedStressConflicts * 3 + manipCount * 6 - Math.min(10, repairCount * 1.5);
+  const stressRelief = Math.min(15, loveLanguageSignals * 2 + sharedHistoryCount * 3 + futurePlanningCount * 2.5);
+  const stressBase = (100 - positivityScore + mitigatedStressConflicts * 3 * stressMultiplier + manipCount * 6 - Math.min(10, repairCount * 1.5) - stressRelief) * stressMultiplier;
   const stressVariance = (seed % 15) - 7;
   let stressScore = stressBase + stressVariance;
   stressScore = Math.max(10, Math.min(95, stressScore));
@@ -670,17 +743,83 @@ export function analyzeChatLocally(chatText: string): IAIAnalysisResult {
     attachmentStyle = "fearful";
   }
 
-  // === SUGGESTIONS, TIMELINE, VOICE INSIGHTS ===
-  const suggestions: string[] = [
-    `Practice Reflective Mirroring: When one partner shares longer thoughts, try repeating back one core point before responding to show active listening.`,
-    `Invite Shared Exploration: Ask open questions like "What has been quietly worrying you lately?" to reduce verbal asymmetry.`,
-    `Treat the relationship as "us vs. the problem" instead of "me vs. you" to de-escalate stress.`
-  ];
+  // === PROACTIVE SUGGESTION ENGINE ===
+  const suggestions: string[] = [];
+
+  // 1. Proactive Conversation Starter
+  if (totalConflicts >= 2) {
+    suggestions.push(
+      "Conversation Starter: 'I felt a bit of distance during our exchange earlier. Can we check in on how we can make each other feel more supported when things get heated?'"
+    );
+  } else if (loveLanguageSignals > 0) {
+    suggestions.push(
+      `Conversation Starter: 'I really appreciated it when you shared support earlier. What is one way I can speak your primary love language more clearly this week?'`
+    );
+  } else {
+    suggestions.push(
+      "Conversation Starter: 'What is one topic you've been wanting to discuss with me that we haven't found the quiet space for yet?'"
+    );
+  }
+
+  // 2. Proactive Relationship Exercise
+  if (sharedHistoryCount > 0) {
+    suggestions.push(
+      "Exercise (Memory Lane): Choose one positive memory or inside joke mentioned today and spend 10 minutes sharing why that moment was special to you."
+    );
+  } else if (futurePlanningCount > 0) {
+    suggestions.push(
+      "Exercise (Joint Future Visioning): Outline three small habits or joint plans you want to establish next month to help build toward your future goals."
+    );
+  } else {
+    suggestions.push(
+      "Exercise (Daily Appreciations): Share three direct, micro-affirmations with each other before the day ends, highlighting acts of service or words of support."
+    );
+  }
+
+  // 3. Behavioral Guidance Advice
+  if (stats.balanceRatio > 65 || stats.balanceRatio < 35) {
+    suggestions.push(
+      "Practice Conversational Pacing: Try checking in with shorter questions to invite your partner's equal sharing and restore communication balance."
+    );
+  } else {
+    suggestions.push(
+      "Practice Active Validation: When discussing hard topics, validate your partner's perspective first before offering solutions to maintain deep safety."
+    );
+  }
 
   const timelineInsights = [
     "Established a stable baseline for communication balance and text pacing.",
     "Noticed periods of emotional coordination showing resilient connection strengths."
   ];
+
+  // Dynamic Love Languages & Memory timeline insights
+  if (affirmationCount > 0) {
+    timelineInsights.push("Love Language: Words of Affirmation active. Partners reinforced connection with supportive praise.");
+  }
+  if (qualityTimeCount > 0) {
+    timelineInsights.push("Love Language: Quality Time priorities mentioned, highlighting shared activity values.");
+  }
+  if (actsOfServiceCount > 0) {
+    timelineInsights.push("Love Language: Acts of Service recognized, reflecting daily helpfulness and mutual support.");
+  }
+  if (giftsCount > 0 || physicalTouchCount > 0) {
+    timelineInsights.push("Love Language: Expressions of affection or gift surprises noted in conversational flow.");
+  }
+
+  if (sharedHistoryCount > 0) {
+    timelineInsights.push("Shared history active: Partners recalled positive shared memories/inside jokes, reinforcing deep attachment safety.");
+  }
+  if (futurePlanningCount > 0) {
+    timelineInsights.push("Future Orientation: Partners discussed future goals and joint plans, signifying mutual long-term commitment.");
+  }
+
+  if (pastSummary) {
+    timelineInsights.push(
+      `Analyzed current dynamics against past patterns. Resilience trend is ${
+        positivityScore >= 70 ? "positive and growing" : "under active adaptation"
+      } based on historical repair loops.`
+    );
+  }
 
   const voiceInsights = [
     "Stable tone indicators detected in voice logs.",
@@ -1039,12 +1178,20 @@ export function validateAndNormalizeAnalysis(raw: any, chatText?: string): IAIAn
  * Executes a full AI chat analysis. Supports multiple Gemini API keys with
  * automatic round-robin rotation. Falls back to local heuristic engine if all keys fail.
  */
-export async function analyzeChatText(chatText: string): Promise<IAIAnalysisResult> {
+export async function analyzeChatText(
+  chatText: string,
+  preferences?: {
+    coachTone?: string;
+    banterLevel?: string;
+    conflictBaseline?: string;
+    pastSummary?: string;
+  }
+): Promise<IAIAnalysisResult> {
   const apiKeys = loadApiKeys();
 
   if (apiKeys.length === 0) {
     console.log("📢 [AI Engine] No valid Gemini API keys found. Using local adaptive NLP heuristic engine!");
-    return analyzeChatLocally(chatText);
+    return analyzeChatLocally(chatText, preferences);
   }
 
   console.log(`🔑 [AI Engine] ${apiKeys.length} API key(s) loaded. Using key #${(keyRotationIndex % apiKeys.length) + 1} (round-robin rotation).`);
@@ -1066,6 +1213,29 @@ export async function analyzeChatText(chatText: string): Promise<IAIAnalysisResu
 You are a highly sophisticated relationship psychologist, mediator, and emotional intelligence AI assistant for HeartMind AI.
 Your task is to analyze the provided chat log conversation between two partners.
 
+### USER-SPECIFIC RELATIONSHIP CALIBRATION:
+- Playful Banter / Teasing Level: ${preferences?.banterLevel || "medium"}
+  (If 'high', the partners naturally engage in a high frequency of playful teasing, jokes, and light sarcasm. Differentiate this playfulness from genuine passive-aggression or emotional distance. Do NOT flag lighthearted bantering as conflict/red flags. Adjust scores and insights to reward this banter as bonding.)
+- Relationship normal Conflict Baseline: ${preferences?.conflictBaseline || "calm"}
+  (If 'expressive' or 'heated', the partners naturally express disagreements with higher emotional volume or passion. Do not immediately penalize intensity or pacing as 'stress_escalation' unless it indicates actual toxicity.)
+- Preferred Coaching Tone: ${preferences?.coachTone || "empathetic"}
+
+### LONG-TERM HISTORICAL TRENDS:
+- Past Relationship Analytics History (growth/repair trend):
+${preferences?.pastSummary || "No past history available yet."}
+  (CRITICAL: Do not analyze this conversation as an isolated incident. Look at the long-term trend of their relationship resilience, recovery speed, and growth over time. Mention this historical progression and how the current interaction reflects their resilience in the "timelineInsights" output.)
+
+### LOVE LANGUAGES & SHARED HISTORY:
+- Identify partners' specific Love Languages (Words of Affirmation, Quality Time, Acts of Service, Gifts, Physical Touch) when expressed in dialogue. Reward these as positive connection cues by raising positivityScore and lowering stressScore.
+- Look for references to Shared Memories, Inside Jokes, or Joint Future Plans. Treat these as strong attachment resilience markers, and detail them in the timelineInsights output.
+
+### PROACTIVE SUGGESTIONS (CRITICAL):
+Your "suggestions" array MUST contain exactly 3 items:
+1. One proactive conversation starter prefixed with "Conversation Starter: " (e.g. "Conversation Starter: 'Rahul, how did you feel when Priya said...'").
+2. One practical relationship exercise prefixed with "Exercise: " (e.g. "Exercise: Spend 10 minutes tonight listing three things...").
+3. One behavioral guidance advice.
+All suggestions must be personalized, highly actionable, and tailored to improve the relationship's positive dynamics.
+
 ### STRICT LEGAL & ETHICAL SAFETY RULES:
 1. NEVER make definitive, absolute, or accusatory claims about the relationship status or individuals' character.
    - DO NOT write "your partner is toxic", "they do not care about you", or "this is gaslighting".
@@ -1075,7 +1245,6 @@ Your task is to analyze the provided chat log conversation between two partners.
 3. Use names exactly as they appear in the conversation. DO NOT add ** or any markdown formatting to names.
 4. RELATIONAL CONTEXT & RESILIENCE:
    - Analyze conflicts in their full sequential context. Look for repair indicators (e.g. apologies, quick recovery, humorous jokes, laughter, playful emojis like 😂, 😜, ❤️, or words like "haha", "sorry").
-   - Understand that playful arguments or "masti-wale jhagde" are healthy signs of high trust and overall resilience if they resolve quickly and end with lighthearted affection.
    - Differentiate toxic patterns from healthy disagreements followed by fast, supportive repair. Do not classify light teasing or affectionate banter as toxic red flags.
    - Act as a sensitive, warm, and highly constructive relationship coach. Focus suggestions on strengthening repair attempts and validating each other's perspective.
 
@@ -1152,7 +1321,7 @@ ${chatText}
     }
   }
 
-  return analyzeChatLocally(chatText);
+  return analyzeChatLocally(chatText, preferences);
 }
 
 /**

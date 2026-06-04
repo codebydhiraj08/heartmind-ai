@@ -96,15 +96,88 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const banterLevel = (dbUser as any).banterLevel || "medium";
+    const conflictBaseline = (dbUser as any).conflictBaseline || "calm";
+
     // 4. Extract scores and map sentiment
     const stressObj = emotions.find((e: any) => e.name === "Stress Level") || { value: 30 };
     const excitementObj = emotions.find((e: any) => e.name === "Excitement") || { value: 50 };
     const hesitationObj = emotions.find((e: any) => e.name === "Hesitation") || { value: 20 };
     const sadnessObj = emotions.find((e: any) => e.name === "Sadness") || { value: 10 };
     const angerObj = emotions.find((e: any) => e.name === "Anger") || { value: 5 };
+
+    let stressVal = stressObj.value;
+    let excitementVal = excitementObj.value;
+    let hesitationVal = hesitationObj.value;
+    let sadnessVal = sadnessObj.value;
+    let angerVal = angerObj.value;
+
+    const updatedInsights = Array.isArray(insights) ? [...insights] : [];
+
+    // Tonal Calibration based on conflictBaseline
+    if (conflictBaseline === "expressive") {
+      stressVal = Math.max(10, Math.round(stressVal * 0.85));
+      angerVal = Math.max(0, Math.round(angerVal * 0.85));
+    } else if (conflictBaseline === "heated") {
+      stressVal = Math.max(10, Math.round(stressVal * 0.7));
+      angerVal = Math.max(0, Math.round(angerVal * 0.7));
+    }
+
+    // Acoustic Nuance Detection
+    let isSarcasmDetected = false;
+    let isConcernDetected = false;
+
+    // 1. Playful Sarcasm Detection: High playfulness and banter, moderate stress but high excitement
+    if ((banterLevel === "high" || banterLevel === "medium") && excitementVal > 50 && stressVal > 40) {
+      isSarcasmDetected = true;
+      stressVal = Math.max(10, Math.round(stressVal * 0.8)); // Defuse stress score due to playfulness
+      angerVal = Math.max(0, Math.round(angerVal * 0.7));
+      
+      // Inject Playful Sarcasm Insight
+      if (!updatedInsights.some(ins => ins.title.includes("Sarcasm"))) {
+        updatedInsights.unshift({
+          type: "positive",
+          title: "Playful Sarcasm Detected 🎭",
+          description: "Vocal dynamics indicate lighthearted sarcasm and high excitement resonance, reflecting a playful, secure banter style in line with your calibrated relationship normal."
+        });
+      }
+    }
+
+    // 2. Genuine Concern Detection: Moderate/High stress + sadness, low anger + excitement (vulnerable sharing)
+    if (!isSarcasmDetected && stressVal > 45 && sadnessVal > 15 && angerVal < 10 && excitementVal < 40) {
+      isConcernDetected = true;
+      stressVal = Math.max(10, Math.round(stressVal * 0.85)); // Soften stress since it is empathetic/vulnerable concern
+      
+      // Inject Genuine Concern Insight
+      if (!updatedInsights.some(ins => ins.title.includes("Concern"))) {
+        updatedInsights.unshift({
+          type: "positive",
+          title: "Genuine Concern Detected 🍃",
+          description: "Vocal frequency contour lines show soft pitch adjustments and lower volume peaks, indicating deep emotional vulnerability, empathy, and genuine concern."
+        });
+      }
+    }
+
+    // Inject baseline info if settings are calibrated
+    if ((conflictBaseline === "expressive" || conflictBaseline === "heated") && !updatedInsights.some(ins => ins.title.includes("Baseline"))) {
+      updatedInsights.push({
+        type: "neutral",
+        title: "Calibrated Tonal Baseline Active",
+        description: `Your vocal analysis is calibrated for a ${conflictBaseline} relationship style, adjusting thresholds to prevent false red flags.`
+      });
+    }
+
+    // Reconstruct updated emotions spectrum
+    const updatedEmotions = [
+      { name: "Stress Level", value: stressVal, icon: "Zap", color: "text-warning", bgColor: "bg-warning/20" },
+      { name: "Hesitation", value: hesitationVal, icon: "AlertCircle", color: "text-accent", bgColor: "bg-accent/20" },
+      { name: "Excitement", value: excitementVal, icon: "Smile", color: "text-success", bgColor: "bg-success/20" },
+      { name: "Sadness", value: sadnessVal, icon: "Frown", color: "text-muted-foreground", bgColor: "bg-secondary" },
+      { name: "Anger", value: angerVal, icon: "Meh", color: "text-danger", bgColor: "bg-danger/20" }
+    ];
     
-    // Overall positivity score based on voice excitement and lower stress
-    const overallScore = Math.min(100, Math.max(0, Math.round((excitementObj.value + (100 - stressObj.value)) / 2)));
+    // Overall positivity score based on calibrated excitement and stress
+    const overallScore = Math.min(100, Math.max(0, Math.round((excitementVal + (100 - stressVal)) / 2)));
 
     let sentimentBucket = "neutral";
     if (overallScore >= 70) {
@@ -120,78 +193,87 @@ export async function POST(req: NextRequest) {
     let angerThreshold = 20;
     let excitementThreshold = 30;
 
+    // Adjust thresholds based on conflictBaseline calibration
+    if (conflictBaseline === "expressive") {
+      stressThreshold += 10;
+      angerThreshold += 10;
+    } else if (conflictBaseline === "heated") {
+      stressThreshold += 20;
+      angerThreshold += 20;
+    }
+
     if (overallScore < 85) {
       // Moderate concerns: scale down thresholds to capture subtle signals
-      stressThreshold = 30;
-      hesitationThreshold = 30;
-      sadnessThreshold = 12;
-      angerThreshold = 5;
+      stressThreshold = Math.max(30, stressThreshold - 15);
+      hesitationThreshold = Math.max(30, hesitationThreshold - 15);
+      sadnessThreshold = Math.max(12, sadnessThreshold - 15);
+      angerThreshold = Math.max(5, angerThreshold - 10);
       excitementThreshold = 45;
     }
     
     if (overallScore < 55) {
       // High concerns: scale down thresholds further
-      stressThreshold = 20;
-      hesitationThreshold = 20;
-      sadnessThreshold = 8;
-      angerThreshold = 3;
+      stressThreshold = Math.max(20, stressThreshold - 25);
+      hesitationThreshold = Math.max(20, hesitationThreshold - 25);
+      sadnessThreshold = Math.max(8, sadnessThreshold - 20);
+      angerThreshold = Math.max(3, angerThreshold - 15);
       excitementThreshold = 60;
     }
 
     // Construct dynamic red flags array
     const redFlagsList = [];
 
-    if (stressObj.value > stressThreshold) {
+    if (stressVal > stressThreshold) {
       redFlagsList.push({
         type: "stress_escalation",
-        severity: stressObj.value > 70 ? ("high" as const) : ("medium" as const),
+        severity: stressVal > 70 ? ("high" as const) : ("medium" as const),
         title: "Acoustic Stress Escalation",
-        description: `Voice analysis detected elevated acoustic stress indicators at ${stressObj.value}% intensity.`,
-        confidence: Math.round(stressObj.value * 0.9),
+        description: `Voice analysis detected elevated acoustic stress indicators at ${stressVal}% intensity.`,
+        confidence: Math.round(stressVal * 0.9),
         evidence: `Micro-tremor amplitude shifts in vocal harmonics indicate heightened emotional arousal.`
       });
     }
 
-    if (hesitationObj.value > hesitationThreshold) {
+    if (hesitationVal > hesitationThreshold) {
       redFlagsList.push({
         type: "avoidance_pattern",
         severity: "medium" as const,
         title: "Acoustic Evasion & Hesitation",
-        description: `High hesitation rates (${hesitationObj.value}%) hint at emotional guarding or active topic evasion.`,
-        confidence: Math.round(hesitationObj.value * 0.95),
-        evidence: `Processing delays and silent interval clusters measured at ${hesitationObj.value}% severity.`
+        description: `High hesitation rates (${hesitationVal}%) hint at emotional guarding or active topic evasion.`,
+        confidence: Math.round(hesitationVal * 0.95),
+        evidence: `Processing delays and silent interval clusters measured at ${hesitationVal}% severity.`
       });
     }
 
-    if (sadnessObj.value > sadnessThreshold) {
+    if (sadnessVal > sadnessThreshold) {
       redFlagsList.push({
         type: "emotional_withdrawal",
         severity: "medium" as const,
         title: "Vocal Tone Flattening",
-        description: `Subtle vocal energy flattening suggests emotional withdrawal or fatigue (${sadnessObj.value}% sadness).`,
-        confidence: Math.round(sadnessObj.value * 0.9),
+        description: `Subtle vocal energy flattening suggests emotional withdrawal or fatigue (${sadnessVal}% sadness).`,
+        confidence: Math.round(sadnessVal * 0.9),
         evidence: `Loss of pitch resonance and flattened frequency contour lines observed.`
       });
     }
 
-    if (angerObj.value > angerThreshold) {
+    if (angerVal > angerThreshold) {
       redFlagsList.push({
         type: "defensive_behavior",
         severity: "high" as const,
         title: "Acoustic Defense Posture",
-        description: `Sharp syllabic energy spikes suggest defensive tone adjustments during verbal sharing (${angerObj.value}% anger).`,
-        confidence: Math.round(angerObj.value * 0.9),
+        description: `Sharp syllabic energy spikes suggest defensive tone adjustments during verbal sharing (${angerVal}% anger).`,
+        confidence: Math.round(angerVal * 0.9),
         evidence: `Sudden bursts in acoustic volume and compression of pitch ranges.`
       });
     }
 
-    if (excitementObj.value < excitementThreshold) {
+    if (excitementVal < excitementThreshold) {
       redFlagsList.push({
         type: "emotional_distance",
         severity: "medium" as const,
         title: "Emotional Distance Detected",
-        description: `Low vocal excitement and low acoustic involvement (${excitementObj.value}%) suggest potential emotional distance.`,
-        confidence: Math.round((100 - excitementObj.value) * 0.85),
+        description: `Low vocal excitement and low acoustic involvement (${excitementVal}%) suggest potential emotional distance.`,
+        confidence: Math.round((100 - excitementVal) * 0.85),
         evidence: `Subtle dampening of voice dynamics and lack of verbal excitement resonance.`
       });
     }
@@ -207,21 +289,27 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Construct proactive suggestions for voice analysis
+    const voiceSuggestions = [
+      "Conversation Starter: 'I feel a bit of tension in our vocal tones during deep check-ins. Can we talk about how we can help each other speak more gently?'",
+      "Exercise (Vocal Appreciation): Spend 5 minutes recording a voice memo sharing three direct things you appreciated about each other today, focusing on keeping a slow, relaxed pitch.",
+      "Practice Conversational Regard: When sharing high-emotion feelings, take a centering breath before speaking to maintain steady acoustic harmony."
+    ];
+
     const fullResult = {
       positivityScore: overallScore,
-      stressScore: stressObj.value,
+      stressScore: stressVal,
       communicationBalance: 50,
       attachmentStyle: "secure" as const,
       redFlags: redFlagsList,
-      suggestions: Array.isArray(insights) ? insights.map((ins: any) => ins.description || ins.title) : [
-        "Maintain a steady, relaxed pacing when communicating high-emotion topics.",
-        "Practice deep breathing exercises before sharing vulnerable thoughts."
-      ],
+      suggestions: voiceSuggestions,
       timelineInsights: [
         "Logged relationship voice alignment session.",
-        "Monitored dynamic acoustic harmony peaks."
+        `Acoustic resonance evaluated against your ${conflictBaseline} conflict baseline.`
       ],
-      voiceInsights: Array.isArray(insights) ? insights.map((ins: any) => ins.title) : ["Warm tone detected"]
+      voiceInsights: Array.isArray(updatedInsights) ? updatedInsights.map((ins: any) => ins.title) : ["Warm tone detected"],
+      emotions: updatedEmotions,
+      insights: updatedInsights
     };
 
     // 5. Save the analysis block directly to the database

@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
       tipsEnabled,
       analysisAlerts,
       marketingEmails,
+      banterLevel,
+      conflictBaseline,
     } = await req.json();
 
     if (!name || !email) {
@@ -90,6 +92,14 @@ export async function POST(req: NextRequest) {
       user.marketingEmails = marketingEmails === true || marketingEmails === "true";
     }
 
+    if (banterLevel !== undefined) {
+      user.banterLevel = banterLevel;
+    }
+
+    if (conflictBaseline !== undefined) {
+      user.conflictBaseline = conflictBaseline;
+    }
+
     if (password && password.trim() !== "") {
       if (password.length < 6) {
         return NextResponse.json({ success: false, error: "Password must be at least 6 characters long" }, { status: 400 });
@@ -115,6 +125,8 @@ export async function POST(req: NextRequest) {
         tipsEnabled: user.tipsEnabled,
         analysisAlerts: user.analysisAlerts,
         marketingEmails: user.marketingEmails,
+        banterLevel: user.banterLevel,
+        conflictBaseline: user.conflictBaseline,
       }
     });
   } catch (error: any) {

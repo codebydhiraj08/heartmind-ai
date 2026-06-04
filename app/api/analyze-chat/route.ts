@@ -98,9 +98,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Run the high-fidelity AI Analysis pipeline
+    // Fetch last 3 past analyses to feed as historical sequence context to detect growth/repair trends over time
+    const pastAnalyses = await ChatAnalysis.find({ userId }).sort({ createdAt: -1 }).limit(3);
+    const pastSummary = pastAnalyses
+      .map(
+        (a) =>
+          `Date: ${new Date(a.createdAt).toLocaleDateString()}, Score: ${a.score}, Sentiment: ${a.sentiment}, Flagged Patterns: ${
+            a.analysisResult?.redFlags?.map((f: any) => f.type).join(", ") || "none"
+          }`
+      )
+      .join("\n");
+
+    // 4. Run the high-fidelity AI Analysis pipeline with calibration preferences & past trends
     const safeText = sampleChatTextIfTooLong(text);
-    const result = await analyzeChatText(safeText);
+    const result = await analyzeChatText(safeText, {
+      coachTone: dbUser.coachTone,
+      banterLevel: (dbUser as any).banterLevel,
+      conflictBaseline: (dbUser as any).conflictBaseline,
+      pastSummary,
+    });
 
     // Map Positivity Score to general sentiment bucket
     let sentimentBucket = "neutral";

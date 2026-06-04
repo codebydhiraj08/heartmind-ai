@@ -134,6 +134,8 @@ export const authOptions: NextAuthOptions = {
           token.tipsEnabled = dbUser.tipsEnabled !== false;
           token.analysisAlerts = dbUser.analysisAlerts !== false;
           token.marketingEmails = dbUser.marketingEmails === true;
+          token.banterLevel = dbUser.banterLevel || "medium";
+          token.conflictBaseline = dbUser.conflictBaseline || "calm";
 
           // Avoid storing heavy base64 strings in the JWT cookie
           const dbImage = dbUser.image || "";
@@ -157,6 +159,8 @@ export const authOptions: NextAuthOptions = {
           token.tipsEnabled = (user as any).tipsEnabled !== false;
           token.analysisAlerts = (user as any).analysisAlerts !== false;
           token.marketingEmails = (user as any).marketingEmails === true;
+          token.banterLevel = (user as any).banterLevel || "medium";
+          token.conflictBaseline = (user as any).conflictBaseline || "calm";
 
           const userImage = user.image || "";
           const safeImage = (userImage.startsWith("data:image/") || userImage.includes("/api/user/profile-image"))
@@ -187,6 +191,8 @@ export const authOptions: NextAuthOptions = {
           token.tipsEnabled = dbUser.tipsEnabled !== false;
           token.analysisAlerts = dbUser.analysisAlerts !== false;
           token.marketingEmails = dbUser.marketingEmails === true;
+          token.banterLevel = dbUser.banterLevel || "medium";
+          token.conflictBaseline = dbUser.conflictBaseline || "calm";
 
           const dbImage = dbUser.image || "";
           const safeImage = (dbImage.startsWith("data:image/") || dbImage.includes("/api/user/profile-image"))
@@ -206,6 +212,8 @@ export const authOptions: NextAuthOptions = {
           if (updateData.tipsEnabled !== undefined) token.tipsEnabled = updateData.tipsEnabled;
           if (updateData.analysisAlerts !== undefined) token.analysisAlerts = updateData.analysisAlerts;
           if (updateData.marketingEmails !== undefined) token.marketingEmails = updateData.marketingEmails;
+          if (updateData.banterLevel !== undefined) token.banterLevel = updateData.banterLevel;
+          if (updateData.conflictBaseline !== undefined) token.conflictBaseline = updateData.conflictBaseline;
 
           const sessionImage = updateData.image || "";
           const safeImage = (sessionImage.startsWith("data:image/") || sessionImage.includes("/api/user/profile-image"))
@@ -235,6 +243,8 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).tipsEnabled = token.tipsEnabled as boolean;
         (session.user as any).analysisAlerts = token.analysisAlerts as boolean;
         (session.user as any).marketingEmails = token.marketingEmails as boolean;
+        (session.user as any).banterLevel = token.banterLevel as string;
+        (session.user as any).conflictBaseline = token.conflictBaseline as string;
       }
       return session;
     },
