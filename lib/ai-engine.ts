@@ -613,14 +613,22 @@ export function analyzeChatLocally(chatText: string): IAIAnalysisResult {
   const totalPositives = posWordCount + posEmojiCount;
   const totalConflicts = negWordCount + negEmojiCount;
 
-  // Compute Positivity Score
-  const positivityBase = 68 + totalPositives * 4 - totalConflicts * 5 - manipCount * 12;
+  // Scan for repair indicators and playfulness (laughter, apologies, affectionate teasing)
+  const repairWords = /\b(sorry|apologize|maafi|haha|hehe|lol|laugh|masti|joke|😂|🤣|😜|😉|🥰|❤️)\b/gi;
+  const repairCount = (lowerText.match(repairWords) || []).length;
+
+  // Offset the negative impact of conflicts based on repair frequency (representing relationship resilience)
+  const mitigatedConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / 1.5));
+  
+  // Compute Positivity Score (adding bonus points for constructive repair attempts)
+  const positivityBase = 68 + totalPositives * 4 - mitigatedConflicts * 5 - manipCount * 12 + Math.min(12, repairCount * 2.5);
   const positivityVariance = (seed % 19) - 9;
   let positivityScore = positivityBase + positivityVariance;
   positivityScore = Math.max(30, Math.min(97, positivityScore));
 
-  // Compute Stress Score
-  const stressBase = 100 - positivityScore + totalConflicts * 3 + manipCount * 6;
+  // Compute Stress Score (relieved by repair attempts)
+  const mitigatedStressConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / 1.2));
+  const stressBase = 100 - positivityScore + mitigatedStressConflicts * 3 + manipCount * 6 - Math.min(10, repairCount * 1.5);
   const stressVariance = (seed % 15) - 7;
   let stressScore = stressBase + stressVariance;
   stressScore = Math.max(10, Math.min(95, stressScore));
@@ -1065,6 +1073,11 @@ Your task is to analyze the provided chat log conversation between two partners.
    - Use gentle, professional phrases like: "Possible indicators suggest...", "Potential differences in emotional pacing...", "Communication patterns may indicate...", "Signs of potential defensive reciprocity...".
    - Keep your insights supportive, highly objective, constructive, therapeutic, and ethically sound.
 3. Use names exactly as they appear in the conversation. DO NOT add ** or any markdown formatting to names.
+4. RELATIONAL CONTEXT & RESILIENCE:
+   - Analyze conflicts in their full sequential context. Look for repair indicators (e.g. apologies, quick recovery, humorous jokes, laughter, playful emojis like 😂, 😜, ❤️, or words like "haha", "sorry").
+   - Understand that playful arguments or "masti-wale jhagde" are healthy signs of high trust and overall resilience if they resolve quickly and end with lighthearted affection.
+   - Differentiate toxic patterns from healthy disagreements followed by fast, supportive repair. Do not classify light teasing or affectionate banter as toxic red flags.
+   - Act as a sensitive, warm, and highly constructive relationship coach. Focus suggestions on strengthening repair attempts and validating each other's perspective.
 
 ### SCORE-PATTERN ALIGNMENT RULE (CRITICAL):
 The number of redFlags in your output MUST align with the positivityScore:

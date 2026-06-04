@@ -25,6 +25,11 @@ I have refactored the "Support & Resources" section under the **Plan & Billing I
 - Includes an animated submit state (`Loader2` spinner showing "Sending Support Ticket...") followed by a realistic dispatch success confirmation containing the generated and saved ticket reference number (`#HM-XXXX`) and an automated user-issue-specific review ("Initial Assessment of Your Issue") generated dynamically using keywords-based parsing of the user's submitted message.
 - Clicking "Submitted (Close)" closes the modal and returns the user directly back to the Settings page.
 
+### 5. Improved AI Chat & Voice Analysis Engine (Relational Resilience & Context Sensitivity)
+- Updated [ai-engine.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/ai-engine.ts) system prompt and local heuristic metrics to analyze conflict in sequence/context.
+- Instructed the AI to value **playful banter / masti-wale jhagde** and **repair loops** (apologies, laughter, support indicators) as signs of high trust and resilience rather than penalizing scores.
+- Dynamic scoring in the local analysis engine now offsets conflict flags if repair words (haha, sorry, love, joke, etc.) are detected.
+
 ---
 
 ## Verification Steps (Manual)

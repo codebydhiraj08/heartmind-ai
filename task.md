@@ -12,3 +12,4 @@
 - `[x]` Connect Support Ticket modal form to the API endpoint to persist user tickets
 - `[x]` Fix AnalyticsEventName TS type issue by declaring support_ticket_submitted event in lib/analytics.ts and app/api/analytics/event/route.ts
 - `[x]` Implement dynamic keywords-based user issue assessment response parsing and change 'Submit Another' to close modal transition
+- `[x]` Improve AI Engine (LLM prompt & local heuristics) to analyze playful arguments and repair loops instead of isolated harsh words
