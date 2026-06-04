@@ -345,7 +345,13 @@ export function generateRedFlagsForScore(chatText: string, positivityScore: numb
     }),
     // 7: Reassurance Dependency
     () => {
-      const isSecureVulnerability = reassuranceBaseline === "vulnerable" || positivityScore >= 75;
+      let threshold = 75;
+      if (reassuranceBaseline === "vulnerable") {
+        threshold = 60;
+      } else if (reassuranceBaseline === "strict") {
+        threshold = 90;
+      }
+      const isSecureVulnerability = positivityScore >= threshold;
       return {
         type: "reassurance_dependency",
         severity: "low" as const,
@@ -1172,7 +1178,13 @@ export function validateAndNormalizeAnalysis(raw: any, chatText?: string, reassu
   // Post-process reassurance_dependency type flags to handle secure vulnerability adjustment
   for (const flag of redFlags) {
     if (flag.type === "reassurance_dependency") {
-      const isSecureVulnerability = reassuranceBaseline === "vulnerable" || positivityScore >= 75;
+      let threshold = 75;
+      if (reassuranceBaseline === "vulnerable") {
+        threshold = 60;
+      } else if (reassuranceBaseline === "strict") {
+        threshold = 90;
+      }
+      const isSecureVulnerability = positivityScore >= threshold;
       if (isSecureVulnerability) {
         flag.title = "Secure Vulnerability & Deep Attachment 🍃";
         flag.description = flag.description
