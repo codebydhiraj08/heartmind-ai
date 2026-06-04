@@ -4,21 +4,30 @@ import { logApiKeyUsage } from "@/lib/api-key-tracker";
 
 export const dynamic = "force-dynamic";
 
-function getApiKey(): string {
+function loadApiKeys(): string[] {
   const multiKeys = process.env.GEMINI_API_KEYS;
   if (multiKeys) {
-    const keys = multiKeys.split(",").map(k => k.trim()).filter(k => k.length > 0 && !k.includes("<") && !k.includes("placeholder"));
-    if (keys.length > 0) return keys[0];
+    return multiKeys
+      .split(",")
+      .map(k => k.trim())
+      .filter(k => k.length > 0 && !k.includes("<") && !k.includes("placeholder"));
   }
   const singleKey = process.env.GEMINI_API_KEY;
   if (singleKey && !singleKey.includes("<") && !singleKey.includes("placeholder")) {
-    return singleKey;
+    return [singleKey];
   }
-  return "";
+  return [];
+}
+
+let keyRotationIndex = 0;
+
+function getNextApiKey(keys: string[]): string {
+  const key = keys[keyRotationIndex % keys.length];
+  keyRotationIndex = (keyRotationIndex + 1) % keys.length;
+  return key;
 }
 
 export async function POST(req: NextRequest) {
-  let apiKey = "unknown";
   let start = Date.now();
   try {
     const { imageBase64 } = await req.json();
@@ -29,16 +38,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    apiKey = getApiKey();
-    if (!apiKey) {
+    const apiKeys = loadApiKeys();
+    if (apiKeys.length === 0) {
       return NextResponse.json(
         { success: false, error: "AI API key is not configured on the server." },
         { status: 500 }
       );
     }
-
-    const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Clean base64 string
     const base64Data = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
@@ -64,7 +70,6 @@ Rules:
   Do not wrap in markdown code blocks (\`\`\`), do not add intros or extra descriptions.
 `;
 
-
     const imagePart = {
       inlineData: {
         data: base64Data,
@@ -72,24 +77,56 @@ Rules:
       }
     };
 
-    start = Date.now();
-    const result = await model.generateContent([prompt, imagePart]);
-    const responseText = result.response.text();
-    const duration = Date.now() - start;
+    let transcriptionText = "";
+    let success = false;
+    let lastError = null;
 
-    if (!responseText || !responseText.trim()) {
-      throw new Error("The image parser was unable to read text from this image. Please ensure the chat log is clearly visible.");
+    for (let attempt = 0; attempt < apiKeys.length; attempt++) {
+      const currentKey = getNextApiKey(apiKeys);
+      const keyLabel = `Key #${(attempt + 1)}`;
+      start = Date.now();
+
+      try {
+        const ai = new GoogleGenerativeAI(currentKey);
+        const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        const result = await model.generateContent([prompt, imagePart]);
+        const responseText = result.response.text();
+        const duration = Date.now() - start;
+
+        if (responseText && responseText.trim()) {
+          transcriptionText = responseText.trim();
+          success = true;
+          logApiKeyUsage("/api/analyze-image (Screenshot Transcribe)", currentKey, "success", duration);
+          break;
+        } else {
+          throw new Error("The image parser returned an empty response.");
+        }
+      } catch (error: any) {
+        const duration = Date.now() - start;
+        lastError = error;
+        const isRateLimit = error.message?.includes("429") || error.message?.toLowerCase().includes("quota");
+        
+        logApiKeyUsage("/api/analyze-image (Screenshot Transcribe)", currentKey, "failed", duration, error.message);
+        
+        if (isRateLimit && attempt < apiKeys.length - 1) {
+          console.warn(`⚠️ [API Route] ${keyLabel} hit rate limit (429). Rotating to next key...`);
+          continue;
+        }
+        break; // Stop and fail if it's not a rate limit, or if we have no more keys
+      }
     }
 
-    logApiKeyUsage("/api/analyze-image (Screenshot Transcribe)", apiKey, "success", duration);
+    if (!success) {
+      throw lastError || new Error("Failed to transcribe screenshot.");
+    }
+
     return NextResponse.json({
       success: true,
-      text: responseText.trim()
+      text: transcriptionText
     });
   } catch (error: any) {
-    const duration = (typeof start === "number") ? Date.now() - start : 0;
     console.error("❌ [API Route] Error transcribing image:", error.message);
-    logApiKeyUsage("/api/analyze-image (Screenshot Transcribe)", apiKey || "unknown", "failed", duration, error.message);
     return NextResponse.json(
       { success: false, error: error.message || "Failed to transcribe chat screenshot." },
       { status: 500 }

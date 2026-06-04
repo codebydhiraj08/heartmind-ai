@@ -322,9 +322,14 @@ function ChatAnalyzerInner() {
     };
 
     try {
+      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
       const transcribedTexts: string[] = [];
-      for (const file of files) {
-        const text = await readAndTranscribeFile(file);
+      for (let i = 0; i < files.length; i++) {
+        if (i > 0) {
+          // Add a 1.5s delay to keep free tier API requests spaced out
+          await sleep(1500);
+        }
+        const text = await readAndTranscribeFile(files[i]);
         transcribedTexts.push(text);
       }
 
