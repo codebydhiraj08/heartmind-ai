@@ -7,6 +7,8 @@ import User from "@/models/User";
 import { getUserAccess, FREE_PLAN } from "@/lib/subscription-service";
 import { trackEvent } from "@/lib/analytics";
 import { revalidatePath } from "next/cache";
+import { calculateEmotions, calculateCompatibility, calculateAttachmentBreakdown, calibrateAnalysis } from "@/lib/metrics";
+
 
 export const dynamic = "force-dynamic";
 
@@ -348,11 +350,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 6. Return response
+    const userBaseline = dbUser.reassuranceBaseline || "standard";
+    const calibratedResult = calibrateAnalysis(fullResult, userBaseline, "voice");
+
     return NextResponse.json({
       success: true,
       message: "Voice log analyzed and saved successfully!",
       recordId: savedRecord._id,
-      analysis: fullResult,
+      analysis: calibratedResult,
     });
   } catch (error: any) {
     console.error("❌ [API Route] Error analyzing voice log:", error.message);
@@ -400,24 +405,42 @@ export async function GET(req: NextRequest) {
         ? (analysisRecord as any).toObject()
         : analysisRecord;
 
+      const userBaseline = (session.user as any).reassuranceBaseline || "standard";
+      const calibratedResult = calibrateAnalysis({
+        ...recordObj.analysisResult,
+        score: recordObj.score,
+      }, userBaseline, "voice");
+
       return NextResponse.json({
         success: true,
         analysis: {
-          ...recordObj.analysisResult,
+          ...calibratedResult,
           name: recordObj.name,
           duration: recordObj.duration,
           createdAt: recordObj.createdAt,
-          score: recordObj.score,
-          sentiment: recordObj.sentiment
         }
       });
     }
 
     const analyses = await VoiceAnalysis.find({ userId }).sort({ createdAt: -1 });
+    const userBaseline = (session.user as any).reassuranceBaseline || "standard";
+
+    const calibratedAnalyses = analyses.map((a) => {
+      const doc = typeof (a as any).toObject === "function" ? (a as any).toObject() : a;
+      if (doc.analysisResult) {
+        doc.analysisResult = calibrateAnalysis({
+          ...doc.analysisResult,
+          score: doc.score,
+        }, userBaseline, "voice");
+        doc.score = doc.analysisResult.positivityScore;
+        doc.sentiment = doc.analysisResult.sentiment;
+      }
+      return doc;
+    });
 
     return NextResponse.json({
       success: true,
-      analyses
+      analyses: calibratedAnalyses
     }, {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

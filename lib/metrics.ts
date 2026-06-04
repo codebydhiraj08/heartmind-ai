@@ -163,3 +163,61 @@ export function calculateAttachmentBreakdown(attachmentStyle: string, positivity
     fearful
   };
 }
+
+/**
+ * Server-side baseline calibration helper.
+ * Filters out reassurance dependency under "vulnerable" baseline and boosts positivity/legacy score.
+ * Recalculates dependent metrics so all views (dashboard, details, redflags) are perfectly in sync.
+ */
+export function calibrateAnalysis(
+  analysis: any,
+  userBaseline: string,
+  type: "chat" | "voice" = "chat"
+): any {
+  if (!analysis) return null;
+
+  const rawRedFlags = analysis.redFlags ?? [];
+  const validRedFlags = Array.isArray(rawRedFlags)
+    ? rawRedFlags.filter((f: any) => f && typeof f === "object" && typeof f.type === "string" && typeof f.title === "string")
+    : [];
+
+  const normalizedRedFlags = validRedFlags.map((f: any) => ({
+    ...f,
+    confidence: typeof f.confidence === "number" ? f.confidence : (f.severity === "high" ? 82 : f.severity === "medium" ? 72 : 62),
+    evidence: typeof f.evidence === "string" ? f.evidence : ""
+  }));
+
+  let pos = analysis.positivityScore ?? analysis.score ?? 70;
+  let finalRedFlags = normalizedRedFlags;
+
+  if (userBaseline === "vulnerable") {
+    const hasReassurance = normalizedRedFlags.some((f: any) => f.type === "reassurance_dependency");
+    if (hasReassurance) {
+      finalRedFlags = normalizedRedFlags.filter((f: any) => f.type !== "reassurance_dependency");
+      if (finalRedFlags.length === 0) {
+        pos = 100;
+      } else {
+        pos = Math.min(98, pos + 12);
+      }
+    }
+  }
+
+  const str = analysis.stressScore ?? 30;
+  const style = analysis.attachmentStyle ?? "secure";
+  const rfCount = finalRedFlags.length;
+
+  const positiveThreshold = type === "voice" ? 70 : 75;
+  const negativeThreshold = type === "voice" ? 45 : 50;
+  const sentiment = pos >= positiveThreshold ? "positive" : pos < negativeThreshold ? "negative" : "neutral";
+
+  return {
+    ...analysis,
+    redFlags: finalRedFlags,
+    positivityScore: pos,
+    score: pos,
+    sentiment,
+    emotions: calculateEmotions(pos, rfCount),
+    compatibility: calculateCompatibility(pos, str, style, rfCount),
+    attachmentBreakdown: calculateAttachmentBreakdown(style, pos)
+  };
+}

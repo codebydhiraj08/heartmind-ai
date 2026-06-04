@@ -8,7 +8,7 @@ import User from "@/models/User";
 import { isSubscriptionActive, getUserAccess, FREE_PLAN } from "@/lib/subscription-service";
 import { trackEvent } from "@/lib/analytics";
 import { revalidatePath } from "next/cache";
-import { calculateEmotions, calculateCompatibility, calculateAttachmentBreakdown } from "@/lib/metrics";
+import { calculateEmotions, calculateCompatibility, calculateAttachmentBreakdown, calibrateAnalysis } from "@/lib/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -166,11 +166,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 6. Return response
+    const userBaseline = dbUser.reassuranceBaseline || "standard";
+    const calibratedResult = calibrateAnalysis(result, userBaseline, "chat");
+
     return NextResponse.json({
       success: true,
       message: "Chat conversation analyzed successfully!",
       recordId: savedRecord._id,
-      analysis: result,
+      analysis: calibratedResult,
     });
   } catch (error: any) {
     console.error("❌ [API Route] Error analyzing chat conversation:", error.message);
@@ -218,47 +221,45 @@ export async function GET(req: NextRequest) {
         ? (analysisRecord as any).toObject()
         : analysisRecord;
 
-      const rawRedFlags = doc.analysisResult?.redFlags ?? [];
-      const validRedFlags = Array.isArray(rawRedFlags)
-        ? rawRedFlags.filter((f: any) => f && typeof f === "object" && typeof f.type === "string" && typeof f.title === "string")
-        : [];
-
-      const normalizedRedFlags = validRedFlags.map((f: any) => ({
-        ...f,
-        confidence: typeof f.confidence === "number" ? f.confidence : (f.severity === "high" ? 82 : f.severity === "medium" ? 72 : 62),
-        evidence: typeof f.evidence === "string" ? f.evidence : ""
-      }));
-
-      const pos = doc.analysisResult?.positivityScore ?? doc.score ?? 70;
-      const str = doc.analysisResult?.stressScore ?? 30;
-      const style = doc.analysisResult?.attachmentStyle ?? "secure";
-      const rfCount = normalizedRedFlags.length;
+      const userBaseline = (session.user as any).reassuranceBaseline || "standard";
+      const calibratedResult = calibrateAnalysis({
+        ...doc.analysisResult,
+        score: doc.score,
+      }, userBaseline, "chat");
 
       return NextResponse.json({
         success: true,
         analysis: {
-          ...doc.analysisResult,
+          ...calibratedResult,
           analysisId: doc._id.toString(),
-          redFlags: normalizedRedFlags,
           communicationBalance: typeof doc.analysisResult?.communicationBalance === "number" ? doc.analysisResult.communicationBalance : 50,
           name: doc.name,
           platform: doc.platform,
           createdAt: doc.createdAt,
-          score: doc.score,
-          sentiment: doc.sentiment,
           schemaVersion: doc.schemaVersion ?? doc.analysisResult?.schemaVersion ?? 1,
-          emotions: calculateEmotions(pos, rfCount),
-          compatibility: calculateCompatibility(pos, str, style, rfCount),
-          attachmentBreakdown: calculateAttachmentBreakdown(style, pos)
         }
       });
     }
 
     const analyses = await ChatAnalysis.find({ userId }).sort({ createdAt: -1 });
+    const userBaseline = (session.user as any).reassuranceBaseline || "standard";
+
+    const calibratedAnalyses = analyses.map((a) => {
+      const doc = typeof (a as any).toObject === "function" ? (a as any).toObject() : a;
+      if (doc.analysisResult) {
+        doc.analysisResult = calibrateAnalysis({
+          ...doc.analysisResult,
+          score: doc.score,
+        }, userBaseline, "chat");
+        doc.score = doc.analysisResult.positivityScore;
+        doc.sentiment = doc.analysisResult.sentiment;
+      }
+      return doc;
+    });
 
     return NextResponse.json({
       success: true,
-      analyses
+      analyses: calibratedAnalyses
     }, {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

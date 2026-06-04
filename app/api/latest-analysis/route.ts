@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import ChatAnalysis from "@/models/ChatAnalysis";
 import VoiceAnalysis from "@/models/VoiceAnalysis";
-import { calculateEmotions, calculateCompatibility, calculateAttachmentBreakdown } from "@/lib/metrics";
+import { calculateEmotions, calculateCompatibility, calculateAttachmentBreakdown, calibrateAnalysis } from "@/lib/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -68,41 +68,20 @@ export async function GET(req: NextRequest) {
 
     const doc = typeof latest.toObject === "function" ? latest.toObject() : latest;
 
-    // Filter redFlags to only include valid object-format entries (not old string format)
-    const rawRedFlags = doc.analysisResult?.redFlags ?? [];
-    const validRedFlags = Array.isArray(rawRedFlags)
-      ? rawRedFlags.filter((f: any) => f && typeof f === "object" && typeof f.type === "string" && typeof f.title === "string")
-      : [];
+    const userBaseline = (session.user as any).reassuranceBaseline || "standard";
+    const calibratedResult = calibrateAnalysis({
+      ...doc.analysisResult,
+      score: doc.score,
+    }, userBaseline, type || "chat");
 
-    const normalizedRedFlags = validRedFlags.map((f: any) => ({
-      ...f,
-      confidence: typeof f.confidence === "number" ? f.confidence : (f.severity === "high" ? 82 : f.severity === "medium" ? 72 : 62),
-      evidence: typeof f.evidence === "string" ? f.evidence : ""
-    }));
-
-    const pos = doc.analysisResult?.positivityScore ?? doc.score ?? 70;
-    const str = doc.analysisResult?.stressScore ?? 30;
-    const style = doc.analysisResult?.attachmentStyle ?? "secure";
-    const rfCount = normalizedRedFlags.length;
-
-    // Standardize representation matching the strict schema pattern
     const analysisResponse = {
+      ...calibratedResult,
       analysisId: doc._id.toString(),
-      positivityScore: pos,
-      stressScore: str,
       communicationBalance: typeof doc.analysisResult?.communicationBalance === "number" ? doc.analysisResult.communicationBalance : 50,
-      attachmentStyle: style,
-      redFlags: normalizedRedFlags,
-      suggestions: doc.analysisResult?.suggestions ?? [],
-      timelineInsights: doc.analysisResult?.timelineInsights ?? [],
-      voiceInsights: doc.analysisResult?.voiceInsights ?? [],
-      createdAt: doc.createdAt,
       name: doc.name || (type === "chat" ? "Chat Analysis" : "Voice Analysis"),
       type,
+      createdAt: doc.createdAt,
       schemaVersion: doc.schemaVersion ?? doc.analysisResult?.schemaVersion ?? 1,
-      emotions: calculateEmotions(pos, rfCount),
-      compatibility: calculateCompatibility(pos, str, style, rfCount),
-      attachmentBreakdown: calculateAttachmentBreakdown(style, pos)
     };
 
     return NextResponse.json({
