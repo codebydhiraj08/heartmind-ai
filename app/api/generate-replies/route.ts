@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { logApiKeyUsage } from "@/lib/api-key-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -357,6 +358,7 @@ export async function POST(req: NextRequest) {
     for (let attempt = 0; attempt < apiKeys.length; attempt++) {
       const currentKey = getNextApiKey(apiKeys);
       const keyLabel = `Key #${(attempt + 1)}`;
+      let start = Date.now();
 
       try {
         const ai = new GoogleGenerativeAI(currentKey);
@@ -411,9 +413,11 @@ Tone Description: "${toneInfo.description}"
 Ensure the output is ONLY the raw JSON array (no markdown code blocks, no backticks, no wrap, no introductory or concluding text).
 `;
 
+        start = Date.now();
         const response = await model.generateContent(prompt);
         const resultText = response.response.text();
         if (!resultText) throw new Error("Empty response received from Gemini API");
+        const duration = Date.now() - start;
 
         // RESILIENT SANITIZATION: Remove any markdown code blocks (```json ... ```) to prevent JSON parse failures
         let cleanText = resultText.trim();
@@ -426,6 +430,7 @@ Ensure the output is ONLY the raw JSON array (no markdown code blocks, no backti
           // Normalize to exactly 3 replies and remove any escaped quotes
           const finalReplies = parsedResult.slice(0, 3).map(r => String(r).replace(/&apos;/g, "'").replace(/&quot;/g, '"'));
           console.log(`✅ [AI Replies API] Real Gemini-generated replies completed via ${keyLabel}!`);
+          logApiKeyUsage("/api/generate-replies (Generate Replies)", currentKey, "success", duration);
           return NextResponse.json({
             success: true,
             replies: finalReplies,
@@ -436,12 +441,15 @@ Ensure the output is ONLY the raw JSON array (no markdown code blocks, no backti
         }
 
       } catch (error: any) {
+        const duration = (typeof start === "number") ? Date.now() - start : 0;
         console.error(`❌ [AI Replies API] ${keyLabel} failed: ${error.message}`);
         const isRateLimit = error.message?.includes("429") || error.message?.toLowerCase().includes("quota");
         if (isRateLimit && attempt < apiKeys.length - 1) {
           console.warn(`⚠️ [AI Replies API] ${keyLabel} hit rate limit (429). Rotating key...`);
+          logApiKeyUsage("/api/generate-replies (Generate Replies)", currentKey, "failed", duration, `Rate limit (429): ${error.message}`);
           continue;
         }
+        logApiKeyUsage("/api/generate-replies (Generate Replies)", currentKey, "failed", duration, error.message);
         if (attempt === apiKeys.length - 1) {
           console.error("❌ [AI Replies API] All API keys exhausted. Falling back to local dynamic engine.");
         }

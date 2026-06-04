@@ -24,8 +24,6 @@ import {
   MessageSquare,
   Volume2,
   Database,
-  RefreshCw,
-  AlertTriangle,
   Terminal,
   CheckCircle2,
   X,
@@ -42,7 +40,7 @@ export default function SettingsPage() {
   const { subscription, usage, loading: subLoading, refreshSubscription } = useSubscription()
 
   // Active settings tab state
-  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "subscription" | "diagnostics">("profile")
+  const [activeTab, setActiveTab] = useState<"profile" | "preferences" | "subscription">("profile")
 
   // Support & Resources modal states
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false)
@@ -133,41 +131,7 @@ export default function SettingsPage() {
 
 
 
-  // Diagnostics Tab states
-  const [diagLoading, setDiagLoading] = useState(false)
-  const [diagRetrying, setDiagRetrying] = useState(false)
-  const [diagData, setDiagData] = useState<any>(null)
-  const [diagError, setDiagError] = useState<string | null>(null)
 
-  // Fetch diagnostics details from server
-  const fetchDiagnostics = async (isRetry = false) => {
-    if (isRetry) {
-      setDiagRetrying(true)
-    } else {
-      setDiagLoading(true)
-    }
-    setDiagError(null)
-
-    try {
-      const res = await fetch(`/api/test-db${isRetry ? "?retry=true" : ""}`)
-      const data = await res.json()
-      setDiagData(data)
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to load database diagnostics.")
-      }
-    } catch (err: any) {
-      setDiagError(err.message || "An unexpected diagnostics error occurred.")
-    } finally {
-      setDiagLoading(false)
-      setDiagRetrying(false)
-    }
-  }
-
-  useEffect(() => {
-    if (activeTab === "diagnostics") {
-      fetchDiagnostics(false)
-    }
-  }, [activeTab])
 
   // Form states - Personal Profile
   const [name, setName] = useState("")
@@ -1151,8 +1115,6 @@ export default function SettingsPage() {
 
             </div>
           )}
-
-
 
         </motion.div>
       </AnimatePresence>

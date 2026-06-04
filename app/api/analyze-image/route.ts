@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { logApiKeyUsage } from "@/lib/api-key-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,8 @@ function getApiKey(): string {
 }
 
 export async function POST(req: NextRequest) {
+  let apiKey = "unknown";
+  let start = Date.now();
   try {
     const { imageBase64 } = await req.json();
     if (!imageBase64) {
@@ -26,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const apiKey = getApiKey();
+    apiKey = getApiKey();
     if (!apiKey) {
       return NextResponse.json(
         { success: false, error: "AI API key is not configured on the server." },
@@ -69,19 +72,24 @@ Rules:
       }
     };
 
+    start = Date.now();
     const result = await model.generateContent([prompt, imagePart]);
     const responseText = result.response.text();
+    const duration = Date.now() - start;
 
     if (!responseText || !responseText.trim()) {
       throw new Error("The image parser was unable to read text from this image. Please ensure the chat log is clearly visible.");
     }
 
+    logApiKeyUsage("/api/analyze-image (Screenshot Transcribe)", apiKey, "success", duration);
     return NextResponse.json({
       success: true,
       text: responseText.trim()
     });
   } catch (error: any) {
+    const duration = (typeof start === "number") ? Date.now() - start : 0;
     console.error("❌ [API Route] Error transcribing image:", error.message);
+    logApiKeyUsage("/api/analyze-image (Screenshot Transcribe)", apiKey || "unknown", "failed", duration, error.message);
     return NextResponse.json(
       { success: false, error: error.message || "Failed to transcribe chat screenshot." },
       { status: 500 }

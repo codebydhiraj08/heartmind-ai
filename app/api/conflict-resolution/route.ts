@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { logApiKeyUsage } from "@/lib/api-key-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -137,6 +138,7 @@ export async function POST(req: NextRequest) {
     for (let attempt = 0; attempt < apiKeys.length; attempt++) {
       const currentKey = getNextApiKey(apiKeys);
       const keyLabel = `Key #${(attempt + 1)}`;
+      let start = Date.now();
 
       try {
         const ai = new GoogleGenerativeAI(currentKey);
@@ -187,9 +189,11 @@ Output your response as a valid JSON object matching this schema:
 Ensure the output is ONLY the raw JSON object (no markdown code blocks, no backticks, no wrap, no introductory or concluding text).
 `;
 
+        start = Date.now();
         const response = await model.generateContent(prompt);
         const resultText = response.response.text();
         if (!resultText) throw new Error("Empty response received from Gemini API");
+        const duration = Date.now() - start;
 
         // RESILIENT SANITIZATION: Remove any markdown code blocks (```json ... ```) to prevent JSON parse failures
         let cleanText = resultText.trim();
@@ -204,6 +208,7 @@ Ensure the output is ONLY the raw JSON object (no markdown code blocks, no backt
           const finalAlternatives = parsedResult.alternatives.slice(0, 3).map((a: any) => String(a).replace(/&apos;/g, "'").replace(/&quot;/g, '"').trim());
 
           console.log(`✅ [Conflict AI API] Real Gemini-generated conflict resolution completed via ${keyLabel}!`);
+          logApiKeyUsage("/api/conflict-resolution (Conflict Resolution)", currentKey, "success", duration);
           return NextResponse.json({
             success: true,
             result: {
@@ -217,12 +222,15 @@ Ensure the output is ONLY the raw JSON object (no markdown code blocks, no backt
         }
 
       } catch (error: any) {
+        const duration = (typeof start === "number") ? Date.now() - start : 0;
         console.error(`❌ [Conflict AI API] ${keyLabel} failed: ${error.message}`);
         const isRateLimit = error.message?.includes("429") || error.message?.toLowerCase().includes("quota");
         if (isRateLimit && attempt < apiKeys.length - 1) {
           console.warn(`⚠️ [Conflict AI API] ${keyLabel} hit rate limit (429). Rotating key...`);
+          logApiKeyUsage("/api/conflict-resolution (Conflict Resolution)", currentKey, "failed", duration, `Rate limit (429): ${error.message}`);
           continue;
         }
+        logApiKeyUsage("/api/conflict-resolution (Conflict Resolution)", currentKey, "failed", duration, error.message);
         if (attempt === apiKeys.length - 1) {
           console.error("❌ [Conflict AI API] All API keys exhausted. Falling back to local dynamic engine.");
         }

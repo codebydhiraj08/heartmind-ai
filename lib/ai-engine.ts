@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { calculateEmotions, calculateCompatibility, calculateAttachmentBreakdown } from "./metrics";
+import { logApiKeyUsage } from "./api-key-tracker";
 
 
 export interface IAIRedFlag {
@@ -1236,6 +1237,7 @@ export async function analyzeChatText(
   for (let attempt = 0; attempt < apiKeys.length; attempt++) {
     const currentKey = getNextApiKey(apiKeys);
     const keyLabel = `Key #${(attempt + 1)}`;
+    let start = Date.now();
 
     try {
       const ai = new GoogleGenerativeAI(currentKey);
@@ -1338,22 +1340,29 @@ Conversation text:
 ${chatText}
 `;
 
+      start = Date.now();
       const response = await model.generateContent(prompt);
       const resultText = response.response.text();
       if (!resultText) throw new Error("Empty response received from Gemini API");
+      const duration = Date.now() - start;
 
       const parsedResult = JSON.parse(resultText);
       const validated = validateAndNormalizeAnalysis(parsedResult, chatText, preferences?.reassuranceBaseline);
       console.log(`✅ [AI Engine] Live Gemini Flash analysis completed via ${keyLabel}!`);
+      
+      logApiKeyUsage("/api/analyze-chat (Chat Analysis)", currentKey, "success", duration);
       return validated;
 
     } catch (error: any) {
+      const duration = (typeof start === "number") ? Date.now() - start : 0;
       const isRateLimit = error.message?.includes("429") || error.message?.toLowerCase().includes("quota");
       if (isRateLimit && attempt < apiKeys.length - 1) {
         console.warn(`⚠️ [AI Engine] ${keyLabel} hit rate limit (429). Rotating to next key...`);
+        logApiKeyUsage("/api/analyze-chat (Chat Analysis)", currentKey, "failed", duration, `Rate limit (429): ${error.message}`);
         continue;
       }
       console.error(`❌ [AI Engine] ${keyLabel} failed: ${error.message}`);
+      logApiKeyUsage("/api/analyze-chat (Chat Analysis)", currentKey, "failed", duration, error.message);
       if (attempt === apiKeys.length - 1) {
         console.error("❌ [AI Engine] All API keys exhausted. Falling back to local NLP engine.");
       }

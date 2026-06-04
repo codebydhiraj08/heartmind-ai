@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { logApiKeyUsage } from "@/lib/api-key-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -506,6 +507,7 @@ export async function POST(req: NextRequest) {
     for (let attempt = 0; attempt < apiKeys.length; attempt++) {
       const currentKey = getNextApiKey(apiKeys);
       const keyLabel = `Key #${(attempt + 1)}`;
+      let start = Date.now();
 
       try {
         const ai = new GoogleGenerativeAI(currentKey);
@@ -551,11 +553,14 @@ User: ${message}
 Coach:
 `;
 
+        start = Date.now();
         const response = await model.generateContent(prompt);
         const replyText = response.response.text();
         if (!replyText || !replyText.trim()) throw new Error("Empty response received from Gemini model.");
+        const duration = Date.now() - start;
 
         console.log(`✅ [AI Coach API] Live Gemini response generated successfully via ${keyLabel}!`);
+        logApiKeyUsage("/api/coach (AI Coach Chat)", currentKey, "success", duration);
         return NextResponse.json({
           success: true,
           reply: replyText.trim(),
@@ -563,12 +568,15 @@ Coach:
         });
 
       } catch (error: any) {
+        const duration = (typeof start === "number") ? Date.now() - start : 0;
         console.error(`❌ [AI Coach API] ${keyLabel} failed: ${error.message}`);
         const isRateLimit = error.message?.includes("429") || error.message?.toLowerCase().includes("quota");
         if (isRateLimit && attempt < apiKeys.length - 1) {
           console.warn(`⚠️ [AI Coach API] ${keyLabel} hit rate limit. Rotating to next key...`);
+          logApiKeyUsage("/api/coach (AI Coach Chat)", currentKey, "failed", duration, `Rate limit (429): ${error.message}`);
           continue;
         }
+        logApiKeyUsage("/api/coach (AI Coach Chat)", currentKey, "failed", duration, error.message);
         if (attempt === apiKeys.length - 1) {
           console.error("❌ [AI Coach API] All Gemini API keys exhausted. Triggering local psychological engine.");
         }
