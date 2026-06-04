@@ -276,56 +276,73 @@ function ChatAnalyzerInner() {
   };
 
   const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     setErrorMsg("");
     setNotification(null);
     setIsExtractingScreenshot(true);
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64Data = event.target?.result as string;
-      if (!base64Data) {
-        setErrorMsg("Failed to read the image file.");
-        setIsExtractingScreenshot(false);
-        return;
-      }
+    const readAndTranscribeFile = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const base64Data = event.target?.result as string;
+          if (!base64Data) {
+            reject(new Error(`Failed to read the image file: ${file.name}`));
+            return;
+          }
 
-      try {
-        const response = await fetch("/api/analyze-image", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ imageBase64: base64Data }),
-        });
+          try {
+            const response = await fetch("/api/analyze-image", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ imageBase64: base64Data }),
+            });
 
-        const data = await response.json();
-        if (data.success && data.text) {
-          setChatText(data.text);
-          setNotification({
-            type: "success",
-            message: "Successfully extracted chat text from screenshot!",
-            description: "Our AI model has transcribed the screenshot text into clean chat log format. Feel free to review it and click 'Analyze Conversation' to get your report."
-          });
-        } else {
-          setErrorMsg(data.error || "Failed to extract text from screenshot. Please try pasting the text or uploading a standard export file.");
-        }
-      } catch (err: any) {
-        console.error(err);
-        setErrorMsg("Connection error while calling the image parser.");
-      } finally {
-        setIsExtractingScreenshot(false);
-      }
+            const data = await response.json();
+            if (data.success && data.text) {
+              resolve(data.text.trim());
+            } else {
+              reject(new Error(data.error || `Failed to extract text from ${file.name}`));
+            }
+          } catch (err: any) {
+            reject(new Error(`Connection error while transcribing ${file.name}`));
+          }
+        };
+
+        reader.onerror = () => {
+          reject(new Error(`Failed to read the image file: ${file.name}`));
+        };
+
+        reader.readAsDataURL(file);
+      });
     };
 
-    reader.onerror = () => {
-      setErrorMsg("Failed to read the image file.");
+    try {
+      const transcribedTexts: string[] = [];
+      for (const file of files) {
+        const text = await readAndTranscribeFile(file);
+        transcribedTexts.push(text);
+      }
+
+      const combinedText = transcribedTexts.join("\n\n");
+      setChatText(prev => prev ? `${prev}\n\n${combinedText}` : combinedText);
+
+      setNotification({
+        type: "success",
+        message: `Successfully extracted chat text from ${files.length} screenshot(s)!`,
+        description: `Our AI model has transcribed all ${files.length} screenshot(s) and combined their text in chronological order. Feel free to review it and click 'Analyze Conversation' to get your report.`
+      });
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Failed to extract text from one or more screenshots. Please try pasting the text or uploading a standard export file.");
+    } finally {
       setIsExtractingScreenshot(false);
-    };
-
-    reader.readAsDataURL(file);
+      e.target.value = "";
+    }
   };
 
   // Auto-switch tab based on URL search params
@@ -1107,6 +1124,7 @@ function ChatAnalyzerInner() {
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           onChange={handleScreenshotUpload}
                           className="hidden"
                           id="chat-screenshot-upload"
@@ -1117,7 +1135,7 @@ function ChatAnalyzerInner() {
                           className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98] select-none"
                         >
                           <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors" />
-                          <span>{isExtractingScreenshot ? "Uploading..." : "Upload Screenshot (PNG/JPG)"}</span>
+                          <span>{isExtractingScreenshot ? "Transcribing..." : "Upload Screenshot(s)"}</span>
                         </label>
                       </div>
                     </div>
