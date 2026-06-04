@@ -192,26 +192,28 @@ function RedFlagsPageInner() {
           setActiveLogName(analysis.name || (chatId ? "Selected Chat Analysis" : voiceId ? "Selected Voice Analysis" : "Latest Analysis"));
 
           const dbRedFlags = analysis.redFlags || [];
+          const userBaseline = (session?.user as any)?.reassuranceBaseline || "standard";
+          
+          let filteredFlags = dbRedFlags;
+          let adjustedScore = analysis.positivityScore ?? analysis.score ?? 100;
+          
+          if (userBaseline === "vulnerable") {
+            const hasReassurance = dbRedFlags.some((f: any) => f.type === "reassurance_dependency");
+            if (hasReassurance) {
+              // Filter out reassurance dependency completely from display list
+              filteredFlags = dbRedFlags.filter((f: any) => f.type !== "reassurance_dependency");
+              // Recalculate score (if it was the only one, make it 100, otherwise raise by 12 points)
+              if (filteredFlags.length === 0) {
+                adjustedScore = 100;
+              } else {
+                adjustedScore = Math.min(98, adjustedScore + 12);
+              }
+            }
+          }
           
           const updatedPatterns = redFlagPatterns.map(p => {
-            const matchedFlag = dbRedFlags.find((f: any) => f.type === p.id);
+            const matchedFlag = filteredFlags.find((f: any) => f.type === p.id);
             if (matchedFlag) {
-              const userBaseline = (session?.user as any)?.reassuranceBaseline || "standard";
-              const isReassurance = p.id === "reassurance_dependency";
-              
-              if (isReassurance && userBaseline === "vulnerable") {
-                return {
-                  ...p,
-                  detected: true,
-                  confidence: typeof matchedFlag.confidence === "number" ? matchedFlag.confidence : 85,
-                  examples: 1,
-                  realEvidence: matchedFlag.evidence ? [matchedFlag.evidence] : [matchedFlag.description],
-                  displayName: "Secure Vulnerability & Deep Attachment 🍃",
-                  displayDescription: "Expressions of emotional vulnerability and requests for validation framed as secure attachment bonding.",
-                  displaySeverity: "low"
-                };
-              }
-              
               return {
                 ...p,
                 detected: true,
@@ -236,7 +238,7 @@ function RedFlagsPageInner() {
           });
 
           setPatterns(updatedPatterns);
-          setSafetyScore(analysis.positivityScore ?? analysis.score ?? 100);
+          setSafetyScore(adjustedScore);
         } else {
           setActiveLogName(null);
           setPatterns(redFlagPatterns.map(p => ({
