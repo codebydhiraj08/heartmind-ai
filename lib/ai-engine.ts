@@ -139,7 +139,7 @@ function getChatHash(text: string): number {
  * Scans chat text for keyword signals, extracts quotes, and builds exactly the correct
  * number of realistic, high-fidelity redFlags depending on the positivityScore.
  */
-export function generateRedFlagsForScore(chatText: string, positivityScore: number): IAIRedFlag[] {
+export function generateRedFlagsForScore(chatText: string, positivityScore: number, reassuranceBaseline?: string): IAIRedFlag[] {
   const stats = preprocessChatText(chatText);
   const lowerText = chatText.toLowerCase();
   const seed = getChatHash(chatText);
@@ -344,16 +344,25 @@ export function generateRedFlagsForScore(chatText: string, positivityScore: numb
       evidence: lastMsgs.length > 0 ? lastMsgs[0] : ""
     }),
     // 7: Reassurance Dependency
-    () => ({
-      type: "reassurance_dependency",
-      severity: "low",
-      title: "Reassurance-Seeking Tendency",
-      description: reassuranceEvidence.length > 0
-        ? `High frequency of validation-seeking language detected: ${reassuranceEvidence.join(" | ")}`
-        : `Elevated question density (${questionCount} questions detected) combined with the conversation's emotional pacing suggests possible reassurance-dependency tendencies.`,
-      confidence: reassuranceEvidence.length > 0 ? 76 : 60,
-      evidence: reassuranceEvidence.length > 0 ? reassuranceEvidence[0] : ""
-    }),
+    () => {
+      const isSecureVulnerability = reassuranceBaseline === "vulnerable" || positivityScore >= 75;
+      return {
+        type: "reassurance_dependency",
+        severity: "low" as const,
+        title: isSecureVulnerability
+          ? "Secure Vulnerability & Deep Attachment 🍃"
+          : "Reassurance-Seeking Tendency",
+        description: isSecureVulnerability
+          ? (reassuranceEvidence.length > 0
+              ? `Expressions of emotional vulnerability and requests for validation framed as secure attachment bonding: ${reassuranceEvidence.join(" | ")}`
+              : `Dialogue shows open expressions of healthy vulnerability and emotional sharing that strengthen attachment security.`)
+          : (reassuranceEvidence.length > 0
+              ? `High frequency of validation-seeking language detected: ${reassuranceEvidence.join(" | ")}`
+              : `Elevated question density (${questionCount} questions detected) combined with the conversation's emotional pacing suggests possible reassurance-dependency tendencies.`),
+        confidence: reassuranceEvidence.length > 0 ? 76 : 60,
+        evidence: reassuranceEvidence.length > 0 ? reassuranceEvidence[0] : ""
+      };
+    },
     // 8: Conflict Loop
     () => ({
       type: "conflict_loop",
@@ -601,6 +610,7 @@ export function analyzeChatLocally(
     coachTone?: string;
     banterLevel?: string;
     conflictBaseline?: string;
+    reassuranceBaseline?: string;
     pastSummary?: string;
   }
 ): IAIAnalysisResult {
@@ -712,7 +722,7 @@ export function analyzeChatLocally(
   const ruleRes = runRuleEngine(chatText);
 
   // Stage 2: Local Heuristic AI Engine
-  let redFlags = generateRedFlagsForScore(chatText, positivityScore);
+  let redFlags = generateRedFlagsForScore(chatText, positivityScore, preferences?.reassuranceBaseline);
 
   const localRawRes: IAIAnalysisResult = {
     positivityScore,
@@ -847,7 +857,7 @@ export function analyzeChatLocally(
   };
 
   // Stage 4: Final Validation Layer
-  return validateAndNormalizeAnalysis(rawResult, chatText);
+  return validateAndNormalizeAnalysis(rawResult, chatText, preferences?.reassuranceBaseline);
 }
 
 /**
@@ -878,7 +888,7 @@ function getNextApiKey(keys: string[]): string {
   return key;
 }
 
-export function validateAndNormalizeAnalysis(raw: any, chatText?: string): IAIAnalysisResult {
+export function validateAndNormalizeAnalysis(raw: any, chatText?: string, reassuranceBaseline?: string): IAIAnalysisResult {
   const allowedRedFlags = [
     "defensive_behavior",
     "emotional_distance",
@@ -1002,7 +1012,7 @@ export function validateAndNormalizeAnalysis(raw: any, chatText?: string): IAIAn
     redFlags = redFlags.slice(0, targetCount);
   } else if (redFlags.length < targetCount) {
     if (chatText) {
-      const generated = generateRedFlagsForScore(chatText, positivityScore);
+      const generated = generateRedFlagsForScore(chatText, positivityScore, reassuranceBaseline);
       for (const gen of generated) {
         if (redFlags.length >= targetCount) break;
         if (!redFlags.some(f => f.type === gen.type)) {
@@ -1159,6 +1169,20 @@ export function validateAndNormalizeAnalysis(raw: any, chatText?: string): IAIAn
     };
   }
 
+  // Post-process reassurance_dependency type flags to handle secure vulnerability adjustment
+  for (const flag of redFlags) {
+    if (flag.type === "reassurance_dependency") {
+      const isSecureVulnerability = reassuranceBaseline === "vulnerable" || positivityScore >= 75;
+      if (isSecureVulnerability) {
+        flag.title = "Secure Vulnerability & Deep Attachment 🍃";
+        flag.description = flag.description
+          .replace(/validation-seeking language detected/gi, "expressions of emotional vulnerability and requests for validation framed as secure attachment bonding")
+          .replace(/validation-seeking tendencies|reassurance-dependency tendencies/gi, "healthy emotional vulnerability and deep attachment secure sharing");
+        flag.severity = "low";
+      }
+    }
+  }
+
   return {
     positivityScore,
     stressScore,
@@ -1184,6 +1208,7 @@ export async function analyzeChatText(
     coachTone?: string;
     banterLevel?: string;
     conflictBaseline?: string;
+    reassuranceBaseline?: string;
     pastSummary?: string;
   }
 ): Promise<IAIAnalysisResult> {
@@ -1218,6 +1243,8 @@ Your task is to analyze the provided chat log conversation between two partners.
   (If 'high', the partners naturally engage in a high frequency of playful teasing, jokes, and light sarcasm. Differentiate this playfulness from genuine passive-aggression or emotional distance. Do NOT flag lighthearted bantering as conflict/red flags. Adjust scores and insights to reward this banter as bonding.)
 - Relationship normal Conflict Baseline: ${preferences?.conflictBaseline || "calm"}
   (If 'expressive' or 'heated', the partners naturally express disagreements with higher emotional volume or passion. Do not immediately penalize intensity or pacing as 'stress_escalation' unless it indicates actual toxicity.)
+- Reassurance & Vulnerability Interpretation Baseline: ${preferences?.reassuranceBaseline || "standard"}
+  (If 'vulnerable', or if the overall conversation tone is highly positive with strong indicators of Love Languages and Shared Memories, interpret partners' validation requests, minor insecurities, or reassurance-seeking expressions like "kabhi kabhi dar lagta hai" as 'reassurance_dependency' but frame it as a secure, deep attachment vulnerability, calling it "Secure Vulnerability & Deep Attachment 🍃". Rate its severity as 'low' and write a description highlighting the vulnerability as positive attachment rather than toxic codependency. If 'strict', flag reassurance-seeking strictly.)
 - Preferred Coaching Tone: ${preferences?.coachTone || "empathetic"}
 
 ### LONG-TERM HISTORICAL TRENDS:
@@ -1304,7 +1331,7 @@ ${chatText}
       if (!resultText) throw new Error("Empty response received from Gemini API");
 
       const parsedResult = JSON.parse(resultText);
-      const validated = validateAndNormalizeAnalysis(parsedResult, chatText);
+      const validated = validateAndNormalizeAnalysis(parsedResult, chatText, preferences?.reassuranceBaseline);
       console.log(`✅ [AI Engine] Live Gemini Flash analysis completed via ${keyLabel}!`);
       return validated;
 

@@ -136,6 +136,7 @@ export const authOptions: NextAuthOptions = {
           token.marketingEmails = dbUser.marketingEmails === true;
           token.banterLevel = dbUser.banterLevel || "medium";
           token.conflictBaseline = dbUser.conflictBaseline || "calm";
+          token.reassuranceBaseline = dbUser.reassuranceBaseline || "standard";
 
           // Avoid storing heavy base64 strings in the JWT cookie
           const dbImage = dbUser.image || "";
@@ -161,6 +162,7 @@ export const authOptions: NextAuthOptions = {
           token.marketingEmails = (user as any).marketingEmails === true;
           token.banterLevel = (user as any).banterLevel || "medium";
           token.conflictBaseline = (user as any).conflictBaseline || "calm";
+          token.reassuranceBaseline = (user as any).reassuranceBaseline || "standard";
 
           const userImage = user.image || "";
           const safeImage = (userImage.startsWith("data:image/") || userImage.includes("/api/user/profile-image"))
@@ -193,6 +195,7 @@ export const authOptions: NextAuthOptions = {
           token.marketingEmails = dbUser.marketingEmails === true;
           token.banterLevel = dbUser.banterLevel || "medium";
           token.conflictBaseline = dbUser.conflictBaseline || "calm";
+          token.reassuranceBaseline = dbUser.reassuranceBaseline || "standard";
 
           const dbImage = dbUser.image || "";
           const safeImage = (dbImage.startsWith("data:image/") || dbImage.includes("/api/user/profile-image"))
@@ -214,6 +217,7 @@ export const authOptions: NextAuthOptions = {
           if (updateData.marketingEmails !== undefined) token.marketingEmails = updateData.marketingEmails;
           if (updateData.banterLevel !== undefined) token.banterLevel = updateData.banterLevel;
           if (updateData.conflictBaseline !== undefined) token.conflictBaseline = updateData.conflictBaseline;
+          if (updateData.reassuranceBaseline !== undefined) token.reassuranceBaseline = updateData.reassuranceBaseline;
 
           const sessionImage = updateData.image || "";
           const safeImage = (sessionImage.startsWith("data:image/") || sessionImage.includes("/api/user/profile-image"))
@@ -245,6 +249,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).marketingEmails = token.marketingEmails as boolean;
         (session.user as any).banterLevel = token.banterLevel as string;
         (session.user as any).conflictBaseline = token.conflictBaseline as string;
+        (session.user as any).reassuranceBaseline = token.reassuranceBaseline as string;
       }
       return session;
     },

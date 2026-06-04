@@ -153,4 +153,33 @@ const voiceResB = simulateVoiceAnalysis(mockConcernEmotions, { banterLevel: "med
 console.log("Overall Score:", voiceResB.score);
 console.log("Stress Score (Calibrated down):", voiceResB.stressScore);
 console.log("Insights:", voiceResB.insights);
+
+// 3. Dialogue with reassurance seeking
+const reassuranceChat = `
+Rahul: I am feeling a bit anxious today. Kabhi kabhi na dar lagta hai that I am not doing enough.
+Priya: Hey, don't worry, you are doing amazing. Do you still love me the same way?
+Rahul: Yes, always. I promise.
+`;
+
+console.log("\n==================================================================");
+console.log("🧪 TESTING REASSURANCE / VULNERABILITY BASELINE CALIBRATION:");
+console.log("==================================================================");
+
+// Case 1: Vulnerable Baseline
+console.log("\n[Reassurance Case A] Calibrating for: Vulnerable Baseline...");
+const vulnerabilityResA = analyzeChatLocally(reassuranceChat, {
+  reassuranceBaseline: "vulnerable"
+});
+console.log("Positivity Score:", vulnerabilityResA.positivityScore);
+console.log("Red Flags:");
+vulnerabilityResA.redFlags.forEach(f => console.log(` - Type: ${f.type}, Title: ${f.title}, Severity: ${f.severity}, Description: ${f.description}`));
+
+// Case 2: Strict Baseline
+console.log("\n[Reassurance Case B] Calibrating for: Strict Baseline...");
+const vulnerabilityResB = analyzeChatLocally(reassuranceChat, {
+  reassuranceBaseline: "strict"
+});
+console.log("Positivity Score:", vulnerabilityResB.positivityScore);
+console.log("Red Flags:");
+vulnerabilityResB.redFlags.forEach(f => console.log(` - Type: ${f.type}, Title: ${f.title}, Severity: ${f.severity}, Description: ${f.description}`));
 console.log("==================================================================");

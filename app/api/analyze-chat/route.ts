@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
       coachTone: dbUser.coachTone,
       banterLevel: (dbUser as any).banterLevel,
       conflictBaseline: (dbUser as any).conflictBaseline,
+      reassuranceBaseline: (dbUser as any).reassuranceBaseline,
       pastSummary,
     });
 

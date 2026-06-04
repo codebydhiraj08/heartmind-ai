@@ -1,61 +1,66 @@
-# Walkthrough - AI Engine Calibration, Past Trends & Voice Nuance Detection
+# Walkthrough - Dynamic Reassurance Baseline Calibration
 
-I have implemented the relationship baseline calibration preferences, historical trend growth tracking, acoustic voice tone nuance detection, love languages, nostalgic memory tracking, and the proactive suggestion engine across the chat and voice analysis pipelines.
+I have successfully implemented the dynamic reassurance baseline calibration, settings UI controls, NextAuth session mapping, and the user feedback loop for relationship attachment scanning.
 
 ---
 
-## Changes Made
+## Key Changes Made
 
-### 1. Persistent User Calibration Baseline Fallback
-- Modified [User.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/models/User.ts)'s `MockUserDocument` to declare, initialize, and serialize the relationship calibration fields `banterLevel` and `conflictBaseline`.
-- This ensures that user-specific calibration settings configured via Settings -> AI Psychology are persisted correctly and not dropped when running in local fallback database mode (e.g. offline/local JSON DB).
+### 1. Database Model Updates
+- Added `reassuranceBaseline?: "standard" | "vulnerable" | "strict"` to the `IUser` interface in [User.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/models/User.ts).
+- Integrated `reassuranceBaseline` into the Mongoose `UserSchema` with a default value of `"standard"`.
+- Declared and serialized this field within the local fallback class `MockUserDocument` to ensure settings are saved correctly in local JSON database mode (`db.json`).
 
-### 2. Context-Sensitive AI Chat Analyzer (Preferences & Trends)
-- Refactored [ai-engine.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/ai-engine.ts)'s `analyzeChatText` and `analyzeChatLocally` signatures to receive the user's calibration preferences and past history summary.
-- **Gemini Flash System Prompt**: Updated the LLM instructions to inject:
-  - Playful Banter Level (`banterLevel`): Instructs the LLM that `high` banter means light sarcasm or playful teasing are normal bonding traits and should not be flagged as conflict.
-  - Conflict Baseline (`conflictBaseline`): Instructs the LLM that `expressive` or `heated` baseline styles involve higher conversational volume/energy and should not trigger false stress flags.
-  - Long-Term Historical Trends (`pastSummary`): Feeds the last 3 past analyses (dates, scores, sentiment, patterns) to evaluate relationship growth, repair velocity, and overall resilience over time.
-- **Local Heuristics**: Modified local calculations to adjust conflict word weights and de-escalation speed based on `banterLevel` and `conflictBaseline`.
-- **Dynamic Timeline Insights**: Appends historical resilience logs if `pastSummary` is present.
+### 2. NextAuth Session & JWT Mapping
+- Modified [auth.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/auth.ts) to map `reassuranceBaseline` during token generation (`jwt` callback) and session synchronization (`session` callback).
+- Added triggers to fetch and persist this field on dynamic session updates, ensuring frontend states sync instantly without logging out.
 
-### 3. Love Languages & Shared Memories Detection
-- **Love Languages**: Scans chat logs (Gemini & Local Heuristics) to spot primary Love Languages (Words of Affirmation, Quality Time, Acts of Service, Gifts, Physical Touch). Correct matches reward the positivity score (up to +8 boost), reduce stress scores, and append matching timeline insights.
-- **Shared Memories & Jokes**: Identifies nostalgic phrases (e.g., `remember when`, `last year`, `inside joke`, `that trip`) and future planning references (e.g., `future house`, `planning to`, `marriage`). Correct matches add positive timeline logs and boost secure attachment parameters.
+### 3. API Preferences Update Route
+- Updated [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/user/update/route.ts) to retrieve `reassuranceBaseline` from the profile update POST body payload, save it securely to the Mongoose user profile record, and return it in the validated response payload.
+- Forwarded this setting in the chat analyzer API route [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-chat/route.ts) to the core AI engine context.
 
-### 4. Proactive Suggestion Engine (Chat & Voice)
-- **Chat Suggestion Format**: Instructs Gemini and Local heuristics to output exactly three suggestions:
-  1. A custom conversation starter prefixed with `"Conversation Starter: "` (e.g., `"Conversation Starter: 'Rahul, how did you feel...'"`).
-  2. A practical, actionable relationship exercise prefixed with `"Exercise: "` (e.g., `"Exercise (Memory Lane): Spend 10 minutes...'"`).
-  3. A behavioral guidance advice.
-- **Voice Suggestions**: Refactored [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-voice/route.ts) POST endpoint to query user calibration preferences and output proactive suggestions focused on vocal appreciation and composure.
+### 4. Settings UI Calibration Options
+- Updated [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/settings/page.tsx) to manage state for `reassuranceBaseline`.
+- Rendered an interactive selection card row under "Relationship Baseline Calibration":
+  - **Standard**: Standard codependency rules apply.
+  - **Vulnerable (Recommended)**: Flags reassurance seeking as secure, healthy vulnerability.
+  - **Strict**: Strictly flags validation seeking.
+- Saved the selected baseline value in the preferences POST call payload.
 
-### 5. Voice Analyzer Server-Side Calibration & Acoustic Nuance Detection
-- **Tonal Threshold Calibration**: Adjusts dynamic stress and anger thresholds based on `conflictBaseline` to prevent false positive alerts for expressive/heated relationships.
-- **Acoustic Nuance Rules**:
-  - **Playful Sarcasm 🎭**: Triggered when the user has `high` or `medium` banter enabled, excitement is high (> 50), and stress is moderately elevated (> 40). It scales down vocal stress/anger scores and injects a custom insight.
-  - **Genuine Concern 🍃**: Triggered when stress and sadness are moderately elevated but anger is low and excitement is low (emotional vulnerability). It defuses stress scores and highlights authentic empathy.
-- **Database Persistence**: Saved the updated calibrated `emotions` and `insights` inside the `analysisResult` schema. When loading past voice reports from the History Log, they will display the calibrated values instead of falling back to default mock templates.
+### 5. Context-Sensitive AI Engine & Dynamic Threshold
+- Refactored [ai-engine.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/ai-engine.ts):
+  - Received `reassuranceBaseline` preference parameter in `analyzeChatLocally`, `analyzeChatText`, `generateRedFlagsForScore`, and `validateAndNormalizeAnalysis`.
+  - Added instructions to the Gemini LLM Prompt: When `reassuranceBaseline === "vulnerable"` or overall positivity is high, interpret validation requests or expressions of minor insecurity (e.g. "kabhi kabhi dar lagta hai") as secure vulnerability rather than purely negative codependency.
+  - In `validateAndNormalizeAnalysis` and `generateRedFlagsForScore` local heuristic engines, if `reassuranceBaseline === "vulnerable"` or `positivityScore >= 75` (secure relationship context):
+    - Changed flag Title to `"Secure Vulnerability & Deep Attachment 🍃"`.
+    - Rewrote the description to frame the validation request as healthy emotional sharing and secure vulnerability rather than toxic codependency.
+    - Set the flag severity to `"low"`.
+
+### 6. User Feedback Loop
+- Added a feedback card on the Red Flags page [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/red-flags/page.tsx) inside the expanded details view of any detected `reassurance_dependency` pattern.
+- Provided an interactive button: **"Mark as Normal Vulnerability 🍃"** which:
+  - Dispatches an asynchronous POST call to update the user's calibration settings in the database to `"vulnerable"`.
+  - Dynamically updates the client-side NextAuth session.
+  - Displays a success confirmation message and reloads the page to adapt future scanning logic to the couple's specific attachment style.
 
 ---
 
 ## Verification Steps (Manual)
 
-1. **Verify Chat Calibration, Love Languages, and Suggestions**:
-   - Run the custom verification script created in the workspace root by executing:
+1. **Verify Local Heuristic Behavior**:
+   - Run the custom verification test suite in your terminal:
      ```bash
-     node scratch-verify-calibration.js
+     npx tsx scratch-verify-calibration.js
      ```
-   - Verify that **Case A** (High Banter) yields a higher positivity score and lower stress score than **Case B** (Low Banter literal interpretation) for the exact same teasing chat log.
-   - Verify that the **Love Languages** test shows Words of Affirmation, Acts of Service, and Shared Memories being detected and logged under Timeline Insights.
-   - Verify that the **Proactive Suggestions Engine** outputs a prefixed Conversation Starter and Exercise successfully.
-   - Verify that the simulated voice output shows **Playful Sarcasm** and **Genuine Concern** being correctly detected and calibrated.
+   - Verify that under `[Reassurance Case A] (Vulnerable Baseline)` the flagged pattern is named `"Secure Vulnerability & Deep Attachment 🍃"` with a severity of `low` and frames the expressions as secure bonding.
+   - Verify that under `[Reassurance Case B] (Strict Baseline)` the flagged pattern remains `"Reassurance-Seeking Tendency"` with standard codependency warning descriptions.
 
-2. **Verify Settings Calibration Persistence**:
-   - Navigate to **Settings** -> **AI Psychology**.
-   - Change your calibration settings (e.g. set Banter to *High* and Conflict Baseline to *Expressive*).
-   - Click Save. Refresh the page and verify that your selected baseline values remain persisted.
+2. **Verify Settings Calibration Saving**:
+   - Go to **Settings** -> **AI Psychology**.
+   - Change "Reassurance & Vulnerability Calibration" to *Vulnerable*.
+   - Save Preferences, refresh the page, and check if it is saved correctly.
 
-3. **Verify Voice History Log Rendering**:
-   - Record a voice log, or click on an existing voice log in the **History Log** tab.
-   - Confirm that the UI loads and displays the calibrated emotions spectrum and acoustic insights properly.
+3. **Verify Red Flags Feedback Action**:
+   - Go to **Red Flags** page and click to expand a detected **Reassurance Dependency** card.
+   - Click the button **Mark as Normal Vulnerability 🍃**.
+   - Verify that a success alert appears, the settings update correctly in the database, and the page refreshes.

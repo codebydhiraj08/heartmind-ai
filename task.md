@@ -1,12 +1,10 @@
-# Task Checklist - AI Calibration, Past Trends & Voice Nuances
+# Task Checklist - Dynamic Reassurance Baseline Calibration
 
-- `[x]` Update `models/User.ts` (MockUserDocument class fields, constructor, and serialization)
-- `[x]` Update `lib/ai-engine.ts` (Update `analyzeChatText` and `analyzeChatLocally` signatures & Gemini prompt template)
-- `[x]` Implement local heuristics calibration in `analyzeChatLocally` for `banterLevel`, `conflictBaseline`, and `pastSummary`
-- `[x]` Update `app/api/analyze-voice/route.ts` to query calibration preferences and perform server-side vocal metrics adjustment
-- `[x]` Implement Rule-Based Acoustic Nuance Detection (Playful Sarcasm & Genuine Concern) in `app/api/analyze-voice/route.ts`
-- `[x]` Save calibrated emotions and insights in `analysisResult` in the voice analysis API route
-- `[x]` Implement Love Languages detection, nostalgic memories & inside jokes tracking, and future planning checks
-- `[x]` Design Proactive Suggestion Engine with custom conversation starters & exercises in chat and voice analyses
-- `[x]` Verify calibration saving in Settings and Chat Analyzer
-- `[x]` Verify Voice Analyzer nuances detection and History Log rendering
+- [x] Update database model user schema and fallback serializer for `reassuranceBaseline` setting in `models/User.ts`
+- [x] Integrate NextAuth JWT and session callbacks synchronization in `lib/auth.ts`
+- [x] Add dynamic parameter handling in profile preferences update API endpoint in `app/api/user/update/route.ts`
+- [x] Create Settings page preference controls UI for reassurance calibration in `app/dashboard/settings/page.tsx`
+- [x] Forward user reassurance baseline preferences inside chat analyzer API route `app/api/analyze-chat/route.ts`
+- [x] Adjust local heuristics and Gemini prompt in `lib/ai-engine.ts` for dynamic threshold interpretation
+- [x] Implement user feedback loop option card on Red Flags details list page `app/dashboard/red-flags/page.tsx`
+- [x] Create verification test cases in `scratch-verify-calibration.js` and prepare deployment commands

@@ -1,57 +1,68 @@
-# Implementation Plan — Love Languages, Shared History & Proactive Suggestions
+# Implementation Plan — Dynamic Reassurance Baseline Calibration
 
-This plan details the changes required to expand the AI Engine's capability to detect partners' **Love Languages**, identify references to **Shared Memories, Inside Jokes, & Future Plans**, and generate a **Proactive Suggestion Engine** with personalized conversation starters and relationship exercises.
+This plan details the changes required to implement user-calibrated **Reassurance Baseline Calibration**, enabling the AI (Gemini and local heuristics) to interpret emotional vulnerability and reassurance-seeking as secure attachment bonding instead of negative codependency when overall positivity is high.
 
 ---
 
 ## Proposed Changes
 
-### 1. Love Languages & Shared Memories Heuristics (Chat Analysis)
+### 1. Database Model updates (Calibration Fields)
 
-#### [MODIFY] [ai-engine.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/ai-engine.ts)
-- Define new regex search patterns inside `analyzeChatLocally`:
-  - **Love Languages**:
-    - *Words of Affirmation*: e.g., `proud of you`, `thank you for`, `appreciate you`, `so kind`, `love how you`.
-    - *Quality Time*: e.g., `trip together`, `date night`, `spend time`, `our evening`, `alone time`.
-    - *Acts of Service*: e.g., `helped me`, `cooked`, `cleaned`, `took care of`, `fixed the`.
-    - *Gifts*: e.g., `bought you`, `gift`, `present`, `surprise`, `flowers`.
-    - *Physical Touch*: e.g., `hug`, `kiss`, `cuddle`, `hold your hand`.
-  - **Shared History & Memories**:
-    - References to past moments (e.g., `remember when`, `last year`, `that trip`, `remember that laugh`, `inside joke`, `our joke`).
-  - **Future Planning**:
-    - References to future goals (e.g., `future`, `next year`, `when we move`, `our house`, `marriage`, `kids`, `planning to`).
-- **Scoring Adjustment**:
-  - When love language expressions, shared history, or future plans are detected, apply positive reinforcement by increasing the positivity score (up to +8 boost) and reducing stress indicators.
-- **Dynamic Timeline Insights**:
-  - If a love language is detected, append a timeline insight: e.g., `"Words of Affirmation active: Priya validated Rahul with encouraging praise."`
-  - If shared history/jokes are detected: `"Shared history active: Partners recalled a humorous inside joke, reinforcing attachment security."`
-  - If future goals are discussed: `"Future alignment: Partners expressed mutual goals for their future path, signaling long-term commitment."`
+#### [MODIFY] [User.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/models/User.ts)
+- Add `reassuranceBaseline?: "standard" | "vulnerable" | "strict"` to the `IUser` interface.
+- Add `reassuranceBaseline` to the Mongoose `UserSchema` with default `"standard"`.
+- Declare, initialize (default `"standard"`), and serialize `reassuranceBaseline` in the `MockUserDocument` fallback class for local database operations.
 
 ---
 
-### 2. Proactive Suggestion Engine & Gemini System Prompts
+### 2. NextAuth Sync & Preferences API Endpoint
 
-#### [MODIFY] [ai-engine.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/ai-engine.ts)
-- Modify the Gemini Flash prompt template in `analyzeChatText` to add instructions for:
-  - **Love Language Detection**: Identify partners' primary love languages shown in the text and reward them as positive reinforcements.
-  - **Shared History & Inside Jokes**: Reward reference to shared memories or inside jokes as strong resilience indicators.
-  - **Proactive Suggestions**: Force the output suggestions to be highly action-oriented, providing at least one conversation starter (e.g., `"Conversation Starter: 'What has been...'"`), and one practical relationship exercise (e.g., `"Exercise: Discuss your plans for next summer..."`).
-- In `analyzeChatLocally` (local fallback engine), update the hardcoded suggestions list to dynamically inject one conversation starter and one exercise based on the analyzed conflict levels and detected love languages.
+#### [MODIFY] [auth.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/auth.ts)
+- Map `reassuranceBaseline` in NextAuth's `jwt` and `session` callbacks so it is dynamically synchronized in user sessions.
+
+#### [MODIFY] [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/user/update/route.ts)
+- Extract `reassuranceBaseline` from the JSON payload, validate it, update the user record, and return it in the updated profile block.
 
 ---
 
-### 3. Proactive Suggestions in Voice Analysis
+### 3. Settings UI Calibration Options
 
-#### [MODIFY] [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-voice/route.ts)
-- Update default voice suggestions to incorporate proactive connection exercises (e.g., `"Acoustic Exercise: Practice sharing three verbal appreciations in a calm, slow pace to build warmth"`).
+#### [MODIFY] [page.tsx](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/dashboard/settings/page.tsx)
+- Declare state hook `const [reassuranceBaseline, setReassuranceBaseline] = useState("standard")`.
+- Sync the state hook with `session.user.reassuranceBaseline` in `useEffect`.
+- Send `reassuranceBaseline` in the POST request body inside `handleSavePreferences`.
+- Render a new calibration choice list under "Relationship Baseline Calibration":
+  - **Reassurance / Vulnerability Baseline**:
+    - `standard`: Standard codependency checks.
+    - `vulnerable` (Recommended): Frames validation seeking as healthy vulnerability and deep attachment secure sharing.
+    - `strict`: Strictly flags codependency triggers.
+
+---
+
+### 4. AI Engine Tonal Calibration & Rule adjustments
+
+#### [MODIFY] [ai-engine.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/lib/ai-engine.ts)
+- Refactored `analyzeChatText` and `analyzeChatLocally` signatures to accept `reassuranceBaseline` under `preferences`.
+- In `generateRedFlagsForScore` (or within the `reassurance_dependency` builder block):
+  - Pass `preferences` context.
+  - If `positivityScore >= 75` or `preferences?.reassuranceBaseline === "vulnerable"`, change the `reassurance_dependency` red flag:
+    - Change Title to: `"Secure Vulnerability & Deep Attachment 🍃"`
+    - Adjust Description to frame the validation request as healthy emotional sharing and secure vulnerability rather than negative reassurance dependency.
+    - Keep severity at `"low"`.
+- In `analyzeChatText` Gemini Prompt:
+  - Add guidelines for `reassuranceBaseline`: if `"vulnerable"` or overall positivity is high, interpret validation requests or expressions of minor insecurity (e.g. "kabhi kabhi dar lagta hai") as secure vulnerability rather than purely negative codependency.
+
+#### [MODIFY] [route.ts](file:///c:/Users/DhirajWarangane/OneDrive/Desktop/Heartmind/app/api/analyze-chat/route.ts)
+- Fetch and pass `reassuranceBaseline: (dbUser as any).reassuranceBaseline` in the `analyzeChatText` preferences object.
 
 ---
 
 ## Verification Plan
 
-### Manual Verification
-1. **Calibration & Love Language Script**:
-   - Update `scratch-verify-calibration.js` with a test case that contains love language expressions (e.g., "thank you for cooking dinner, I appreciate you") and shared memory references.
-   - Run the script to verify that the local heuristic successfully boosts positivity score and appends custom timeline insights and proactive suggestions.
-2. **Settings and API Testing**:
-   - Verify that when a user uploads a WhatsApp chat containing words like "remember when we went to that beach, I appreciate how you always help me", the AI chat output details the primary love language detected and includes a proactive conversation starter in suggestions.
+### Automated/Manual Testing
+1. **Verification Script**:
+   - Update `scratch-verify-calibration.js` to simulate a dialogue containing vulnerability (e.g., "Rahul: sometimes I get scared, Priya: don't worry, I'm here for you").
+   - Test under two baselines: `vulnerable` (should frame the trigger as Secure Vulnerability) vs `strict` (should flag as Reassurance Dependency).
+   - Execute script with `npx tsx scratch-verify-calibration.js`.
+2. **Settings Page Save**:
+   - Go to Settings -> AI Psychology, verify you can change and persist Reassurance Baseline choices.

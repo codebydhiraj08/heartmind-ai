@@ -16,6 +16,7 @@ export interface IUser extends Document {
   marketingEmails?: boolean;
   banterLevel?: "low" | "medium" | "high";
   conflictBaseline?: "calm" | "expressive" | "heated";
+  reassuranceBaseline?: "standard" | "vulnerable" | "strict";
   emailVerified: Date | null;
   verificationToken?: string | null;
   resetPasswordToken?: string | null;
@@ -113,6 +114,11 @@ const UserSchema: Schema<IUser> = new Schema(
       type: String,
       enum: ["calm", "expressive", "heated"],
       default: "calm",
+    },
+    reassuranceBaseline: {
+      type: String,
+      enum: ["standard", "vulnerable", "strict"],
+      default: "standard",
     },
     emailVerified: {
       type: Date,
@@ -285,6 +291,7 @@ class MockUserDocument {
   marketingEmails?: boolean;
   banterLevel?: "low" | "medium" | "high";
   conflictBaseline?: "calm" | "expressive" | "heated";
+  reassuranceBaseline?: "standard" | "vulnerable" | "strict";
   emailVerified: Date | null;
   verificationToken?: string | null;
   resetPasswordToken?: string | null;
@@ -338,6 +345,7 @@ class MockUserDocument {
     this.marketingEmails = data.marketingEmails === true || data.marketingEmails === "true";
     this.banterLevel = data.banterLevel || "medium";
     this.conflictBaseline = data.conflictBaseline || "calm";
+    this.reassuranceBaseline = data.reassuranceBaseline || "standard";
     
     // Parse Dates properly - Auto-verify emails in local JSON DB for frictionless development
     this.emailVerified = data.emailVerified ? new Date(data.emailVerified) : new Date();

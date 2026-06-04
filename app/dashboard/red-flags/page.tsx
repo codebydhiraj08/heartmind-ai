@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import {
   Shield,
@@ -154,6 +155,7 @@ interface RedFlagPattern {
 }
 
 function RedFlagsPageInner() {
+  const { data: session, update: updateSession } = useSession()
   const searchParams = useSearchParams()
   const chatId = searchParams.get("chatId")
   const voiceId = searchParams.get("voiceId")
@@ -527,6 +529,55 @@ function RedFlagsPageInner() {
                                 </ul>
                               </div>
                             ) : null}
+
+                            {pattern.id === "reassurance_dependency" && (
+                              <div className="p-3.5 rounded-xl border border-white/[0.04] bg-white/[0.01] space-y-2">
+                                <p className="text-xs font-semibold text-zinc-350 flex items-center gap-1.5">
+                                  <Heart className="w-3.5 h-3.5 text-primary" />
+                                  Is this a normal expression of vulnerability for you?
+                                </p>
+                                <p className="text-[10px] text-zinc-400 leading-normal">
+                                  Every relationship is unique. If you consider this healthy communication rather than codependency, mark it as &quot;Normal Vulnerability&quot; to calibrate the AI to your attachment style.
+                                </p>
+                                <Button
+                                  type="button"
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const res = await fetch("/api/user/update", {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          name: session?.user?.name,
+                                          email: session?.user?.email,
+                                          reassuranceBaseline: "vulnerable"
+                                        }),
+                                      });
+                                      if (res.ok) {
+                                        if (updateSession) {
+                                          await updateSession({
+                                            reassuranceBaseline: "vulnerable",
+                                            user: {
+                                              reassuranceBaseline: "vulnerable"
+                                            }
+                                          });
+                                        }
+                                        alert("Baseline calibrated! Future scans will frame reassurance expressions as secure vulnerability. 🍃");
+                                        window.location.reload();
+                                      }
+                                    } catch (err) {
+                                      console.error("Failed to update feedback loop:", err);
+                                    }
+                                  }}
+                                  size="sm"
+                                  className="w-full bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary font-bold text-[10px] uppercase tracking-wider h-8 rounded-lg"
+                                >
+                                  Mark as Normal Vulnerability 🍃
+                                </Button>
+                              </div>
+                            )}
 
                             <div>
                               <p className="text-sm font-medium mb-2 text-zinc-300">Common Indicators:</p>

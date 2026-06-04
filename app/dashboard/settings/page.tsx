@@ -201,6 +201,7 @@ export default function SettingsPage() {
   const [coachTone, setCoachTone] = useState("empathetic")
   const [banterLevel, setBanterLevel] = useState("medium")
   const [conflictBaseline, setConflictBaseline] = useState("calm")
+  const [reassuranceBaseline, setReassuranceBaseline] = useState("standard")
   const [partnerName, setPartnerName] = useState("")
   const [relationshipStatus, setRelationshipStatus] = useState("dating")
   const [anniversaryDate, setAnniversaryDate] = useState("")
@@ -236,6 +237,7 @@ export default function SettingsPage() {
       setMarketingEmails((session.user as any).marketingEmails === true)
       setBanterLevel((session.user as any).banterLevel || "medium")
       setConflictBaseline((session.user as any).conflictBaseline || "calm")
+      setReassuranceBaseline((session.user as any).reassuranceBaseline || "standard")
     }
   }, [session])
 
@@ -323,6 +325,7 @@ export default function SettingsPage() {
           marketingEmails,
           banterLevel,
           conflictBaseline,
+          reassuranceBaseline,
         }),
       })
 
@@ -347,6 +350,7 @@ export default function SettingsPage() {
         marketingEmails,
         banterLevel,
         conflictBaseline,
+        reassuranceBaseline,
         user: {
           name,
           email,
@@ -362,6 +366,7 @@ export default function SettingsPage() {
           marketingEmails,
           banterLevel,
           conflictBaseline,
+          reassuranceBaseline,
         }
       })
 
@@ -777,6 +782,34 @@ export default function SettingsPage() {
                               onClick={() => setConflictBaseline(opt.id)}
                               className={`flex-1 p-2.5 rounded-xl border text-center transition-all ${
                                 conflictBaseline === opt.id
+                                  ? "bg-primary/10 border-primary text-white text-[11px] font-bold"
+                                  : "bg-zinc-950/40 border-white/[0.03] text-zinc-400 text-[10px] hover:border-white/[0.06]"
+                              }`}
+                            >
+                              <span className="block">{opt.label}</span>
+                              <span className="block text-[8px] opacity-60 leading-normal">{opt.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Reassurance Baseline */}
+                      <div className="space-y-2 col-span-1 sm:col-span-2">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                          Reassurance & Vulnerability Interpretation
+                        </label>
+                        <div className="flex gap-2">
+                          {[
+                            { id: "standard", label: "Standard ⚖️", desc: "Default codependency scans" },
+                            { id: "vulnerable", label: "Vulnerable (Recommended) 🍃", desc: "Frames reassurance as healthy vulnerability & deep attachment" },
+                            { id: "strict", label: "Strict 🎯", desc: "Strictly flags validation seeking" }
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => setReassuranceBaseline(opt.id)}
+                              className={`flex-1 p-2.5 rounded-xl border text-center transition-all ${
+                                reassuranceBaseline === opt.id
                                   ? "bg-primary/10 border-primary text-white text-[11px] font-bold"
                                   : "bg-zinc-950/40 border-white/[0.03] text-zinc-400 text-[10px] hover:border-white/[0.06]"
                               }`}
