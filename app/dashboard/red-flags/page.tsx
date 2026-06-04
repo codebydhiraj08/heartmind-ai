@@ -152,6 +152,9 @@ interface RedFlagPattern {
   confidence: number
   examples: number
   realEvidence?: string[]
+  displayName?: string
+  displayDescription?: string
+  displaySeverity?: string
 }
 
 function RedFlagsPageInner() {
@@ -193,12 +196,31 @@ function RedFlagsPageInner() {
           const updatedPatterns = redFlagPatterns.map(p => {
             const matchedFlag = dbRedFlags.find((f: any) => f.type === p.id);
             if (matchedFlag) {
+              const userBaseline = (session?.user as any)?.reassuranceBaseline || "standard";
+              const isReassurance = p.id === "reassurance_dependency";
+              
+              if (isReassurance && userBaseline === "vulnerable") {
+                return {
+                  ...p,
+                  detected: true,
+                  confidence: typeof matchedFlag.confidence === "number" ? matchedFlag.confidence : 85,
+                  examples: 1,
+                  realEvidence: matchedFlag.evidence ? [matchedFlag.evidence] : [matchedFlag.description],
+                  displayName: "Secure Vulnerability & Deep Attachment 🍃",
+                  displayDescription: "Expressions of emotional vulnerability and requests for validation framed as secure attachment bonding.",
+                  displaySeverity: "low"
+                };
+              }
+              
               return {
                 ...p,
                 detected: true,
                 confidence: typeof matchedFlag.confidence === "number" ? matchedFlag.confidence : 85,
                 examples: 1,
-                realEvidence: matchedFlag.evidence ? [matchedFlag.evidence] : [matchedFlag.description]
+                realEvidence: matchedFlag.evidence ? [matchedFlag.evidence] : [matchedFlag.description],
+                displayName: matchedFlag.title || p.name,
+                displayDescription: matchedFlag.description || p.description,
+                displaySeverity: matchedFlag.severity || p.severity
               };
             }
             return {
@@ -206,7 +228,10 @@ function RedFlagsPageInner() {
               detected: false,
               confidence: 0,
               examples: 0,
-              realEvidence: []
+              realEvidence: [],
+              displayName: p.name,
+              displayDescription: p.description,
+              displaySeverity: p.severity
             };
           });
 
@@ -219,7 +244,10 @@ function RedFlagsPageInner() {
             detected: false,
             confidence: 0,
             examples: 0,
-            realEvidence: []
+            realEvidence: [],
+            displayName: p.name,
+            displayDescription: p.description,
+            displaySeverity: p.severity
           })));
           setSafetyScore(100);
         }
@@ -473,17 +501,17 @@ function RedFlagsPageInner() {
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getSeverityColor(pattern.severity)}`}>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getSeverityColor(pattern.displaySeverity || pattern.severity)}`}>
                         <pattern.icon className="w-6 h-6" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">{pattern.name}</h3>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(pattern.severity)}`}>
-                            {pattern.severity}
+                          <h3 className="font-semibold">{pattern.displayName || pattern.name}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(pattern.displaySeverity || pattern.severity)}`}>
+                            {pattern.displaySeverity || pattern.severity}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">{pattern.description}</p>
+                        <p className="text-sm text-muted-foreground mb-3">{pattern.displayDescription || pattern.description}</p>
                         
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-1">
@@ -539,43 +567,49 @@ function RedFlagsPageInner() {
                                 <p className="text-[10px] text-zinc-400 leading-normal">
                                   Every relationship is unique. If you consider this healthy communication rather than codependency, mark it as &quot;Normal Vulnerability&quot; to calibrate the AI to your attachment style.
                                 </p>
-                                <Button
-                                  type="button"
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    try {
-                                      const res = await fetch("/api/user/update", {
-                                        method: "POST",
-                                        headers: {
-                                          "Content-Type": "application/json",
-                                        },
-                                        body: JSON.stringify({
-                                          name: session?.user?.name,
-                                          email: session?.user?.email,
-                                          reassuranceBaseline: "vulnerable"
-                                        }),
-                                      });
-                                      if (res.ok) {
-                                        if (updateSession) {
-                                          await updateSession({
-                                            reassuranceBaseline: "vulnerable",
-                                            user: {
-                                              reassuranceBaseline: "vulnerable"
-                                            }
-                                          });
+                                {((session?.user as any)?.reassuranceBaseline === "vulnerable") ? (
+                                  <div className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-center">
+                                    Baseline calibrated! Scan frames reassurance as secure vulnerability. 🍃
+                                  </div>
+                                ) : (
+                                  <Button
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      try {
+                                        const res = await fetch("/api/user/update", {
+                                          method: "POST",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                          },
+                                          body: JSON.stringify({
+                                            name: session?.user?.name,
+                                            email: session?.user?.email,
+                                            reassuranceBaseline: "vulnerable"
+                                          }),
+                                        });
+                                        if (res.ok) {
+                                          if (updateSession) {
+                                            await updateSession({
+                                              reassuranceBaseline: "vulnerable",
+                                              user: {
+                                                reassuranceBaseline: "vulnerable"
+                                              }
+                                            });
+                                          }
+                                          alert("Baseline calibrated! Future scans will frame reassurance expressions as secure vulnerability. 🍃");
+                                          window.location.reload();
                                         }
-                                        alert("Baseline calibrated! Future scans will frame reassurance expressions as secure vulnerability. 🍃");
-                                        window.location.reload();
+                                      } catch (err) {
+                                        console.error("Failed to update feedback loop:", err);
                                       }
-                                    } catch (err) {
-                                      console.error("Failed to update feedback loop:", err);
-                                    }
-                                  }}
-                                  size="sm"
-                                  className="w-full bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary font-bold text-[10px] uppercase tracking-wider h-8 rounded-lg"
-                                >
-                                  Mark as Normal Vulnerability 🍃
-                                </Button>
+                                    }}
+                                    size="sm"
+                                    className="w-full bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary font-bold text-[10px] uppercase tracking-wider h-8 rounded-lg"
+                                  >
+                                    Mark as Normal Vulnerability 🍃
+                                  </Button>
+                                )}
                               </div>
                             )}
 

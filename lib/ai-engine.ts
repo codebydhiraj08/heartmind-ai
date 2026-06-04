@@ -710,10 +710,22 @@ export function analyzeChatLocally(
   const mitigatedConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / repairFactor));
   
   // Compute Positivity Score (adding bonus points for constructive repair attempts)
-  const positivityBase = 68 + totalPositives * 4 - (mitigatedConflicts * 5 * conflictMultiplier) - manipCount * 12 + Math.min(12, repairCount * 2.5) + positivityBaseBoost;
+  let baseScore = 75;
+  if (totalConflicts === 0 && manipCount === 0) {
+    baseScore = 95;
+  } else if (totalConflicts <= 1 && totalPositives >= 2) {
+    baseScore = 90;
+  }
+
+  const positivityBase = baseScore + totalPositives * 4 - (mitigatedConflicts * 6 * conflictMultiplier) - manipCount * 15 + Math.min(12, repairCount * 2.5) + positivityBaseBoost;
   const positivityVariance = (seed % 19) - 9;
   let positivityScore = positivityBase + positivityVariance;
-  positivityScore = Math.max(30, Math.min(97, positivityScore));
+  
+  if (totalConflicts === 0 && manipCount === 0) {
+    positivityScore = 100;
+  } else {
+    positivityScore = Math.max(30, Math.min(100, positivityScore));
+  }
 
   // Compute Stress Score (relieved by repair attempts, love languages, and shared history)
   const mitigatedStressConflicts = Math.max(0, totalConflicts - Math.floor(repairCount / 1.2));
@@ -1285,8 +1297,8 @@ All suggestions must be personalized, highly actionable, and tailored to improve
    - Keep your insights supportive, highly objective, constructive, therapeutic, and ethically sound.
 3. Use names exactly as they appear in the conversation. DO NOT add ** or any markdown formatting to names.
 4. RELATIONAL CONTEXT & RESILIENCE:
-   - Analyze conflicts in their full sequential context. Look for repair indicators (e.g. apologies, quick recovery, humorous jokes, laughter, playful emojis like 😂, 😜, ❤️, or words like "haha", "sorry").
    - Differentiate toxic patterns from healthy disagreements followed by fast, supportive repair. Do not classify light teasing or affectionate banter as toxic red flags.
+   - CRITICAL: Never classify sweet, cute, romantic, or affectionate texting, emojis, or caring statements (e.g., "Main tumhari chat padh ke smile kar rahi thi aur teacher ne pakad liya 😭❤️", "Tum bolti ho to kha leta hu 😌❤️") as any red flags, reassurance dependency, or conflict. These are normal, healthy expressions of love and attachment, not codependency. Treat them as positive connection cues.
    - Act as a sensitive, warm, and highly constructive relationship coach. Focus suggestions on strengthening repair attempts and validating each other's perspective.
 
 ### SCORE-PATTERN ALIGNMENT RULE (CRITICAL):
