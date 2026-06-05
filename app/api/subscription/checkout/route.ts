@@ -34,7 +34,19 @@ export async function POST(req: NextRequest) {
     }
 
     const userEmail = user.email;
-    const activeRegion = (region || user.billingRegion || "US").toUpperCase();
+    
+    // Secure billing region resolution: database value is the single source of truth.
+    // If not set, check geolocation headers before falling back to request param.
+    const countryHeader = req.headers.get("x-vercel-ip-country") || req.headers.get("cf-ipcountry") || "";
+    let activeRegion = "US";
+
+    if (user.billingRegion && (user.billingRegion === "IN" || user.billingRegion === "US")) {
+      activeRegion = user.billingRegion;
+    } else if (countryHeader.toUpperCase() === "IN") {
+      activeRegion = "IN";
+    } else if (region && (region.toUpperCase() === "IN" || region.toUpperCase() === "US")) {
+      activeRegion = region.toUpperCase();
+    }
 
     if (activeRegion === "IN") {
       // Indian regional flow: Razorpay Test Mode

@@ -22,6 +22,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
+    // Server-Side Geolocation detection using standard cloud deployment headers
+    const countryHeader = req.headers.get("x-vercel-ip-country") || req.headers.get("cf-ipcountry") || "";
+    let geoUpdated = false;
+    
+    // Auto-lock region if profile is uninitialized or US default, and headers confirm user is in India
+    if (!user.billingRegion || user.billingRegion === "US") {
+      if (countryHeader.toUpperCase() === "IN") {
+        user.billingRegion = "IN";
+        user.currency = "INR";
+        geoUpdated = true;
+      }
+    }
+
     // Auto-reset monthly counter if 30 days have passed
     let monthlyCount = user.monthlyAnalysisCount || 0;
     const now = new Date();
@@ -31,8 +44,12 @@ export async function GET(req: NextRequest) {
     if (daysSinceReset >= 30) {
       user.monthlyAnalysisCount = 0;
       user.lastUsageResetAt = now;
-      await user.save();
+      geoUpdated = true;
       monthlyCount = 0;
+    }
+
+    if (geoUpdated) {
+      await user.save();
     }
 
     const access = getUserAccess(user);

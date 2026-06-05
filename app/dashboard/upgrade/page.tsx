@@ -94,16 +94,12 @@ export default function UpgradePage() {
   const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
 
-  // Region detection logic
+  // Secure automatic region detection (timezone & locale)
   useEffect(() => {
-    // 1. Check for manual override in localStorage
-    const savedRegion = localStorage.getItem("heartmind_billing_region");
-    if (savedRegion === "IN" || savedRegion === "US") {
-      setSelectedRegion(savedRegion);
-      return;
-    }
+    if (subLoading) return;
 
-    // 2. Check from API returned database subscription region
+    let detectedRegion: "IN" | "US" = "US";
+
     if (subscription?.billingRegion) {
       const dbRegion = subscription.billingRegion.toUpperCase();
       if (dbRegion === "IN" || dbRegion === "US") {
@@ -112,18 +108,54 @@ export default function UpgradePage() {
       }
     }
 
-    // 3. Fallback to browser locale
+    // Client-side timezone fallback
     try {
-      const locale = navigator.language || "";
-      if (locale.includes("IN") || locale.toLowerCase().includes("hi") || locale.toLowerCase().includes("-in")) {
-        setSelectedRegion("IN");
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || tz.includes("Kolkata") || tz.includes("Calcutta")) {
+        detectedRegion = "IN";
       } else {
-        setSelectedRegion("US");
+        // Client-side locale fallback
+        const locale = navigator.language || "";
+        if (locale.includes("IN") || locale.toLowerCase().includes("hi") || locale.toLowerCase().includes("-in")) {
+          detectedRegion = "IN";
+        }
       }
     } catch (e) {
-      setSelectedRegion("US");
+      console.warn("Timezone region detection failed, defaulting to US.");
     }
-  }, [subscription]);
+
+    setSelectedRegion(detectedRegion);
+
+    // Automatically sync detected region to the user profile in DB
+    const syncRegion = async () => {
+      try {
+        await fetch("/api/subscription/status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ region: detectedRegion }),
+        });
+        refreshSubscription();
+      } catch (err) {
+        console.error("Failed to update database profile billing region:", err);
+      }
+    };
+    syncRegion();
+  }, [subscription, subLoading, refreshSubscription]);
+
+  // Handle Stripe canceled parameter detection from redirect
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("canceled") === "true") {
+        setPaymentError("Stripe secure checkout session was canceled. Please try again when you are ready.");
+        // Clean up URL parameters cleanly
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+  }, []);
 
   // Dynamically load Razorpay SDK script
   const loadRazorpayScript = () => {
@@ -135,43 +167,6 @@ export default function UpgradePage() {
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
-  };
-
-  // Poll server-side database user subscription state to verify webhook has completed activation
-  const verifySubscriptionStatus = async (targetTier: string) => {
-    setIsVerifying(true);
-    let attempts = 0;
-    const maxAttempts = 10;
-    
-    const checkStatus = async () => {
-      attempts++;
-      const current = await refreshSubscription();
-      // Fetch latest state directly
-      try {
-        const res = await fetch("/api/subscription/status");
-        const data = await res.json();
-        if (data.success && data.subscription.tier === targetTier) {
-          setPaymentSuccess(true);
-          setIsVerifying(false);
-          setLoadingPlan(null);
-          return;
-        }
-      } catch (err) {
-        console.error("Error polling subscription status:", err);
-      }
-
-      if (attempts < maxAttempts) {
-        setTimeout(checkStatus, 1500);
-      } else {
-        setIsVerifying(false);
-        setLoadingPlan(null);
-        setPaymentError(
-          "Your transaction succeeded, but database sync is taking longer than expected. Please wait a moment and refresh the dashboard."
-        );
-      }
-    };
-
-    checkStatus();
   };
 
   // Handle plan upgrade trigger
@@ -220,11 +215,34 @@ export default function UpgradePage() {
           description: data.description,
           order_id: data.orderId,
           handler: async function (response: any) {
-            // Success handler callback
+            // Secure instant signature verification callback
             setIsVerifying(true);
-            // Razorpay payment successfully authorized client-side. Webhook will process the capture securely,
-            // but we poll the server status to dynamically unlock without hard refreshes.
-            verifySubscriptionStatus(planKey);
+            try {
+              const verifyRes = await fetch("/api/subscription/verify", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                  plan: planKey,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                setPaymentSuccess(true);
+                await refreshSubscription();
+              } else {
+                setPaymentError(verifyData.error || "Payment verification failed. Please contact support.");
+              }
+            } catch (err: any) {
+              setPaymentError(err.message || "An error occurred during payment verification.");
+            } finally {
+              setIsVerifying(false);
+              setLoadingPlan(null);
+            }
           },
           prefill: {
             name: data.prefill?.name || "",
@@ -247,26 +265,6 @@ export default function UpgradePage() {
       console.error("Upgrade error:", err);
       setPaymentError(err.message || "An unexpected error occurred during checkout setup.");
       setLoadingPlan(null);
-    }
-  };
-
-  // Change region preference and update DB/localStorage
-  const handleRegionChange = async (region: "IN" | "US") => {
-    setSelectedRegion(region);
-    localStorage.setItem("heartmind_billing_region", region);
-
-    // Persist user region setting in the database securely
-    try {
-      await fetch("/api/subscription/status", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ region }),
-      });
-      await refreshSubscription();
-    } catch (e) {
-      console.error("Failed to update user database region preference:", e);
     }
   };
 
@@ -293,33 +291,7 @@ export default function UpgradePage() {
           Deepen your communication, understand relationship patterns, and build lasting, healthy connections.
         </p>
 
-        {/* Region selector manually controlled */}
-        <div className="pt-4 flex justify-center">
-          <div className="p-1 rounded-xl bg-zinc-900 border border-white/[0.04] inline-flex items-center gap-1 shadow-inner">
-            <button
-              onClick={() => handleRegionChange("IN")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                selectedRegion === "IN"
-                  ? "bg-primary text-white shadow-md"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              India (₹ INR)
-            </button>
-            <button
-              onClick={() => handleRegionChange("US")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                selectedRegion === "US"
-                  ? "bg-primary text-white shadow-md"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              International ($ USD)
-            </button>
-          </div>
-        </div>
+
       </div>
 
       {/* Verification / Loading overlay */}

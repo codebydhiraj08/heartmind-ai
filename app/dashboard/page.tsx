@@ -79,6 +79,22 @@ export default function DashboardPage() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [showAllPatterns, setShowAllPatterns] = useState(false)
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false)
+
+  // Handle Stripe checkout success parameter detection
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("success") === "true") {
+        setShowCelebrationModal(true);
+        refreshSubscription();
+        
+        // Clean URL parameters cleanly without reloading
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+  }, [refreshSubscription]);
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
@@ -1149,6 +1165,63 @@ export default function DashboardPage() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Celebration Upgrade Success Modal */}
+      <AnimatePresence>
+        {showCelebrationModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-md p-6 bg-zinc-950 border border-white/[0.06] rounded-2xl text-center space-y-6 shadow-2xl relative overflow-hidden neon-glow-pink"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-accent to-neon-cyan" />
+              
+              <div className="space-y-4 pt-2">
+                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto shadow-md animate-bounce">
+                  <Crown className="w-8 h-8 fill-primary" />
+                </div>
+                
+                <h3 className="text-xl font-black text-white tracking-tight">
+                  Welcome to <span className="gradient-text">{activeTier === "premium" ? "HeartMind Premium" : "HeartMind Pro"}</span>!
+                </h3>
+                
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  A new level of clarity is active on your profile. Your advanced relationship intelligence tools, long-term trends, and compatibility charting have been fully unlocked.
+                </p>
+
+                <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] text-[10px] text-zinc-400 text-left space-y-1.5">
+                  <p className="font-semibold text-zinc-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-primary" /> Included with your upgrade:
+                  </p>
+                  <ul className="space-y-1 list-disc list-inside">
+                    <li>Expanded relationship coaching sessions</li>
+                    <li>Sub-surface emotional stresses &amp; tone stress detection</li>
+                    <li>Shared relationship Growth Timeline access</li>
+                    <li>Empathetic AI communication reframing</li>
+                  </ul>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    setShowCelebrationModal(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white text-xs font-bold h-11 rounded-xl shadow-lg shadow-primary/10"
+                >
+                  Start Exploring Premium
+                  <ArrowRight className="ml-1.5 w-4 h-4" />
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
