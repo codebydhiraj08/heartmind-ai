@@ -22,7 +22,7 @@ const PREVIEW_SNIPPETS: Record<string, string> = {
 };
 
 interface PremiumGateProps {
-  allowedTiers: ("pro" | "premium")[];
+  allowedTiers: ("free" | "pro" | "premium")[];
   featureName: string;
   children: React.ReactNode;
   fallbackMode?: "lock" | "blur";
