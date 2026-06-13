@@ -706,18 +706,12 @@ function ChatAnalyzerInner() {
                           cx="56"
                           cy="56"
                           r="48"
-                          stroke="url(#scoreGradient)"
+                          stroke="oklch(0.62 0.21 285)"
                           strokeWidth="12"
                           fill="none"
                           strokeDasharray={`${dynamicAnalysis.overallScore * 3.01} 301`}
                           strokeLinecap="round"
                         />
-                        <defs>
-                          <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="oklch(0.7 0.25 330)" />
-                            <stop offset="100%" stopColor="oklch(0.65 0.2 200)" />
-                          </linearGradient>
-                        </defs>
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className="text-3xl font-black">{dynamicAnalysis.overallScore}</span>

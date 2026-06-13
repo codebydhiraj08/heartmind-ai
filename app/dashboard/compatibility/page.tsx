@@ -230,18 +230,12 @@ export default function CompatibilityPage() {
                         cx="56"
                         cy="56"
                         r="48"
-                        stroke="url(#compatGradient)"
+                        stroke="oklch(0.7 0.25 330)"
                         strokeWidth="10"
                         fill="none"
                         strokeDasharray={`${overallScore * 3.01} 301`}
                         strokeLinecap="round"
                       />
-                      <defs>
-                        <linearGradient id="compatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="oklch(0.7 0.25 330)" />
-                          <stop offset="100%" stopColor="oklch(0.7 0.2 150)" />
-                        </linearGradient>
-                      </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-3xl font-bold">{overallScore}%</span>

@@ -228,15 +228,14 @@ export default function EmotionsPage() {
   const emotionConfigs: Record<string, {
     stroke: string;
     fill: string;
-    gradientId: string;
     dataKey: string;
   }> = {
-    "Joy": { stroke: "oklch(0.7 0.2 150)", fill: "url(#joyGradient)", gradientId: "joyGradient", dataKey: "joy" },
-    "Sadness": { stroke: "oklch(0.65 0.2 240)", fill: "url(#sadnessGradient)", gradientId: "sadnessGradient", dataKey: "sadness" },
-    "Anxiety": { stroke: "oklch(0.75 0.15 80)", fill: "url(#anxietyGradient)", gradientId: "anxietyGradient", dataKey: "anxiety" },
-    "Anger": { stroke: "oklch(0.6 0.25 25)", fill: "url(#angerGradient)", gradientId: "angerGradient", dataKey: "anger" },
-    "Confusion": { stroke: "oklch(0.65 0.25 300)", fill: "url(#confusionGradient)", gradientId: "confusionGradient", dataKey: "confusion" },
-    "Stress": { stroke: "oklch(0.65 0.2 30)", fill: "url(#stressGradient)", gradientId: "stressGradient", dataKey: "stress" }
+    "Joy": { stroke: "oklch(0.7 0.2 150)", fill: "oklch(0.7 0.2 150)", dataKey: "joy" },
+    "Sadness": { stroke: "oklch(0.65 0.2 240)", fill: "oklch(0.65 0.2 240)", dataKey: "sadness" },
+    "Anxiety": { stroke: "oklch(0.75 0.15 80)", fill: "oklch(0.75 0.15 80)", dataKey: "anxiety" },
+    "Anger": { stroke: "oklch(0.6 0.25 25)", fill: "oklch(0.6 0.25 25)", dataKey: "anger" },
+    "Confusion": { stroke: "oklch(0.65 0.25 300)", fill: "oklch(0.65 0.25 300)", dataKey: "confusion" },
+    "Stress": { stroke: "oklch(0.65 0.2 30)", fill: "oklch(0.65 0.2 30)", dataKey: "stress" }
   };
 
   const currentConfig = emotionConfigs[selectedEmotion] || emotionConfigs["Joy"];
@@ -493,32 +492,6 @@ export default function EmotionsPage() {
             <div className="h-64 sm:h-80 w-full min-h-[250px] flex items-center justify-center overflow-x-hidden">
               {isMobile ? (
                 <AreaChart width={chartWidth} height={240} data={chartTimeline}>
-                  <defs>
-                    <linearGradient id="joyGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="sadnessGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.65 0.2 240)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="oklch(0.65 0.2 240)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="anxietyGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.75 0.15 80)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="oklch(0.75 0.15 80)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="angerGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.6 0.25 25)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="oklch(0.6 0.25 25)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="confusionGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.65 0.25 300)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="oklch(0.65 0.25 300)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="oklch(0.65 0.2 30)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="oklch(0.65 0.2 30)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.02)" vertical={false} />
                   <XAxis dataKey="day" stroke="rgba(255,255,255,0.15)" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="rgba(255,255,255,0.15)" fontSize={10} tickLine={false} axisLine={false} />
@@ -538,38 +511,13 @@ export default function EmotionsPage() {
                     dataKey={currentConfig.dataKey}
                     stroke={currentConfig.stroke}
                     fill={currentConfig.fill}
+                    fillOpacity={0.05}
                     strokeWidth={2.5}
                   />
                 </AreaChart>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartTimeline}>
-                    <defs>
-                      <linearGradient id="joyGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="sadnessGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="oklch(0.65 0.2 240)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="oklch(0.65 0.2 240)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="anxietyGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="oklch(0.75 0.15 80)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="oklch(0.75 0.15 80)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="angerGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="oklch(0.6 0.25 25)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="oklch(0.6 0.25 25)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="confusionGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="oklch(0.65 0.25 300)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="oklch(0.65 0.25 300)" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="oklch(0.65 0.2 30)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="oklch(0.65 0.2 30)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.02)" vertical={false} />
                     <XAxis dataKey="day" stroke="rgba(255,255,255,0.15)" fontSize={10} tickLine={false} axisLine={false} />
                     <YAxis stroke="rgba(255,255,255,0.15)" fontSize={10} tickLine={false} axisLine={false} />
@@ -589,6 +537,7 @@ export default function EmotionsPage() {
                       dataKey={currentConfig.dataKey}
                       stroke={currentConfig.stroke}
                       fill={currentConfig.fill}
+                      fillOpacity={0.05}
                       strokeWidth={2.5}
                     />
                   </AreaChart>

@@ -738,16 +738,6 @@ export default function DashboardPage() {
               <div className="h-72 sm:h-64 flex items-center justify-center overflow-x-hidden">
                 {isMobile ? (
                   <AreaChart width={chartWidth} height={256} data={computedChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="positivityGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.06} />
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
-                      </linearGradient>
-                      <linearGradient id="connectionGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.06} />
-                        <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.02)" vertical={false} />
                     <XAxis 
                       dataKey="day" 
@@ -780,14 +770,16 @@ export default function DashboardPage() {
                       type="monotone"
                       dataKey="positivity"
                       stroke="var(--primary)"
-                      fill="url(#positivityGradient)"
+                      fill="var(--primary)"
+                      fillOpacity={0.05}
                       strokeWidth={1.5}
                     />
                     <Area
                       type="monotone"
                       dataKey="connection"
                       stroke="var(--accent)"
-                      fill="url(#connectionGradient)"
+                      fill="var(--accent)"
+                      fillOpacity={0.05}
                       strokeWidth={1.5}
                     />
                     <Line
@@ -802,16 +794,6 @@ export default function DashboardPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={computedChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="positivityGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.06} />
-                          <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
-                        </linearGradient>
-                        <linearGradient id="connectionGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.06} />
-                          <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
                       <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.02)" vertical={false} />
                       <XAxis 
                         dataKey="day" 
@@ -844,14 +826,16 @@ export default function DashboardPage() {
                         type="monotone"
                         dataKey="positivity"
                         stroke="var(--primary)"
-                        fill="url(#positivityGradient)"
+                        fill="var(--primary)"
+                        fillOpacity={0.05}
                         strokeWidth={1.5}
                       />
                       <Area
                         type="monotone"
                         dataKey="connection"
                         stroke="var(--accent)"
-                        fill="url(#connectionGradient)"
+                        fill="var(--accent)"
+                        fillOpacity={0.05}
                         strokeWidth={1.5}
                       />
                       <Line
