@@ -193,7 +193,7 @@ export default function CompatibilityPage() {
 
   return (
     <PremiumGate allowedTiers={["premium"]} featureName="Couple Compatibility Analysis" fallbackMode="blur">
-      <div className="space-y-6">
+      <div className="space-y-6 force-gpu">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -240,7 +240,7 @@ export function PremiumGate({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 350, damping: 25 }}
-      className="w-full max-w-lg mx-auto overflow-hidden rounded-2xl border border-white/[0.05] bg-zinc-950/80 p-6 md:p-8 shadow-2xl relative glass-strong backdrop-blur-xl"
+      className="w-full max-w-lg mx-auto overflow-hidden rounded-2xl border border-white/[0.05] bg-zinc-950/80 p-6 md:p-8 shadow-2xl relative glass-strong backdrop-blur-none md:backdrop-blur-xl"
     >
       {/* Visual glowing border accents */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -321,7 +321,7 @@ export function PremiumGate({
   return (
     <div className="relative min-h-[500px] w-full rounded-2xl overflow-hidden py-12 px-4 flex items-center justify-center">
       {/* Obscured background layer */}
-      <div className={`absolute inset-0 filter ${fallbackMode === "blur" ? "blur-xl" : "blur-2xl"} select-none pointer-events-none opacity-25`}>
+      <div className={`absolute inset-0 filter ${fallbackMode === "blur" ? "blur-none md:blur-xl" : "blur-none md:blur-2xl"} select-none pointer-events-none opacity-25`}>
         {children ? children : <MockDashboardSkeleton />}
       </div>
       

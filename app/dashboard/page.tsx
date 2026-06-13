@@ -756,7 +756,6 @@ export default function DashboardPage() {
                       cursor={{ stroke: "rgba(255,255,255,0.05)", strokeWidth: 1 }}
                       contentStyle={{
                         backgroundColor: "rgba(9, 9, 11, 0.95)",
-                        backdropFilter: "blur(10px)",
                         border: "1px solid rgba(255, 255, 255, 0.05)",
                         borderRadius: "8px",
                         boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
