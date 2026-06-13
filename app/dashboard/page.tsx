@@ -565,7 +565,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className={cn(
-                "p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-md relative overflow-hidden",
+                "p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-none sm:backdrop-blur-md relative overflow-hidden",
                 glowClass.split(" ")[0],
                 glowClass.split(" ")[1]
               )}
