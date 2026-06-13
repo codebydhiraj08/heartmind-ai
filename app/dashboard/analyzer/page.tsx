@@ -748,28 +748,26 @@ function ChatAnalyzerInner() {
                 </CardHeader>
                 <CardContent className="pt-2">
                   <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-28 h-28 flex-shrink-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={[
-                              { name: "Positive", value: dynamicAnalysis.emotionalTone.positive },
-                              { name: "Neutral", value: dynamicAnalysis.emotionalTone.neutral },
-                              { name: "Negative", value: dynamicAnalysis.emotionalTone.negative }
-                            ]}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={32}
-                            outerRadius={48}
-                            paddingAngle={5}
-                            dataKey="value"
-                          >
-                            {emotionColors.map((color, index) => (
-                              <Cell key={`cell-${index}`} fill={color} />
-                            ))}
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
+                    <div className="w-28 h-28 flex-shrink-0 flex items-center justify-center">
+                      <PieChart width={112} height={112}>
+                        <Pie
+                          data={[
+                            { name: "Positive", value: dynamicAnalysis.emotionalTone.positive },
+                            { name: "Neutral", value: dynamicAnalysis.emotionalTone.neutral },
+                            { name: "Negative", value: dynamicAnalysis.emotionalTone.negative }
+                          ]}
+                          cx={56}
+                          cy={56}
+                          innerRadius={32}
+                          outerRadius={48}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {emotionColors.map((color, index) => (
+                            <Cell key={`cell-${index}`} fill={color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
                     </div>
                     <div className="flex-1 w-full space-y-2.5">
                       {[

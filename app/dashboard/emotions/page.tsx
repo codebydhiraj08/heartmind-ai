@@ -59,6 +59,18 @@ export default function EmotionsPage() {
   const [loadingAnalyses, setLoadingAnalyses] = useState(true)
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week")
   const [selectedEmotion, setSelectedEmotion] = useState<string>("Joy")
+  const [chartWidth, setChartWidth] = useState(320)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+      setChartWidth(Math.min(window.innerWidth - 64, 700))
+    }
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
@@ -478,9 +490,9 @@ export default function EmotionsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-64 sm:h-80 w-full min-h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartTimeline}>
+            <div className="h-64 sm:h-80 w-full min-h-[250px] flex items-center justify-center overflow-x-hidden">
+              {isMobile ? (
+                <AreaChart width={chartWidth} height={240} data={chartTimeline}>
                   <defs>
                     <linearGradient id="joyGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0.25} />
@@ -529,7 +541,59 @@ export default function EmotionsPage() {
                     strokeWidth={2.5}
                   />
                 </AreaChart>
-              </ResponsiveContainer>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartTimeline}>
+                    <defs>
+                      <linearGradient id="joyGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="oklch(0.7 0.2 150)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="sadnessGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.65 0.2 240)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="oklch(0.65 0.2 240)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="anxietyGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.75 0.15 80)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="oklch(0.75 0.15 80)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="angerGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.6 0.25 25)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="oklch(0.6 0.25 25)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="confusionGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.65 0.25 300)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="oklch(0.65 0.25 300)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="stressGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.65 0.2 30)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="oklch(0.65 0.2 30)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.02)" vertical={false} />
+                    <XAxis dataKey="day" stroke="rgba(255,255,255,0.15)" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="rgba(255,255,255,0.15)" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(9, 9, 11, 0.95)",
+                        border: "1px solid rgba(255, 255, 255, 0.05)",
+                        borderRadius: "8px",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                        padding: "8px 12px"
+                      }}
+                      labelStyle={{ color: "rgba(255,255,255,0.9)", fontWeight: 600, fontSize: "11px", marginBottom: "4px" }}
+                      itemStyle={{ fontSize: "11px", padding: "2px 0" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey={currentConfig.dataKey}
+                      stroke={currentConfig.stroke}
+                      fill={currentConfig.fill}
+                      strokeWidth={2.5}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </CardContent>
         </Card>

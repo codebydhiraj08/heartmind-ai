@@ -33,6 +33,16 @@ export default function CompatibilityPage() {
   const { data: session, status: sessionStatus } = useSession()
   const [latestAnalysis, setLatestAnalysis] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
@@ -252,15 +262,25 @@ export default function CompatibilityPage() {
                   </div>
                 </div>
                 <div className="w-full md:w-80 h-80 p-4 border-t md:border-t-0 md:border-l border-border flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="55%" margin={{ top: 10, right: 35, bottom: 10, left: 35 }} data={compatibilityData}>
+                  {isMobile ? (
+                    <RadarChart cx="50%" cy="50%" width={280} height={280} outerRadius="55%" margin={{ top: 10, right: 35, bottom: 10, left: 35 }} data={compatibilityData}>
                       <PolarGrid stroke="oklch(0.25 0.02 280)" />
                       <PolarAngleAxis dataKey="trait" tick={{ fill: "oklch(0.65 0 0)", fontSize: 10 }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                       <Radar name="Partner 1" dataKey="person1" stroke="oklch(0.7 0.25 330)" fill="oklch(0.7 0.25 330)" fillOpacity={0.3} />
                       <Radar name="Partner 2" dataKey="person2" stroke="oklch(0.65 0.2 200)" fill="oklch(0.65 0.2 200)" fillOpacity={0.3} />
                     </RadarChart>
-                  </ResponsiveContainer>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart cx="50%" cy="50%" outerRadius="55%" margin={{ top: 10, right: 35, bottom: 10, left: 35 }} data={compatibilityData}>
+                        <PolarGrid stroke="oklch(0.25 0.02 280)" />
+                        <PolarAngleAxis dataKey="trait" tick={{ fill: "oklch(0.65 0 0)", fontSize: 10 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                        <Radar name="Partner 1" dataKey="person1" stroke="oklch(0.7 0.25 330)" fill="oklch(0.7 0.25 330)" fillOpacity={0.3} />
+                        <Radar name="Partner 2" dataKey="person2" stroke="oklch(0.65 0.2 200)" fill="oklch(0.65 0.2 200)" fillOpacity={0.3} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </div>
             </CardContent>
