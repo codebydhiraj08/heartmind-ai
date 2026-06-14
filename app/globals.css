@@ -217,14 +217,16 @@
     0 0 20px oklch(0.62 0.21 285 / 0.02);
 }
 
-/* GPU acceleration booster to prevent mobile scrolling graphics flicker */
-.force-gpu {
-  transform: translate3d(0, 0, 0);
-  -webkit-transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  perspective: 1000;
-  -webkit-perspective: 1000;
+/* GPU acceleration booster to prevent scrolling graphics flicker */
+@media (min-width: 768px) {
+  .force-gpu {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000;
+    -webkit-perspective: 1000;
+  }
 }
 
 /* Mouse spotlight spotlight effect */
