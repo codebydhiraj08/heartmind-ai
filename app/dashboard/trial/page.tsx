@@ -104,6 +104,7 @@ export default function PremiumTrialOnboarding() {
   }
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (window.innerWidth < 768) return
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
@@ -198,7 +199,7 @@ export default function PremiumTrialOnboarding() {
               className="relative rounded-2xl border border-white/[0.04] bg-zinc-950/60 p-6 flex flex-col justify-between overflow-hidden group hover:border-white/[0.08] transition-all duration-300 glass-strong"
             >
               {/* Blur Preview Overlay */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl rounded-bl-full pointer-events-none opacity-50 blur-xl transition-opacity group-hover:opacity-75" />
+              <div className="hidden md:block absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl rounded-bl-full pointer-events-none opacity-50 blur-xl transition-opacity group-hover:opacity-75" />
               
               <div className="space-y-4 relative z-10">
                 <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800/80 flex items-center justify-center">
@@ -209,7 +210,7 @@ export default function PremiumTrialOnboarding() {
               </div>
 
               {/* Blurred Preview Snippet */}
-              <div className="mt-6 p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl relative overflow-hidden backdrop-blur-md">
+              <div className="mt-6 p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl relative overflow-hidden backdrop-blur-none md:backdrop-blur-md">
                 <div className="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-widest text-zinc-400 mb-1">
                   <Lock className="w-2.5 h-2.5" />
                   Gated Insight Teaser
@@ -217,7 +218,7 @@ export default function PremiumTrialOnboarding() {
                 <p className="text-[10px] text-zinc-300 italic leading-relaxed filter blur-[1.5px] select-none select-none">
                   {item.snippet}
                 </p>
-                <div className="absolute inset-0 bg-black/10 backdrop-blur-[0.5px] flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/10 backdrop-blur-none md:backdrop-blur-[0.5px] flex items-center justify-center">
                   <span className="text-[9px] font-bold text-white uppercase tracking-wider bg-black/60 py-0.5 px-2 rounded border border-white/5">
                     Unlocking on Premium
                   </span>
@@ -293,7 +294,7 @@ export default function PremiumTrialOnboarding() {
 
             {/* Right Column: Dynamic CTA Card */}
             <div className="lg:col-span-5 relative">
-              <div className="rounded-2xl border border-white/[0.06] bg-black/60 p-6 md:p-8 space-y-6 text-center shadow-inner relative overflow-hidden backdrop-blur-md">
+              <div className="rounded-2xl border border-white/[0.06] bg-black/60 p-6 md:p-8 space-y-6 text-center shadow-inner relative overflow-hidden backdrop-blur-none md:backdrop-blur-md">
                 
                 <div className="space-y-2">
                   <span className="text-[10px] font-bold text-accent uppercase tracking-widest block">No Credit Card Required</span>

@@ -134,6 +134,7 @@ export default function DashboardPage() {
   }, [sessionStatus])
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (window.innerWidth < 768) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -205,12 +206,12 @@ export default function DashboardPage() {
           onMouseMove={handleMouseMove}
         >
           {/* Top glowing radial flare */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-72 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 space-y-6">
             {/* Animated Dynamic Icon */}
             <div className="relative w-20 h-20 mx-auto">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+              <div className="hidden md:block absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-white/10 flex items-center justify-center shadow-2xl relative">
                 <Heart className="w-9 h-9 text-primary fill-primary/10" />
                 <Sparkles className="w-4.5 h-4.5 text-accent absolute -top-1 -right-1 animate-bounce" style={{ animationDuration: '3s' }} />
@@ -247,7 +248,7 @@ export default function DashboardPage() {
         {/* Sleek Blurred Live Teaser Outline */}
         <div className="relative mt-12 rounded-3xl overflow-hidden border border-white/[0.03] p-1 bg-zinc-950/20 select-none pointer-events-none">
           {/* Transparent Dark overlay */}
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-md z-20 flex flex-col items-center justify-center p-6 text-center">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-none md:backdrop-blur-md z-20 flex flex-col items-center justify-center p-6 text-center">
             <Sparkles className="w-5 h-5 text-zinc-500 mb-2 animate-pulse" />
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Workspace Dashboard Preview</p>
             <p className="text-xs text-zinc-350 mt-2 max-w-md leading-relaxed font-semibold">
@@ -1070,7 +1071,7 @@ export default function DashboardPage() {
       {/* All Past Analyses History Modal */}
       <AnimatePresence>
         {isHistoryModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none md:backdrop-blur-md">
             {/* Backdrop Closer */}
             <motion.div 
               initial={{ opacity: 0 }}
@@ -1235,7 +1236,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-none md:backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}

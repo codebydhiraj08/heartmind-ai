@@ -126,6 +126,7 @@ export default function EmotionsPage() {
           transition={{ duration: 0.5 }}
           className="premium-card spotlight-glow rounded-3xl border border-white/[0.05] bg-zinc-950/60 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden glass-strong"
           onMouseMove={(e: any) => {
+            if (window.innerWidth < 768) return;
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
@@ -133,11 +134,11 @@ export default function EmotionsPage() {
             e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
           }}
         >
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 w-72 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 space-y-6">
             <div className="relative w-20 h-20 mx-auto">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+              <div className="hidden md:block absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-white/10 flex items-center justify-center shadow-2xl relative">
                 <Brain className="w-9 h-9 text-primary" />
                 <Sparkles className="w-4.5 h-4.5 text-accent absolute -top-1 -right-1 animate-bounce" style={{ animationDuration: '3s' }} />

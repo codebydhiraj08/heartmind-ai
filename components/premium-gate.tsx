@@ -267,7 +267,7 @@ export function PremiumGate({
           </p>
 
           {/* Suggestive and Reflective Preview Box */}
-          <div className="w-full bg-primary/5 border border-primary/10 rounded-xl p-4 mt-4 space-y-1.5 backdrop-blur-md">
+          <div className="w-full bg-primary/5 border border-primary/10 rounded-xl p-4 mt-4 space-y-1.5 backdrop-blur-none md:backdrop-blur-md">
             <div className="flex items-center justify-center gap-1.5 text-[9px] font-extrabold uppercase tracking-widest text-primary">
               <Sparkles className="w-3 h-3 text-primary animate-pulse" />
               Insight Preview

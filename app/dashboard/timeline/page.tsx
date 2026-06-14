@@ -157,10 +157,10 @@ export default function TimelinePage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] p-6 shadow-xl relative overflow-hidden bg-zinc-950/40 backdrop-blur-md"
+            className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] p-6 shadow-xl relative overflow-hidden bg-zinc-950/40 backdrop-blur-none md:backdrop-blur-md"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl" />
+            <div className="hidden md:block absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+            <div className="hidden md:block absolute bottom-0 left-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl" />
             
             <div className="flex items-center gap-2 mb-4">
               <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary">
@@ -278,7 +278,7 @@ export default function TimelinePage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="absolute inset-0 bg-black/60 backdrop-blur-none md:backdrop-blur-md"
             />
 
             {/* Modal Box */}

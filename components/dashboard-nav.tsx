@@ -280,7 +280,7 @@ export function DashboardNav({
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-[-48px] top-full mt-3 w-80 bg-[#071022]/98 backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
+                      className="absolute right-[-48px] top-full mt-3 w-80 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
                     >
                       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/30 select-none">
                         <span className="text-[10px] font-bold tracking-wider uppercase text-zinc-300">
@@ -466,7 +466,7 @@ export function DashboardNav({
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-96 bg-[#071022]/98 backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
+                      className="absolute right-0 top-full mt-2 w-96 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
                     >
                       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/30 select-none">
                         <span className="text-xs font-bold tracking-wider uppercase text-zinc-300">
@@ -606,7 +606,7 @@ export function DashboardNav({
                       opacity: 0,
                       y: 10,
                     }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-[#071022]/98 backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-48 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
                   >
                     <Link
                       href="/dashboard/settings"
