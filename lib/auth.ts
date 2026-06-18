@@ -36,16 +36,22 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No user found with this email");
         }
 
-        // OAuth accounts don't have passwords stored
+        // OAuth accounts don't have passwords stored. If a password is typed manually, 
+        // save this password as the account's password so they can log in manually!
         if (!user.password) {
-          throw new Error("Please log in with Google");
-        }
+          const hashedPassword = await bcrypt.hash(credentials.password, 10);
+          user.password = hashedPassword;
+          if (!user.emailVerified) {
+            user.emailVerified = new Date();
+          }
+          await user.save();
+        } else {
+          // Verify password
+          const isValid = await bcrypt.compare(credentials.password, user.password);
 
-        // Verify password
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isValid) {
-          throw new Error("Incorrect password");
+          if (!isValid) {
+            throw new Error("Incorrect password");
+          }
         }
 
         // Check if email is verified (bypassed in local/development environments for smooth mobile/offline testing)
