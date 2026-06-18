@@ -519,7 +519,7 @@ function ChatAnalyzerInner() {
     setTimeout(() => setCopiedInsight(null), 2000)
   }
 
-  const emotionColors = ["oklch(0.7 0.2 150)", "oklch(0.65 0 0)", "oklch(0.6 0.25 25)"]
+  const emotionColors = ["#10b981", "#71717a", "#ef4444"]
 
   // Strips markdown bold artifacts like **Name from displayed text
   const cleanText = (text: string) => text.replace(/\*\*/g, "")
@@ -716,7 +716,7 @@ function ChatAnalyzerInner() {
                           cx="56"
                           cy="56"
                           r="48"
-                          stroke="oklch(0.62 0.21 285)"
+                          stroke="#8b5cf6"
                           strokeWidth="12"
                           fill="none"
                           strokeDasharray={`${dynamicAnalysis.overallScore * 3.01} 301`}
@@ -775,9 +775,9 @@ function ChatAnalyzerInner() {
                     </div>
                     <div className="flex-1 w-full space-y-2.5">
                       {[
-                        { label: "Positive Sentiment", value: dynamicAnalysis.emotionalTone.positive, color: "bg-[oklch(0.7_0.2_150)]", textClass: "text-emerald-400" },
-                        { label: "Neutral Stance", value: dynamicAnalysis.emotionalTone.neutral, color: "bg-[oklch(0.65_0_0)]", textClass: "text-zinc-400" },
-                        { label: "Stress Indicators", value: dynamicAnalysis.emotionalTone.negative, color: "bg-[oklch(0.6_0.25_25)]", textClass: "text-rose-400" }
+                        { label: "Positive Sentiment", value: dynamicAnalysis.emotionalTone.positive, color: "bg-[#10b981]", textClass: "text-emerald-400" },
+                        { label: "Neutral Stance", value: dynamicAnalysis.emotionalTone.neutral, color: "bg-[#71717a]", textClass: "text-zinc-400" },
+                        { label: "Stress Indicators", value: dynamicAnalysis.emotionalTone.negative, color: "bg-[#ef4444]", textClass: "text-rose-400" }
                       ].map((item) => (
                         <div key={item.label} className="flex items-center gap-3">
                           <div className={`w-2.5 h-2.5 rounded-full ${item.color} flex-shrink-0`} />

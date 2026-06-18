@@ -230,7 +230,7 @@ export default function CompatibilityPage() {
                         cx="56"
                         cy="56"
                         r="48"
-                        stroke="oklch(0.7 0.25 330)"
+                        stroke="#ec4899"
                         strokeWidth="10"
                         fill="none"
                         strokeDasharray={`${overallScore * 3.01} 301`}
@@ -258,20 +258,20 @@ export default function CompatibilityPage() {
                 <div className="w-full md:w-80 h-80 p-4 border-t md:border-t-0 md:border-l border-border flex items-center justify-center overflow-hidden">
                   {isMobile ? (
                     <RadarChart cx="50%" cy="50%" width={280} height={280} outerRadius="55%" margin={{ top: 10, right: 35, bottom: 10, left: 35 }} data={compatibilityData}>
-                      <PolarGrid stroke="oklch(0.25 0.02 280)" />
-                      <PolarAngleAxis dataKey="trait" tick={{ fill: "oklch(0.65 0 0)", fontSize: 10 }} />
+                      <PolarGrid stroke="#27272a" />
+                      <PolarAngleAxis dataKey="trait" tick={{ fill: "#a1a1aa", fontSize: 10 }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                      <Radar name="Partner 1" dataKey="person1" stroke="oklch(0.7 0.25 330)" fill="oklch(0.7 0.25 330)" fillOpacity={0.3} />
-                      <Radar name="Partner 2" dataKey="person2" stroke="oklch(0.65 0.2 200)" fill="oklch(0.65 0.2 200)" fillOpacity={0.3} />
+                      <Radar name="Partner 1" dataKey="person1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.3} />
+                      <Radar name="Partner 2" dataKey="person2" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
                     </RadarChart>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart cx="50%" cy="50%" outerRadius="55%" margin={{ top: 10, right: 35, bottom: 10, left: 35 }} data={compatibilityData}>
-                        <PolarGrid stroke="oklch(0.25 0.02 280)" />
-                        <PolarAngleAxis dataKey="trait" tick={{ fill: "oklch(0.65 0 0)", fontSize: 10 }} />
+                        <PolarGrid stroke="#27272a" />
+                        <PolarAngleAxis dataKey="trait" tick={{ fill: "#a1a1aa", fontSize: 10 }} />
                         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                        <Radar name="Partner 1" dataKey="person1" stroke="oklch(0.7 0.25 330)" fill="oklch(0.7 0.25 330)" fillOpacity={0.3} />
-                        <Radar name="Partner 2" dataKey="person2" stroke="oklch(0.65 0.2 200)" fill="oklch(0.65 0.2 200)" fillOpacity={0.3} />
+                        <Radar name="Partner 1" dataKey="person1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.3} />
+                        <Radar name="Partner 2" dataKey="person2" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
                       </RadarChart>
                     </ResponsiveContainer>
                   )}

@@ -214,8 +214,8 @@ export default function LandingPage() {
                         <circle cx="32" cy="32" r="28" stroke="url(#gradient)" strokeWidth="8" fill="none" strokeDasharray="176" strokeDashoffset="35" strokeLinecap="round" />
                         <defs>
                           <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="oklch(0.7 0.25 330)" />
-                            <stop offset="100%" stopColor="oklch(0.7 0.2 150)" />
+                            <stop offset="0%" stopColor="#ec4899" />
+                            <stop offset="100%" stopColor="#10b981" />
                           </linearGradient>
                         </defs>
                       </svg>

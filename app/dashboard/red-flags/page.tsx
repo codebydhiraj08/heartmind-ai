@@ -370,7 +370,7 @@ function RedFlagsPageInner() {
                       cx="40"
                       cy="40"
                       r="35"
-                      stroke={overallSafetyScore >= 70 ? "oklch(0.7 0.2 150)" : overallSafetyScore >= 50 ? "oklch(0.8 0.15 85)" : "oklch(0.6 0.25 25)"}
+                      stroke={overallSafetyScore >= 70 ? "#10b981" : overallSafetyScore >= 50 ? "#eab308" : "#ef4444"}
                       strokeWidth="8"
                       fill="none"
                       strokeDasharray={`${overallSafetyScore * 2.2} 220`}

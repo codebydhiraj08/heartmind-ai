@@ -231,12 +231,12 @@ export default function EmotionsPage() {
     fill: string;
     dataKey: string;
   }> = {
-    "Joy": { stroke: "oklch(0.7 0.2 150)", fill: "oklch(0.7 0.2 150)", dataKey: "joy" },
-    "Sadness": { stroke: "oklch(0.65 0.2 240)", fill: "oklch(0.65 0.2 240)", dataKey: "sadness" },
-    "Anxiety": { stroke: "oklch(0.75 0.15 80)", fill: "oklch(0.75 0.15 80)", dataKey: "anxiety" },
-    "Anger": { stroke: "oklch(0.6 0.25 25)", fill: "oklch(0.6 0.25 25)", dataKey: "anger" },
-    "Confusion": { stroke: "oklch(0.65 0.25 300)", fill: "oklch(0.65 0.25 300)", dataKey: "confusion" },
-    "Stress": { stroke: "oklch(0.65 0.2 30)", fill: "oklch(0.65 0.2 30)", dataKey: "stress" }
+    "Joy": { stroke: "#10b981", fill: "#10b981", dataKey: "joy" },
+    "Sadness": { stroke: "#3b82f6", fill: "#3b82f6", dataKey: "sadness" },
+    "Anxiety": { stroke: "#f59e0b", fill: "#f59e0b", dataKey: "anxiety" },
+    "Anger": { stroke: "#f43f5e", fill: "#f43f5e", dataKey: "anger" },
+    "Confusion": { stroke: "#d946ef", fill: "#d946ef", dataKey: "confusion" },
+    "Stress": { stroke: "#f97316", fill: "#f97316", dataKey: "stress" }
   };
 
   const currentConfig = emotionConfigs[selectedEmotion] || emotionConfigs["Joy"];
@@ -417,15 +417,13 @@ export default function EmotionsPage() {
             : "border-border hover:bg-white/[0.02] md:hover:scale-[1.01]";
 
           return (
-            <motion.div
+            <div
               key={emotion.name}
-              initial={isMobile ? undefined : { opacity: 0, y: 20 }}
-              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
               onClick={() => setSelectedEmotion(emotion.name)}
-              className="cursor-pointer"
+              className="cursor-pointer md:animate-fade-up"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <Card className={`bg-zinc-950/85 border border-white/[0.06] md:backdrop-blur-md md:transition-[border-color,background-color,transform] md:duration-200 ${activeStyle}`}>
+              <Card className={`bg-zinc-950 md:bg-zinc-950/85 border border-white/[0.06] md:backdrop-blur-md md:transition-[border-color,background-color,transform] md:duration-200 ${activeStyle}`}>
                 <CardContent className="p-4">
                   <div className={`w-10 h-10 rounded-xl ${emotion.color} flex items-center justify-center mb-3`}>
                     <emotion.icon className="w-5 h-5" />
@@ -443,7 +441,7 @@ export default function EmotionsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           )
         })}
       </div>

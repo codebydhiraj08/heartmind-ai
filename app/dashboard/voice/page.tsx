@@ -713,8 +713,8 @@ function VoiceAnalyzerInner() {
                           />
                           <defs>
                             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="oklch(0.7 0.25 330)" />
-                              <stop offset="100%" stopColor="oklch(0.65 0.2 200)" />
+                              <stop offset="0%" stopColor="#ec4899" />
+                              <stop offset="100%" stopColor="#06b6d4" />
                             </linearGradient>
                           </defs>
                         </svg>
@@ -769,7 +769,7 @@ function VoiceAnalyzerInner() {
                                 className="flex-1 rounded-full transition-all duration-200"
                                 style={{ 
                                   height: `${height}%`,
-                                  backgroundColor: isHighlighted ? 'oklch(0.7 0.25 330)' : 'oklch(0.65 0.2 200 / 0.15)'
+                                  backgroundColor: isHighlighted ? '#ec4899' : 'rgba(6, 182, 212, 0.15)'
                                 }}
                               />
                             );
@@ -976,7 +976,7 @@ function VoiceAnalyzerInner() {
                                     className="flex-1 rounded-full transition-all duration-200"
                                     style={{
                                       height: `${height}%`,
-                                      backgroundColor: isHighlighted ? 'oklch(0.7 0.25 330)' : 'oklch(0.65 0.2 200 / 0.15)'
+                                      backgroundColor: isHighlighted ? '#ec4899' : 'rgba(6, 182, 212, 0.15)'
                                     }}
                                   />
                                 );
@@ -1061,7 +1061,7 @@ function VoiceAnalyzerInner() {
                           onClick={toggleRecording}
                           className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 relative z-10 ${
                             isRecording
-                              ? "bg-rose-500 animate-pulse border-4 border-rose-500/30 shadow-[0_0_20px_oklch(0.6_0.25_25)]"
+                              ? "bg-rose-500 animate-pulse border-4 border-rose-500/30 shadow-[0_0_20px_rgba(239,68,68,0.5)]"
                               : "bg-gradient-to-br from-primary to-accent hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
                           }`}
                         >
