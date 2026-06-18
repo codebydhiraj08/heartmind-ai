@@ -113,16 +113,16 @@ export default function EmotionsPage() {
     return (
       <div className="space-y-6">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
+          animate={isMobile ? false : { opacity: 1, y: 0 }}
         >
           <h1 className="text-2xl md:text-3xl font-bold">Emotional Intelligence</h1>
           <p className="text-muted-foreground">Track and understand your emotional patterns</p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={isMobile ? false : { opacity: 0, scale: 0.98 }}
+          animate={isMobile ? false : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="premium-card spotlight-glow rounded-3xl border border-white/[0.05] bg-zinc-950/60 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden glass-strong"
           onMouseMove={(e: any) => {
@@ -380,8 +380,8 @@ export default function EmotionsPage() {
     <div className="space-y-6 force-gpu">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={isMobile ? false : { opacity: 0, y: 20 }}
+        animate={isMobile ? false : { opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
@@ -414,13 +414,13 @@ export default function EmotionsPage() {
                emotion.name === "Anger" ? "border-rose-500/80 bg-rose-500/[0.04] shadow-md shadow-rose-500/10 scale-[1.03] text-rose-400" :
                emotion.name === "Confusion" ? "border-fuchsia-500/80 bg-fuchsia-500/[0.04] shadow-md shadow-fuchsia-500/10 scale-[1.03] text-fuchsia-400" :
                "border-orange-500/80 bg-orange-500/[0.04] shadow-md shadow-orange-500/10 scale-[1.03] text-orange-400")
-            : "border-border hover:bg-white/[0.02] hover:scale-[1.01]";
+            : "border-border hover:bg-white/[0.02] md:hover:scale-[1.01]";
 
           return (
             <motion.div
               key={emotion.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={isMobile ? false : { opacity: 0, y: 20 }}
+              animate={isMobile ? false : { opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => setSelectedEmotion(emotion.name)}
               className="cursor-pointer"
@@ -450,8 +450,8 @@ export default function EmotionsPage() {
 
       {/* Emotional Timeline Chart */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={isMobile ? false : { opacity: 0, y: 20 }}
+        animate={isMobile ? false : { opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <Card className="glass border-border">
@@ -490,7 +490,7 @@ export default function EmotionsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-64 sm:h-80 w-full min-h-[250px] flex items-center justify-center overflow-x-hidden">
+            <div className="h-64 sm:h-80 w-full min-h-[250px] flex items-center justify-center overflow-hidden">
               {isMobile ? (
                 <AreaChart width={chartWidth} height={240} data={chartTimeline}>
                   <CartesianGrid strokeDasharray="4 4" stroke="rgba(255,255,255,0.02)" vertical={false} />
@@ -555,8 +555,8 @@ export default function EmotionsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Emotional Events */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={isMobile ? false : { opacity: 0, y: 20 }}
+              animate={isMobile ? false : { opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
               <Card className="glass border-border h-full">
@@ -598,8 +598,8 @@ export default function EmotionsPage() {
 
             {/* Burnout Risk Assessment */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={isMobile ? false : { opacity: 0, y: 20 }}
+              animate={isMobile ? false : { opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
               <Card className="glass border-border h-full">
@@ -627,8 +627,9 @@ export default function EmotionsPage() {
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
                         <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${indicator.value}%` }}
+                          initial={isMobile ? false : { width: 0 }}
+                          animate={isMobile ? false : { width: `${indicator.value}%` }}
+                          style={isMobile ? { width: `${indicator.value}%` } : undefined}
                           transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
                           className={`h-full rounded-full ${
                             indicator.risk === "low" ? "bg-success" :
@@ -658,8 +659,8 @@ export default function EmotionsPage() {
 
           {/* Weekly Insights */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={isMobile ? false : { opacity: 0, y: 20 }}
+            animate={isMobile ? false : { opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
             <Card className="glass border-border">

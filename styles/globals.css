@@ -143,10 +143,16 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: radial-gradient(1200px 600px at 10% 10%, rgba(var(--glow-purple)/0.09) 0%, transparent 15%),
-              radial-gradient(1000px 500px at 90% 80%, rgba(var(--glow-pink)/0.08) 0%, transparent 12%),
-              linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  background: var(--bg-gradient-start);
   color: var(--foreground);
+}
+
+@media (min-width: 768px) {
+  body {
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(var(--glow-purple)/0.09) 0%, transparent 15%),
+                radial-gradient(1000px 500px at 90% 80%, rgba(var(--glow-pink)/0.08) 0%, transparent 12%),
+                linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  }
 }
 
 .animated-gradient {
@@ -218,7 +224,9 @@ body {
 .animate-fade-up { animation: floatFadeIn 700ms cubic-bezier(.2,.9,.2,1) both; }
 
 /* Subtle micro-interactions */
-.hover\:neon-glow-pink:hover { transform: translateY(-6px); transition: transform 260ms ease, box-shadow 260ms ease; }
+@media (hover: hover) and (min-width: 768px) {
+  .hover\:neon-glow-pink:hover { transform: translateY(-6px); transition: transform 260ms ease, box-shadow 260ms ease; }
+}
 
 /* Headings */
 h1, h2, h3, h4 { font-family: var(--font-headings); letter-spacing: -0.02em; }
