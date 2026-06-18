@@ -78,16 +78,16 @@ export default function CompatibilityPage() {
     return (
       <div className="space-y-6">
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 20 }}
-          animate={isMobile ? false : { opacity: 1, y: 0 }}
+          initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         >
           <h1 className="text-2xl md:text-3xl font-bold">Couple Compatibility Analysis</h1>
           <p className="text-muted-foreground">Understand your relationship dynamics and compatibility</p>
         </motion.div>
 
         <motion.div
-          initial={isMobile ? false : { opacity: 0, scale: 0.98 }}
-          animate={isMobile ? false : { opacity: 1, scale: 1 }}
+          initial={isMobile ? undefined : { opacity: 0, scale: 0.98 }}
+          animate={isMobile ? undefined : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="premium-card spotlight-glow rounded-3xl border border-white/[0.05] bg-zinc-950/60 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden glass-strong"
         >
@@ -206,8 +206,8 @@ export default function CompatibilityPage() {
       <div className="space-y-6 force-gpu">
         {/* Header */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 20 }}
-          animate={isMobile ? false : { opacity: 1, y: 0 }}
+          initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         >
           <h1 className="text-2xl md:text-3xl font-bold">Couple Compatibility Analysis</h1>
           <p className="text-muted-foreground">Understand your relationship dynamics and compatibility</p>
@@ -215,8 +215,8 @@ export default function CompatibilityPage() {
 
         {/* Overall Score */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 20 }}
-          animate={isMobile ? false : { opacity: 1, y: 0 }}
+          initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile ? undefined : { opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
           <Card className="glass border-border overflow-hidden">
@@ -286,8 +286,8 @@ export default function CompatibilityPage() {
           {compatibilityMetrics.map((metric, index) => (
             <motion.div
               key={metric.name}
-              initial={isMobile ? false : { opacity: 0, y: 20 }}
-              animate={isMobile ? false : { opacity: 1, y: 0 }}
+              initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + index * 0.1 }}
             >
               <Card className="glass border-border hover:neon-glow-pink transition-all duration-300">
@@ -304,8 +304,8 @@ export default function CompatibilityPage() {
                   </div>
                   <div className="h-2 bg-secondary rounded-full overflow-hidden mt-2">
                       <motion.div
-                        initial={isMobile ? false : { width: 0 }}
-                        animate={isMobile ? false : { width: `${metric.score}%` }}
+                        initial={isMobile ? undefined : { width: 0 }}
+                        animate={isMobile ? undefined : { width: `${metric.score}%` }}
                         style={isMobile ? { width: `${metric.score}%` } : undefined}
                         transition={{ duration: 1, delay: 0.5 }}
                         className={`h-full rounded-full bg-gradient-to-r ${metric.color}`}
@@ -320,8 +320,8 @@ export default function CompatibilityPage() {
         {/* Strengths & Challenges */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div
-            initial={isMobile ? false : { opacity: 0, y: 20 }}
-            animate={isMobile ? false : { opacity: 1, y: 0 }}
+            initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+            animate={isMobile ? undefined : { opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
             <Card className="glass border-border h-full">
@@ -346,8 +346,8 @@ export default function CompatibilityPage() {
           </motion.div>
 
           <motion.div
-            initial={isMobile ? false : { opacity: 0, y: 20 }}
-            animate={isMobile ? false : { opacity: 1, y: 0 }}
+            initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+            animate={isMobile ? undefined : { opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
             <Card className="glass border-border h-full">
@@ -374,8 +374,8 @@ export default function CompatibilityPage() {
 
         {/* AI Recommendation */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 20 }}
-          animate={isMobile ? false : { opacity: 1, y: 0 }}
+          initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile ? undefined : { opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
           <Card className="glass border-border bg-gradient-to-r from-primary/10 to-accent/10">

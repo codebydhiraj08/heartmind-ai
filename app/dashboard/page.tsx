@@ -186,8 +186,8 @@ export default function DashboardPage() {
       <div className="space-y-10 pb-12">
         {/* Welcome Header */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 12 }}
-          animate={isMobile ? false : { opacity: 1, y: 0 }}
+          initial={isMobile ? undefined : { opacity: 0, y: 12 }}
+          animate={isMobile ? undefined : { opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 24 }}
           className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2"
         >
@@ -199,8 +199,8 @@ export default function DashboardPage() {
 
         {/* Cinematic Empty State Card */}
         <motion.div
-          initial={isMobile ? false : { opacity: 0, scale: 0.98 }}
-          animate={isMobile ? false : { opacity: 1, scale: 1 }}
+          initial={isMobile ? undefined : { opacity: 0, scale: 0.98 }}
+          animate={isMobile ? undefined : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="premium-card spotlight-glow rounded-3xl border border-white/[0.05] bg-zinc-950/60 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden glass-strong"
           onMouseMove={handleMouseMove}
@@ -511,8 +511,8 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Welcome Header */}
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: 12 }}
-        animate={isMobile ? false : { opacity: 1, y: 0 }}
+        initial={isMobile ? undefined : { opacity: 0, y: 12 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 260, damping: 24 }}
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2"
       >
@@ -575,8 +575,8 @@ export default function DashboardPage() {
 
           return (
             <motion.div
-              initial={isMobile ? false : { opacity: 0, y: -10 }}
-              animate={isMobile ? false : { opacity: 1, y: 0 }}
+              initial={isMobile ? undefined : { opacity: 0, y: -10 }}
+              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
               className={cn(
                 "p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 backdrop-blur-none sm:backdrop-blur-md relative overflow-hidden",
                 glowClass.split(" ")[0],
@@ -617,8 +617,8 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <motion.div
         variants={isMobile ? undefined : containerVariants}
-        initial={isMobile ? false : "hidden"}
-        animate={isMobile ? false : "show"}
+        initial={isMobile ? undefined : "hidden"}
+        animate={isMobile ? undefined : "show"}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
       >
         {[
@@ -662,8 +662,8 @@ export default function DashboardPage() {
           <motion.div
             key={stat.title}
             variants={isMobile ? undefined : itemVariants}
-            initial={isMobile ? false : undefined}
-            animate={isMobile ? false : undefined}
+            initial={isMobile ? undefined : undefined}
+            animate={isMobile ? undefined : undefined}
             whileHover={isMobile ? undefined : { y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
           >
             <div
@@ -702,15 +702,15 @@ export default function DashboardPage() {
       {/* Main Content Grid */}
       <motion.div
         variants={isMobile ? undefined : containerVariants}
-        initial={isMobile ? false : "hidden"}
-        animate={isMobile ? false : "show"}
+        initial={isMobile ? undefined : "hidden"}
+        animate={isMobile ? undefined : "show"}
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
         {/* Emotional Trends Chart */}
         <motion.div
           variants={isMobile ? undefined : itemVariants}
-          initial={isMobile ? false : undefined}
-          animate={isMobile ? false : undefined}
+          initial={isMobile ? undefined : undefined}
+          animate={isMobile ? undefined : undefined}
           whileHover={isMobile ? undefined : { y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
           className="lg:col-span-2"
         >
@@ -863,8 +863,8 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <motion.div
           variants={isMobile ? undefined : itemVariants}
-          initial={isMobile ? false : undefined}
-          animate={isMobile ? false : undefined}
+          initial={isMobile ? undefined : undefined}
+          animate={isMobile ? undefined : undefined}
           whileHover={isMobile ? undefined : { y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
         >
           <div
@@ -902,15 +902,15 @@ export default function DashboardPage() {
       {/* Bottom Grid */}
       <motion.div
         variants={isMobile ? undefined : containerVariants}
-        initial={isMobile ? false : "hidden"}
-        animate={isMobile ? false : "show"}
+        initial={isMobile ? undefined : "hidden"}
+        animate={isMobile ? undefined : "show"}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         {/* Recent Analyses */}
         <motion.div
           variants={isMobile ? undefined : itemVariants}
-          initial={isMobile ? false : undefined}
-          animate={isMobile ? false : undefined}
+          initial={isMobile ? undefined : undefined}
+          animate={isMobile ? undefined : undefined}
           whileHover={isMobile ? undefined : { y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
         >
           <div
@@ -968,8 +968,8 @@ export default function DashboardPage() {
         {/* Red Flag Alerts (Stress Pattern Insights) */}
         <motion.div
           variants={isMobile ? undefined : itemVariants}
-          initial={isMobile ? false : undefined}
-          animate={isMobile ? false : undefined}
+          initial={isMobile ? undefined : undefined}
+          animate={isMobile ? undefined : undefined}
           whileHover={isMobile ? undefined : { y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
         >
           <PremiumGate allowedTiers={["free", "pro", "premium"]} featureName="Red Flag Detection" fallbackMode="blur">
@@ -1046,8 +1046,8 @@ export default function DashboardPage() {
       {activeTier !== "free" && (
         <motion.div
           variants={isMobile ? undefined : itemVariants}
-          initial={isMobile ? false : "hidden"}
-          animate={isMobile ? false : "show"}
+          initial={isMobile ? undefined : "hidden"}
+          animate={isMobile ? undefined : "show"}
           whileHover={isMobile ? undefined : { y: -3, transition: { type: "spring", stiffness: 400, damping: 25 } }}
         >
           <PremiumGate allowedTiers={["pro", "premium"]} featureName="AI Relationship Coach" fallbackMode="blur">
@@ -1084,18 +1084,18 @@ export default function DashboardPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-none md:backdrop-blur-md">
             {/* Backdrop Closer */}
             <motion.div 
-              initial={isMobile ? false : { opacity: 0 }}
-              animate={isMobile ? false : { opacity: 1 }}
-              exit={isMobile ? false : { opacity: 0 }}
+              initial={isMobile ? undefined : { opacity: 0 }}
+              animate={isMobile ? undefined : { opacity: 1 }}
+              exit={isMobile ? undefined : { opacity: 0 }}
               onClick={() => setIsHistoryModalOpen(false)}
               className="absolute inset-0 cursor-default"
             />
             
             {/* Modal Body */}
             <motion.div
-              initial={isMobile ? false : { opacity: 0, scale: 0.95, y: 15 }}
-              animate={isMobile ? false : { opacity: 1, scale: 1, y: 0 }}
-              exit={isMobile ? false : { opacity: 0, scale: 0.95, y: 15 }}
+              initial={isMobile ? undefined : { opacity: 0, scale: 0.95, y: 15 }}
+              animate={isMobile ? undefined : { opacity: 1, scale: 1, y: 0 }}
+              exit={isMobile ? undefined : { opacity: 0, scale: 0.95, y: 15 }}
               transition={{ type: "spring", duration: 0.4 }}
               className="relative w-full max-w-2xl bg-zinc-950/95 border border-white/[0.08] shadow-2xl rounded-2xl overflow-hidden glass-strong flex flex-col max-h-[85vh] relative z-10"
             >
@@ -1243,15 +1243,15 @@ export default function DashboardPage() {
       <AnimatePresence>
         {showCelebrationModal && (
           <motion.div
-            initial={isMobile ? false : { opacity: 0 }}
-            animate={isMobile ? false : { opacity: 1 }}
-            exit={isMobile ? false : { opacity: 0 }}
+            initial={isMobile ? undefined : { opacity: 0 }}
+            animate={isMobile ? undefined : { opacity: 1 }}
+            exit={isMobile ? undefined : { opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-none md:backdrop-blur-md"
           >
             <motion.div
-              initial={isMobile ? false : { scale: 0.9, y: 20 }}
-              animate={isMobile ? false : { scale: 1, y: 0 }}
-              exit={isMobile ? false : { scale: 0.9, y: 20 }}
+              initial={isMobile ? undefined : { scale: 0.9, y: 20 }}
+              animate={isMobile ? undefined : { scale: 1, y: 0 }}
+              exit={isMobile ? undefined : { scale: 0.9, y: 20 }}
               className="w-full max-w-md p-6 bg-zinc-950 border border-white/[0.06] rounded-2xl text-center space-y-6 shadow-2xl relative overflow-hidden neon-glow-pink"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary via-accent to-neon-cyan" />

@@ -113,16 +113,16 @@ export default function EmotionsPage() {
     return (
       <div className="space-y-6">
         <motion.div
-          initial={isMobile ? false : { opacity: 0, y: 20 }}
-          animate={isMobile ? false : { opacity: 1, y: 0 }}
+          initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+          animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         >
           <h1 className="text-2xl md:text-3xl font-bold">Emotional Intelligence</h1>
           <p className="text-muted-foreground">Track and understand your emotional patterns</p>
         </motion.div>
 
         <motion.div
-          initial={isMobile ? false : { opacity: 0, scale: 0.98 }}
-          animate={isMobile ? false : { opacity: 1, scale: 1 }}
+          initial={isMobile ? undefined : { opacity: 0, scale: 0.98 }}
+          animate={isMobile ? undefined : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="premium-card spotlight-glow rounded-3xl border border-white/[0.05] bg-zinc-950/60 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-2xl relative overflow-hidden glass-strong"
           onMouseMove={(e: any) => {
@@ -380,8 +380,8 @@ export default function EmotionsPage() {
     <div className="space-y-6 force-gpu">
       {/* Header */}
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: 20 }}
-        animate={isMobile ? false : { opacity: 1, y: 0 }}
+        initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
@@ -419,8 +419,8 @@ export default function EmotionsPage() {
           return (
             <motion.div
               key={emotion.name}
-              initial={isMobile ? false : { opacity: 0, y: 20 }}
-              animate={isMobile ? false : { opacity: 1, y: 0 }}
+              initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => setSelectedEmotion(emotion.name)}
               className="cursor-pointer"
@@ -450,8 +450,8 @@ export default function EmotionsPage() {
 
       {/* Emotional Timeline Chart */}
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: 20 }}
-        animate={isMobile ? false : { opacity: 1, y: 0 }}
+        initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <Card className="glass border-border">
@@ -555,8 +555,8 @@ export default function EmotionsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Emotional Events */}
             <motion.div
-              initial={isMobile ? false : { opacity: 0, y: 20 }}
-              animate={isMobile ? false : { opacity: 1, y: 0 }}
+              initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
               <Card className="glass border-border h-full">
@@ -598,8 +598,8 @@ export default function EmotionsPage() {
 
             {/* Burnout Risk Assessment */}
             <motion.div
-              initial={isMobile ? false : { opacity: 0, y: 20 }}
-              animate={isMobile ? false : { opacity: 1, y: 0 }}
+              initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
               <Card className="glass border-border h-full">
@@ -627,8 +627,8 @@ export default function EmotionsPage() {
                       </div>
                       <div className="h-2 bg-secondary rounded-full overflow-hidden">
                         <motion.div
-                          initial={isMobile ? false : { width: 0 }}
-                          animate={isMobile ? false : { width: `${indicator.value}%` }}
+                          initial={isMobile ? undefined : { width: 0 }}
+                          animate={isMobile ? undefined : { width: `${indicator.value}%` }}
                           style={isMobile ? { width: `${indicator.value}%` } : undefined}
                           transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
                           className={`h-full rounded-full ${
@@ -659,8 +659,8 @@ export default function EmotionsPage() {
 
           {/* Weekly Insights */}
           <motion.div
-            initial={isMobile ? false : { opacity: 0, y: 20 }}
-            animate={isMobile ? false : { opacity: 1, y: 0 }}
+            initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+            animate={isMobile ? undefined : { opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
             <Card className="glass border-border">

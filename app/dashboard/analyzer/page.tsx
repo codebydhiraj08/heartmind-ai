@@ -614,8 +614,8 @@ function ChatAnalyzerInner() {
     <div className="space-y-6 force-gpu">
       {/* Header */}
       <motion.div
-        initial={isMobile ? false : { opacity: 0, y: 20 }}
-        animate={isMobile ? false : { opacity: 1, y: 0 }}
+        initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
         <div>
@@ -671,9 +671,9 @@ function ChatAnalyzerInner() {
         {isAnalyzing ? (
           <motion.div
             key="loading"
-            initial={isMobile ? false : { opacity: 0, scale: 0.98 }}
-            animate={isMobile ? false : { opacity: 1, scale: 1 }}
-            exit={isMobile ? false : { opacity: 0 }}
+            initial={isMobile ? undefined : { opacity: 0, scale: 0.98 }}
+            animate={isMobile ? undefined : { opacity: 1, scale: 1 }}
+            exit={isMobile ? undefined : { opacity: 0 }}
             className="flex flex-col items-center justify-center py-20 bg-zinc-950/40 border border-white/[0.04] rounded-2xl max-w-2xl mx-auto shadow-xl"
           >
             <div className="relative w-20 h-20">
@@ -691,8 +691,8 @@ function ChatAnalyzerInner() {
           /* FULL-WIDTH RESULTS REPORT VIEW */
           <motion.div
             key="results"
-            initial={isMobile ? false : { opacity: 0, y: 20 }}
-            animate={isMobile ? false : { opacity: 1, y: 0 }}
+            initial={isMobile ? undefined : { opacity: 0, y: 20 }}
+            animate={isMobile ? undefined : { opacity: 1, y: 0 }}
             className="space-y-6 force-gpu"
           >
             {/* Top Row Grid: Score & Emotional Breakdown */}
@@ -810,8 +810,8 @@ function ChatAnalyzerInner() {
                       </div>
                       <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-white/[0.02]">
                         <motion.div
-                          initial={isMobile ? false : { width: 0 }}
-                          animate={isMobile ? false : { width: `${value}%` }}
+                          initial={isMobile ? undefined : { width: 0 }}
+                          animate={isMobile ? undefined : { width: `${value}%` }}
                           style={isMobile ? { width: `${value}%` } : undefined}
                           transition={{ duration: 1, delay: 0.2 }}
                           className={`h-full rounded-full ${
@@ -984,8 +984,8 @@ function ChatAnalyzerInner() {
 
             {/* Bottom Navigation Button */}
             <motion.div
-              initial={isMobile ? false : { opacity: 0, y: 10 }}
-              animate={isMobile ? false : { opacity: 1, y: 0 }}
+              initial={isMobile ? undefined : { opacity: 0, y: 10 }}
+              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
               className="flex flex-col sm:flex-row justify-center gap-3 pt-4"
             >
               <Link href={`/dashboard/red-flags?chatId=${analysisData?._id || historyId}`}>
@@ -1013,15 +1013,15 @@ function ChatAnalyzerInner() {
           /* WORKSPACE VIEW: TABS */
           <motion.div
             key="workspace"
-            initial={isMobile ? false : { opacity: 0 }}
-            animate={isMobile ? false : { opacity: 1 }}
+            initial={isMobile ? undefined : { opacity: 0 }}
+            animate={isMobile ? undefined : { opacity: 1 }}
             className="w-full"
           >
             {activeTab === "new" ? (
               /* TAB 1: NEW ANALYSIS FORM */
               <motion.div
-                initial={isMobile ? false : { opacity: 0, y: 15 }}
-                animate={isMobile ? false : { opacity: 1, y: 0 }}
+                initial={isMobile ? undefined : { opacity: 0, y: 15 }}
+                animate={isMobile ? undefined : { opacity: 1, y: 0 }}
                 className="max-w-2xl mx-auto w-full"
               >
                 <Card className="glass border-border shadow-2xl">
@@ -1215,8 +1215,8 @@ function ChatAnalyzerInner() {
             ) : (
               /* TAB 2: SPACIOUS HISTORY LOGS GRID */
               <motion.div
-                initial={isMobile ? false : { opacity: 0, y: 15 }}
-                animate={isMobile ? false : { opacity: 1, y: 0 }}
+                initial={isMobile ? undefined : { opacity: 0, y: 15 }}
+                animate={isMobile ? undefined : { opacity: 1, y: 0 }}
                 className="w-full"
               >
                 <Card className="glass border-border shadow-2xl">
