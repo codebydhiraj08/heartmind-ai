@@ -408,12 +408,12 @@ export default function EmotionsPage() {
         {emotionalStates.map((emotion, index) => {
           const isSelected = selectedEmotion === emotion.name;
           const activeStyle = isSelected
-            ? (emotion.name === "Joy" ? "border-emerald-500/80 bg-emerald-500/[0.04] shadow-md shadow-emerald-500/10 scale-[1.03] text-emerald-400" :
-               emotion.name === "Sadness" ? "border-blue-500/80 bg-blue-500/[0.04] shadow-md shadow-blue-500/10 scale-[1.03] text-blue-400" :
-               emotion.name === "Anxiety" ? "border-amber-500/80 bg-amber-500/[0.04] shadow-md shadow-amber-500/10 scale-[1.03] text-amber-400" :
-               emotion.name === "Anger" ? "border-rose-500/80 bg-rose-500/[0.04] shadow-md shadow-rose-500/10 scale-[1.03] text-rose-400" :
-               emotion.name === "Confusion" ? "border-fuchsia-500/80 bg-fuchsia-500/[0.04] shadow-md shadow-fuchsia-500/10 scale-[1.03] text-fuchsia-400" :
-               "border-orange-500/80 bg-orange-500/[0.04] shadow-md shadow-orange-500/10 scale-[1.03] text-orange-400")
+            ? (emotion.name === "Joy" ? "border-emerald-500/80 bg-emerald-500/[0.04] md:shadow-md md:shadow-emerald-500/10 md:scale-[1.03] text-emerald-400" :
+               emotion.name === "Sadness" ? "border-blue-500/80 bg-blue-500/[0.04] md:shadow-md md:shadow-blue-500/10 md:scale-[1.03] text-blue-400" :
+               emotion.name === "Anxiety" ? "border-amber-500/80 bg-amber-500/[0.04] md:shadow-md md:shadow-amber-500/10 md:scale-[1.03] text-amber-400" :
+               emotion.name === "Anger" ? "border-rose-500/80 bg-rose-500/[0.04] md:shadow-md md:shadow-rose-500/10 md:scale-[1.03] text-rose-400" :
+               emotion.name === "Confusion" ? "border-fuchsia-500/80 bg-fuchsia-500/[0.04] md:shadow-md md:shadow-fuchsia-500/10 md:scale-[1.03] text-fuchsia-400" :
+               "border-orange-500/80 bg-orange-500/[0.04] md:shadow-md md:shadow-orange-500/10 md:scale-[1.03] text-orange-400")
             : "border-border hover:bg-white/[0.02] md:hover:scale-[1.01]";
 
           return (
@@ -425,7 +425,7 @@ export default function EmotionsPage() {
               onClick={() => setSelectedEmotion(emotion.name)}
               className="cursor-pointer"
             >
-              <Card className={`bg-zinc-950/85 border border-white/[0.06] md:backdrop-blur-md transition-[border-color,background-color,transform] duration-200 ${activeStyle}`}>
+              <Card className={`bg-zinc-950/85 border border-white/[0.06] md:backdrop-blur-md md:transition-[border-color,background-color,transform] md:duration-200 ${activeStyle}`}>
                 <CardContent className="p-4">
                   <div className={`w-10 h-10 rounded-xl ${emotion.color} flex items-center justify-center mb-3`}>
                     <emotion.icon className="w-5 h-5" />
