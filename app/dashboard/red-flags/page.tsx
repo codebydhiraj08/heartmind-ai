@@ -272,10 +272,10 @@ function RedFlagsPageInner() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "high": return "text-danger bg-danger/20 border-danger/30"
-      case "medium": return "text-warning bg-warning/20 border-warning/30"
-      case "low": return "text-accent bg-accent/20 border-accent/30"
-      default: return "text-muted-foreground bg-secondary border-border"
+      case "high": return "text-red-400 bg-red-500/10 border-red-500/20"
+      case "medium": return "text-amber-400 bg-amber-500/10 border-amber-500/20"
+      case "low": return "text-blue-400 bg-blue-500/10 border-blue-500/20"
+      default: return "text-muted-foreground bg-zinc-900 border-border"
     }
   }
 
@@ -406,13 +406,13 @@ function RedFlagsPageInner() {
           <Card className="glass border-border h-full">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-danger/20 flex items-center justify-center">
-                  <AlertTriangle className="w-7 h-7 text-danger" />
+                <div className="w-14 h-14 rounded-xl bg-red-500/10 flex items-center justify-center">
+                  <AlertTriangle className="w-7 h-7 text-red-400" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Patterns Detected</p>
                   <p className="text-3xl font-bold">{detectedFlags.length}</p>
-                  <p className="text-sm text-danger">Require attention</p>
+                  <p className="text-sm text-red-400">Require attention</p>
                 </div>
               </div>
             </CardContent>
@@ -427,13 +427,13 @@ function RedFlagsPageInner() {
           <Card className="glass border-border h-full">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-success/20 flex items-center justify-center">
-                  <CheckCircle className="w-7 h-7 text-success" />
+                <div className="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <CheckCircle className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Healthy Patterns</p>
                   <p className="text-3xl font-bold">{safePatterns.length}</p>
-                  <p className="text-sm text-success">Looking good</p>
+                  <p className="text-sm text-emerald-400">Looking good</p>
                 </div>
               </div>
             </CardContent>

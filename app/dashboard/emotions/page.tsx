@@ -218,12 +218,12 @@ export default function EmotionsPage() {
   const stressData = getTrendAndChange(currentEmotions.stress, prevEmotions.stress, true)
 
   const emotionalStates = [
-    { name: "Joy", value: currentEmotions.joy, ...joyData, icon: Smile, color: "text-success bg-success/20" },
-    { name: "Sadness", value: currentEmotions.sadness, ...sadnessData, icon: Frown, color: "text-accent bg-accent/20" },
-    { name: "Anxiety", value: currentEmotions.anxiety, ...anxietyData, icon: AlertCircle, color: "text-warning bg-warning/20" },
-    { name: "Anger", value: currentEmotions.anger, ...angerData, icon: Angry, color: "text-danger bg-danger/20" },
-    { name: "Confusion", value: currentEmotions.confusion, ...confusionData, icon: Meh, color: "text-neon-purple bg-neon-purple/20" },
-    { name: "Stress", value: currentEmotions.stress, ...stressData, icon: Zap, color: "text-warning bg-warning/20" }
+    { name: "Joy", value: currentEmotions.joy, ...joyData, icon: Smile, color: "text-emerald-400 bg-emerald-500/10" },
+    { name: "Sadness", value: currentEmotions.sadness, ...sadnessData, icon: Frown, color: "text-blue-400 bg-blue-500/10" },
+    { name: "Anxiety", value: currentEmotions.anxiety, ...anxietyData, icon: AlertCircle, color: "text-amber-400 bg-amber-500/10" },
+    { name: "Anger", value: currentEmotions.anger, ...angerData, icon: Angry, color: "text-rose-400 bg-rose-500/10" },
+    { name: "Confusion", value: currentEmotions.confusion, ...confusionData, icon: Meh, color: "text-fuchsia-400 bg-fuchsia-500/10" },
+    { name: "Stress", value: currentEmotions.stress, ...stressData, icon: Zap, color: "text-orange-400 bg-orange-500/10" }
   ]
 
   const emotionConfigs: Record<string, {
