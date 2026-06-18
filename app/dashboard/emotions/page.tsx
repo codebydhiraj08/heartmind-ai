@@ -512,6 +512,7 @@ export default function EmotionsPage() {
                     fill={currentConfig.fill}
                     fillOpacity={0.05}
                     strokeWidth={2.5}
+                    isAnimationActive={!isMobile}
                   />
                 </AreaChart>
               ) : (
@@ -538,6 +539,7 @@ export default function EmotionsPage() {
                       fill={currentConfig.fill}
                       fillOpacity={0.05}
                       strokeWidth={2.5}
+                      isAnimationActive={!isMobile}
                     />
                   </AreaChart>
                 </ResponsiveContainer>

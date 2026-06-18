@@ -261,8 +261,8 @@ export default function CompatibilityPage() {
                       <PolarGrid stroke="#27272a" />
                       <PolarAngleAxis dataKey="trait" tick={{ fill: "#a1a1aa", fontSize: 10 }} />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                      <Radar name="Partner 1" dataKey="person1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.3} />
-                      <Radar name="Partner 2" dataKey="person2" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
+                      <Radar name="Partner 1" dataKey="person1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.3} isAnimationActive={!isMobile} />
+                      <Radar name="Partner 2" dataKey="person2" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} isAnimationActive={!isMobile} />
                     </RadarChart>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
@@ -270,8 +270,8 @@ export default function CompatibilityPage() {
                         <PolarGrid stroke="#27272a" />
                         <PolarAngleAxis dataKey="trait" tick={{ fill: "#a1a1aa", fontSize: 10 }} />
                         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                        <Radar name="Partner 1" dataKey="person1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.3} />
-                        <Radar name="Partner 2" dataKey="person2" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
+                        <Radar name="Partner 1" dataKey="person1" stroke="#ec4899" fill="#ec4899" fillOpacity={0.3} isAnimationActive={!isMobile} />
+                        <Radar name="Partner 2" dataKey="person2" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} isAnimationActive={!isMobile} />
                       </RadarChart>
                     </ResponsiveContainer>
                   )}

@@ -30,6 +30,27 @@ export async function POST(req: Request) {
     const existingUser = await User.findOne({ email: email.toLowerCase() });
 
     if (existingUser) {
+      if (!existingUser.password) {
+        // This is a Google OAuth user setting a manual password!
+        const hashedPassword = await bcrypt.hash(password, 10);
+        existingUser.password = hashedPassword;
+        if (name && (existingUser.name === "Google User" || !existingUser.name)) {
+          existingUser.name = name;
+        }
+        if (!existingUser.emailVerified) {
+          existingUser.emailVerified = new Date();
+        }
+        await existingUser.save();
+
+        return NextResponse.json(
+          {
+            message: "Password added to your Google account successfully! You can now log in manually.",
+            userId: existingUser._id.toString(),
+          },
+          { status: 201 }
+        );
+      }
+
       return NextResponse.json(
         { error: "An account with this email already exists" },
         { status: 400 }

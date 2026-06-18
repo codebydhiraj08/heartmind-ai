@@ -778,6 +778,7 @@ export default function DashboardPage() {
                       fill="var(--primary)"
                       fillOpacity={0.05}
                       strokeWidth={1.5}
+                      isAnimationActive={!isMobile}
                     />
                     <Area
                       type="monotone"
@@ -786,6 +787,7 @@ export default function DashboardPage() {
                       fill="var(--accent)"
                       fillOpacity={0.05}
                       strokeWidth={1.5}
+                      isAnimationActive={!isMobile}
                     />
                     <Line
                       type="monotone"
@@ -794,6 +796,7 @@ export default function DashboardPage() {
                       strokeWidth={1.5}
                       strokeDasharray="3 3"
                       dot={false}
+                      isAnimationActive={!isMobile}
                     />
                   </AreaChart>
                 ) : (
@@ -834,6 +837,7 @@ export default function DashboardPage() {
                         fill="var(--primary)"
                         fillOpacity={0.05}
                         strokeWidth={1.5}
+                        isAnimationActive={!isMobile}
                       />
                       <Area
                         type="monotone"
@@ -842,6 +846,7 @@ export default function DashboardPage() {
                         fill="var(--accent)"
                         fillOpacity={0.05}
                         strokeWidth={1.5}
+                        isAnimationActive={!isMobile}
                       />
                       <Line
                         type="monotone"
@@ -850,6 +855,7 @@ export default function DashboardPage() {
                         strokeWidth={1.5}
                         strokeDasharray="3 3"
                         dot={false}
+                        isAnimationActive={!isMobile}
                       />
                     </AreaChart>
                   </ResponsiveContainer>

@@ -766,6 +766,7 @@ function ChatAnalyzerInner() {
                           outerRadius={48}
                           paddingAngle={5}
                           dataKey="value"
+                          isAnimationActive={!isMobile}
                         >
                           {emotionColors.map((color, index) => (
                             <Cell key={`cell-${index}`} fill={color} />

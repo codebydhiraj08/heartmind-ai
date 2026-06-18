@@ -766,7 +766,7 @@ function VoiceAnalyzerInner() {
                             return (
                               <div
                                 key={i}
-                                className="flex-1 rounded-full transition-all duration-200"
+                                className="flex-1 rounded-full"
                                 style={{ 
                                   height: `${height}%`,
                                   backgroundColor: isHighlighted ? '#ec4899' : 'rgba(6, 182, 212, 0.15)'
@@ -973,7 +973,7 @@ function VoiceAnalyzerInner() {
                                 return (
                                   <div
                                     key={i}
-                                    className="flex-1 rounded-full transition-all duration-200"
+                                    className="flex-1 rounded-full"
                                     style={{
                                       height: `${height}%`,
                                       backgroundColor: isHighlighted ? '#ec4899' : 'rgba(6, 182, 212, 0.15)'
