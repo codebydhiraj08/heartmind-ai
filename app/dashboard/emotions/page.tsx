@@ -425,7 +425,7 @@ export default function EmotionsPage() {
               onClick={() => setSelectedEmotion(emotion.name)}
               className="cursor-pointer"
             >
-              <Card className={`bg-zinc-950/85 border border-white/[0.06] backdrop-blur-none md:backdrop-blur-md transition-all duration-300 ${activeStyle}`}>
+              <Card className={`bg-zinc-950/85 border border-white/[0.06] md:backdrop-blur-md transition-[border-color,background-color,transform] duration-200 ${activeStyle}`}>
                 <CardContent className="p-4">
                   <div className={`w-10 h-10 rounded-xl ${emotion.color} flex items-center justify-center mb-3`}>
                     <emotion.icon className="w-5 h-5" />

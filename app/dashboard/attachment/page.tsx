@@ -413,7 +413,7 @@ export default function AttachmentPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsLearnMoreOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-none md:backdrop-blur-md"
+              className="absolute inset-0 bg-black/60 md:backdrop-blur-md"
             />
 
             {/* Modal Body */}

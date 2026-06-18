@@ -321,7 +321,7 @@ function RedFlagsPageInner() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-4 rounded-2xl bg-zinc-950/40 border border-white/[0.04] backdrop-blur-none md:backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="p-4 rounded-2xl bg-zinc-950/40 border border-white/[0.04] md:backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-danger/15 border border-danger/30 flex items-center justify-center text-danger shrink-0">
