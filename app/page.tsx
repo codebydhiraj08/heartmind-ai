@@ -48,7 +48,50 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background animated-gradient">
+    <div className="min-h-screen bg-background animated-gradient relative overflow-x-hidden">
+      {/* Ambient Floating Background Glow Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div 
+          animate={{
+            x: [0, 80, -60, 0],
+            y: [0, -100, 60, 0],
+            scale: [1, 1.15, 0.9, 1]
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute top-[10%] left-[15%] w-[450px] h-[450px] bg-[#ea409b]/12 rounded-full blur-[140px]"
+        />
+        <motion.div 
+          animate={{
+            x: [0, -90, 70, 0],
+            y: [0, 80, -90, 0],
+            scale: [1, 0.9, 1.1, 1]
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute bottom-[20%] right-[10%] w-[450px] h-[450px] bg-[#04c7f0]/12 rounded-full blur-[140px]"
+        />
+        <motion.div 
+          animate={{
+            x: [0, 50, -50, 0],
+            y: [0, -40, 50, 0],
+            scale: [1, 1.1, 0.95, 1]
+          }}
+          transition={{
+            duration: 22,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute top-[40%] left-[45%] w-[400px] h-[400px] bg-[#8b5cf6]/10 rounded-full blur-[155px]"
+        />
+      </div>
+
       {/* Navigation */}
       <motion.nav 
         initial={{ opacity: 0, y: -20 }}
@@ -126,13 +169,7 @@ export default function LandingPage() {
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-20 px-4 sm:px-8 lg:px-12 overflow-hidden hero-container">
-        {/* Background Radial Glow Effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-[#ea409b]/10 rounded-full blur-[160px] opacity-70" />
-          <div className="absolute top-1/3 -right-1/4 w-[600px] h-[600px] bg-[#04c7f0]/10 rounded-full blur-[160px] opacity-70" />
-        </div>
-
+      <section className="relative pt-36 pb-20 px-4 sm:px-8 lg:px-12 overflow-hidden hero-container z-10">
         <motion.div 
           variants={staggerContainer}
           initial="initial"
@@ -192,11 +229,18 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Hero Right Side: High-Fidelity Mockup Dashboard */}
-          <div className="lg:col-span-7 flex justify-center lg:justify-end relative pr-0 lg:pr-8">
+          {/* Hero Right Side: High-Fidelity Mockup Dashboard (Refined & Larger) */}
+          <div className="lg:col-span-7 flex justify-center lg:justify-end relative pr-0 lg:pr-4">
             <motion.div 
-              variants={fadeInUp}
-              className="relative w-full max-w-[580px] aspect-[1.25] rounded-[24px] bg-[#0b0c10]/95 border border-[#161b26] p-6 shadow-2xl relative select-none"
+              animate={{
+                y: [0, -8, 0]
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="relative w-full max-w-[650px] aspect-[1.22] rounded-[24px] bg-[#0b0c10]/95 border border-[#161b26] p-6 shadow-2xl select-none"
             >
               {/* Header inside mockup */}
               <div className="flex items-center justify-between mb-8">
@@ -269,14 +313,14 @@ export default function LandingPage() {
                 </svg>
               </div>
 
-              {/* AI Insight Card */}
+              {/* AI Insight Card (Refined with interactive circular loader and mini trend charts) */}
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.4, duration: 0.4 }}
-                className="absolute bottom-6 left-6 right-[215px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-xl select-none"
+                className="absolute bottom-6 left-6 right-[240px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-xl select-none"
               >
-                <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold mb-2">
+                <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold mb-2.5">
                   <Sparkles className="w-3 h-3 text-purple-400" />
                   <span>AI Insight</span>
                 </div>
@@ -291,14 +335,42 @@ export default function LandingPage() {
                     </p>
                   </div>
 
-                  {/* Circle progress */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative w-10 h-10">
+                  {/* High-tech animated circular chart & mini trend graph */}
+                  <div className="flex items-center gap-4">
+                    {/* Mini trend chart */}
+                    <div className="w-14 h-8 flex items-end gap-[3px] select-none bg-zinc-950/40 p-1 rounded border border-zinc-900/50">
+                      <motion.div initial={{ height: 0 }} animate={{ height: '40%' }} transition={{ delay: 1.2, duration: 0.6 }} className="w-[4px] bg-zinc-800 rounded-t" />
+                      <motion.div initial={{ height: 0 }} animate={{ height: '60%' }} transition={{ delay: 1.3, duration: 0.6 }} className="w-[4px] bg-zinc-700 rounded-t" />
+                      <motion.div initial={{ height: 0 }} animate={{ height: '35%' }} transition={{ delay: 1.4, duration: 0.6 }} className="w-[4px] bg-[#ea409b]/60 rounded-t" />
+                      <motion.div initial={{ height: 0 }} animate={{ height: '80%' }} transition={{ delay: 1.5, duration: 0.6 }} className="w-[4px] bg-[#8b5cf6] rounded-t" />
+                      <motion.div initial={{ height: 0 }} animate={{ height: '70%' }} transition={{ delay: 1.6, duration: 0.6 }} className="w-[4px] bg-[#04c7f0] rounded-t" />
+                    </div>
+
+                    <div className="relative w-11 h-11 flex items-center justify-center">
+                      <div className="absolute inset-0 rounded-full border border-[#8b5cf6]/10 animate-ping" style={{ animationDuration: '3s' }} />
                       <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="20" cy="20" r="17" stroke="rgba(255,255,255,0.03)" strokeWidth="3" fill="none" />
-                        <circle cx="20" cy="20" r="17" stroke="#8b5cf6" strokeWidth="3" fill="none" strokeDasharray="107" strokeDashoffset="13.9" strokeLinecap="round" />
+                        <circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,0.03)" strokeWidth="3" fill="none" />
+                        <motion.circle 
+                          cx="22" 
+                          cy="22" 
+                          r="18" 
+                          stroke="url(#insightGradient)" 
+                          strokeWidth="3" 
+                          fill="none" 
+                          strokeDasharray="113" 
+                          initial={{ strokeDashoffset: 113 }}
+                          animate={{ strokeDashoffset: 14.7 }} // 87% progress
+                          transition={{ delay: 1.7, duration: 1.5, ease: "easeOut" }}
+                          strokeLinecap="round" 
+                        />
+                        <defs>
+                          <linearGradient id="insightGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="100%" stopColor="#ea409b" />
+                          </linearGradient>
+                        </defs>
                       </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-[9px] font-bold text-white leading-none">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-[9px] font-extrabold text-white leading-none">
                         <span>87%</span>
                       </div>
                     </div>
@@ -312,13 +384,21 @@ export default function LandingPage() {
                 </div>
               </motion.div>
 
-              {/* Relationship Signals Floating Card (Bottom Right overlap) */}
+              {/* Relationship Signals Floating Card (Bottom Right overlap & Floating micro-animation) */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.8, duration: 0.5 }}
-                whileHover={{ y: -4, scale: 1.02 }}
-                className="absolute bottom-8 -right-4 w-[200px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-2xl z-10 select-none backdrop-blur-md transition-shadow hover:shadow-[#ea409b]/5"
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  y: [0, 8, 0]
+                }}
+                transition={{ 
+                  opacity: { delay: 1.8, duration: 0.5 },
+                  scale: { delay: 1.8, duration: 0.5 },
+                  y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
+                }}
+                whileHover={{ scale: 1.03 }}
+                className="absolute bottom-8 -right-4 w-[210px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-2xl z-10 select-none backdrop-blur-md transition-shadow hover:shadow-[#ea409b]/5"
               >
                 <div className="flex items-center gap-1.5 text-zinc-300 text-[10px] font-bold mb-3.5">
                   <Activity className="w-3 h-3 text-pink-400" />
@@ -335,7 +415,12 @@ export default function LandingPage() {
                       <span className="font-bold text-white">82%</span>
                     </div>
                     <div className="h-1 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
-                      <div className="h-full w-[82%] bg-pink-500 rounded-full" />
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: "82%" }}
+                        transition={{ delay: 2.0, duration: 1.2, ease: "easeOut" }}
+                        className="h-full bg-pink-500 rounded-full" 
+                      />
                     </div>
                   </div>
 
@@ -348,7 +433,12 @@ export default function LandingPage() {
                       <span className="font-bold text-white">76%</span>
                     </div>
                     <div className="h-1 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
-                      <div className="h-full w-[76%] bg-purple-500 rounded-full" />
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: "76%" }}
+                        transition={{ delay: 2.2, duration: 1.2, ease: "easeOut" }}
+                        className="h-full bg-purple-500 rounded-full" 
+                      />
                     </div>
                   </div>
 
@@ -361,7 +451,12 @@ export default function LandingPage() {
                       <span className="font-bold text-white">71%</span>
                     </div>
                     <div className="h-1 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
-                      <div className="h-full w-[71%] bg-cyan-400 rounded-full" />
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: "71%" }}
+                        transition={{ delay: 2.4, duration: 1.2, ease: "easeOut" }}
+                        className="h-full bg-cyan-400 rounded-full" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -521,7 +616,7 @@ export default function LandingPage() {
                 key={feature.title}
                 variants={fadeInUp}
                 whileHover={{ y: -6, scale: 1.03 }}
-                className="group glass rounded-xl p-6 hover:neon-glow-pink transition-all duration-300 cursor-pointer animate-none"
+                className="group glass rounded-xl p-6 hover:neon-glow-pink transition-all duration-300 cursor-pointer"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="w-6 h-6 text-white" />
