@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
@@ -10,7 +10,6 @@ import {
   Sparkles,
   Heart,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -21,7 +20,23 @@ import {
   Copy,
   Check,
   ArrowRight,
-  Shield
+  Shield,
+  Trash2,
+  Plus,
+  Eye,
+  Search,
+  List,
+  Edit2,
+  X,
+  FileText,
+  Settings,
+  Calendar,
+  Layers,
+  HelpCircle,
+  Lock,
+  ChevronLeft,
+  ChevronRight,
+  CheckSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -50,7 +65,7 @@ const platformOptions = [
   { name: "Snapchat", color: "bg-yellow-500" },
   { name: "iMessage", color: "bg-blue-400" },
   { name: "Other", color: "bg-gray-500" }
-]
+];
 
 const getGradeLabel = (score: number) => {
   if (score >= 90) return "Excellent Resonance";
@@ -68,143 +83,20 @@ const getGradeLetter = (score: number) => {
   return "D";
 };
 
-const autodetectPlatform = (text: string): string => {
-  const sample = text.slice(0, 15000);
-  
-  if (/\[\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}[,\s]/.test(sample) || /\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}[,\s]\d{1,2}:\d{2}/.test(sample)) {
-    return "WhatsApp";
-  }
-  
-  if (/,\s*\[\d{1,2}\.\d{1,2}\.\d{2,4}\s+\d{1,2}:\d{2}\]/.test(sample) || /telegram/i.test(sample)) {
-    return "Telegram";
-  }
-  
-  if (/snapchat/i.test(sample)) {
-    return "Snapchat";
-  }
-  
-  if (/imessage/i.test(sample) || /read\s+at\s+\d{1,2}:\d{2}/i.test(sample)) {
-    return "iMessage";
-  }
+interface Message {
+  id: string;
+  sender: string;
+  timestamp: string;
+  content: string;
+  hasOcrIssue: boolean;
+}
 
-  if (/instagram/i.test(sample)) {
-    return "Instagram";
-  }
-
-  return "Other";
-};
-
-const cleanChatText = (text: string): string => {
-  if (!text) return "";
-  const lines = text.split(/\r?\n/);
-  const cleaned = lines.filter(line => {
-    const trimmed = line.trim().toLowerCase();
-    
-    if (!trimmed) return false;
-    
-    if (trimmed.includes("messages and calls are end-to-end encrypted")) return false;
-    if (trimmed.includes("joined using this group's invite link")) return false;
-    if (trimmed.includes("created group")) return false;
-    if (trimmed.includes("changed the subject")) return false;
-    if (trimmed.includes("changed this group's icon")) return false;
-    if (trimmed.includes("changed their phone number")) return false;
-    if (trimmed.includes("security code changed")) return false;
-    if (trimmed.includes("this message was deleted")) return false;
-    if (trimmed.includes("you deleted this message")) return false;
-    
-    if (trimmed.includes("<media omitted>")) return false;
-    if (trimmed.includes("[media omitted]")) return false;
-    if (trimmed.includes("image omitted")) return false;
-    if (trimmed.includes("video omitted")) return false;
-    if (trimmed.includes("sticker omitted")) return false;
-    if (trimmed.includes("audio omitted")) return false;
-    if (trimmed.includes("file omitted")) return false;
-    if (trimmed.includes("gif omitted")) return false;
-    
-    return true;
-  });
-  return cleaned.join("\n");
-};
-
-const sampleChatTextClient = (chatText: string, maxMessages = 1000): { text: string; totalMessages: number; isSampled: boolean } => {
-  if (!chatText) return { text: "", totalMessages: 0, isSampled: false };
-  const lines = chatText.split(/\r?\n/);
-  
-  const bracketedTimestampRegex = /^\[[^\]]{5,50}\]\s*[-:]?\s*/;
-  const unbracketedTimestampRegex = /^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}[,\s]\s?\d{1,2}:\d{2}(?::\d{2})?\s?[APap]?[Mm]?\s*[-:]?\s*/;
-  const simpleLineRegex = /^([^:]+):\s*(.*)$/;
-
-  let messageCount = 0;
-  let splitIndex = 0;
-  let totalParsedMessages = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trim();
-    if (!trimmed) continue;
-    let cleanLine = trimmed;
-    let isMessageStart = false;
-    if (bracketedTimestampRegex.test(cleanLine) || unbracketedTimestampRegex.test(cleanLine)) {
-      isMessageStart = true;
-    } else {
-      const matchSimple = cleanLine.match(simpleLineRegex);
-      if (matchSimple) {
-        const sender = matchSimple[1].trim();
-        if (sender && sender.length < 50 && !sender.startsWith("[") && !sender.endsWith("]")) {
-          isMessageStart = true;
-        }
-      }
-    }
-    if (isMessageStart) {
-      totalParsedMessages++;
-    }
-  }
-
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const trimmed = lines[i].trim();
-    if (!trimmed) continue;
-
-    let cleanLine = trimmed;
-    let isMessageStart = false;
-
-    if (bracketedTimestampRegex.test(cleanLine)) {
-      cleanLine = cleanLine.replace(bracketedTimestampRegex, "");
-      isMessageStart = true;
-    } else if (unbracketedTimestampRegex.test(cleanLine)) {
-      cleanLine = cleanLine.replace(unbracketedTimestampRegex, "");
-      isMessageStart = true;
-    } else {
-      const matchSimple = cleanLine.match(simpleLineRegex);
-      if (matchSimple) {
-        const sender = matchSimple[1].trim();
-        if (sender && sender.length < 50 && !sender.startsWith("[") && !sender.endsWith("]")) {
-          isMessageStart = true;
-        }
-      }
-    }
-
-    if (isMessageStart) {
-      messageCount++;
-      if (messageCount >= maxMessages) {
-        splitIndex = i;
-        break;
-      }
-    }
-  }
-
-  if (totalParsedMessages > maxMessages && splitIndex > 0) {
-    return {
-      text: lines.slice(splitIndex).join("\n"),
-      totalMessages: totalParsedMessages,
-      isSampled: true
-    };
-  }
-  
-  return {
-    text: chatText,
-    totalMessages: totalParsedMessages || lines.length,
-    isSampled: false
-  };
-};
+interface SelectedImage {
+  id: string;
+  name: string;
+  file: File;
+  url: string;
+}
 
 function ChatAnalyzerInner() {
   const router = useRouter()
@@ -213,162 +105,45 @@ function ChatAnalyzerInner() {
   const { subscription } = useSubscription()
   const activeTier = subscription?.tier || "free"
 
-  const [chatText, setChatText] = useState("")
-  const [isExtractingScreenshot, setIsExtractingScreenshot] = useState(false)
+  // Workflow steps: "upload" | "selection" | "ocr" | "preview" | "analyzing" | "report"
+  const [step, setStep] = useState<"upload" | "selection" | "ocr" | "preview" | "analyzing" | "report">("upload")
   const [selectedPlatform, setSelectedPlatform] = useState("WhatsApp")
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([])
+  
+  // OCR processing states
+  const [ocrProgress, setOcrProgress] = useState(0)
+  const [ocrStageIndex, setOcrStageIndex] = useState(0)
+  const [ocrLog, setOcrLog] = useState<string[]>([])
+  const [activePreviewImage, setActivePreviewImage] = useState<string | null>(null)
+
+  // Reconstructed conversation data
+  const [reconstructedMessages, setReconstructedMessages] = useState<Message[]>([])
+  const [participants, setParticipants] = useState({ nameA: "Person A", nameB: "Person B" })
+  const [viewMode, setViewMode] = useState<"chat" | "table">("chat")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [ocrIssuesOnly, setOcrIssuesOnly] = useState(false)
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null)
+  
+  // Message edit form variables
+  const [editSender, setEditSender] = useState("")
+  const [editTimestamp, setEditTimestamp] = useState("")
+  const [editContent, setEditContent] = useState("")
+
+  // Analysis Report & loading states
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [showResults, setShowResults] = useState(false)
-  const [copiedInsight, setCopiedInsight] = useState<number | null>(null)
   const [analysisData, setAnalysisData] = useState<any>(null)
+  const [analysisStage, setAnalysisStage] = useState(0)
   const [errorMsg, setErrorMsg] = useState("")
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [copiedInsight, setCopiedInsight] = useState<number | null>(null)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+
+  // Sidebar controls inside the final report view
+  const [sidebarTab, setSidebarTab] = useState<"dashboard" | "conversations" | "history" | "timeline" | "patterns" | "insights" | "settings">("dashboard")
   const [pastAnalyses, setPastAnalyses] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<"new" | "history">("new")
-  const [notification, setNotification] = useState<{
-    type: "info" | "success" | "warning";
-    message: string;
-    description?: string;
-  } | null>(null)
-  const [showMobileGuide, setShowMobileGuide] = useState(false)
-  const [showAllPatterns, setShowAllPatterns] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const appendInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setErrorMsg("");
-    setNotification(null);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const rawText = event.target?.result as string;
-      if (!rawText || !rawText.trim()) {
-        setErrorMsg("The uploaded file is empty. Please select a valid chat export.");
-        return;
-      }
-
-      const detected = autodetectPlatform(rawText);
-      setSelectedPlatform(detected);
-      const cleaned = cleanChatText(rawText);
-      const sampled = sampleChatTextClient(cleaned, 1000);
-      setChatText(sampled.text);
-
-      if (sampled.isSampled) {
-        setNotification({
-          type: "success",
-          message: `Successfully loaded ${detected} chat export!`,
-          description: `Detected platform: ${detected}. We identified ${sampled.totalMessages} messages and automatically optimized the analysis to focus on the most recent 1,000 messages for maximum accuracy and speed.`
-        });
-      } else {
-        setNotification({
-          type: "success",
-          message: `Successfully loaded ${detected} chat export!`,
-          description: `Detected platform: ${detected}. Loaded all ${sampled.totalMessages} messages cleanly, removing system noise/media placeholders.`
-        });
-      }
-    };
-
-    reader.onerror = () => {
-      setErrorMsg("Failed to read the file. Please try again.");
-    };
-
-    reader.readAsText(file);
-  };
-
-  const handleScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    setErrorMsg("");
-    setNotification(null);
-    setIsExtractingScreenshot(true);
-
-    const readAndTranscribeFile = (file: File): Promise<string> => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const base64Data = event.target?.result as string;
-          if (!base64Data) {
-            reject(new Error(`Failed to read the image file: ${file.name}`));
-            return;
-          }
-
-          try {
-            const response = await fetch("/api/analyze-image", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ imageBase64: base64Data }),
-            });
-
-            const data = await response.json();
-            if (data.success && data.text) {
-              resolve(data.text.trim());
-            } else {
-              reject(new Error(data.error || `Failed to extract text from ${file.name}`));
-            }
-          } catch (err: any) {
-            reject(new Error(`Connection error while transcribing ${file.name}`));
-          }
-        };
-
-        reader.onerror = () => {
-          reject(new Error(`Failed to read the image file: ${file.name}`));
-        };
-
-        reader.readAsDataURL(file);
-      });
-    };
-
-    try {
-      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-      const transcribedTexts: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        if (i > 0) {
-          // Add a 1.5s delay to keep free tier API requests spaced out
-          await sleep(1500);
-        }
-        const text = await readAndTranscribeFile(files[i]);
-        transcribedTexts.push(text);
-      }
-
-      const combinedText = transcribedTexts.join("\n\n");
-      setChatText(prev => prev ? `${prev}\n\n${combinedText}` : combinedText);
-
-      setNotification({
-        type: "success",
-        message: `Successfully extracted chat text from ${files.length} screenshot(s)!`,
-        description: `Our AI model has transcribed all ${files.length} screenshot(s) and combined their text in chronological order. Feel free to review it and click 'Analyze Conversation' to get your report.`
-      });
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(err.message || "Failed to extract text from one or more screenshots. Please try pasting the text or uploading a standard export file.");
-    } finally {
-      setIsExtractingScreenshot(false);
-      e.target.value = "";
-    }
-  };
-
-  // Auto-switch tab based on URL search params
-  useEffect(() => {
-    const tabParam = searchParams.get("tab")
-    if (tabParam === "history") {
-      setActiveTab("history")
-    }
-  }, [searchParams])
-
-  // Load all analysis history logs for the sidebar/list
+  // Load all analysis history logs for the sidebar/list on mount
   const loadHistoryList = () => {
     fetch("/api/analyze-chat?_t=" + Date.now(), { cache: "no-store" })
       .then((res) => res.json())
@@ -380,927 +155,1541 @@ function ChatAnalyzerInner() {
       .catch((err) => console.error("Error loading analysis history:", err))
   }
 
-  // Fetch past analysis if ID is in the URL query parameters, and load history list on mount
   useEffect(() => {
     loadHistoryList()
   }, [])
 
+  // Auto-load past analysis if ID is present in query parameters
   useEffect(() => {
     if (historyId) {
-      setIsLoadingHistory(true)
+      setStep("analyzing")
       setErrorMsg("")
       fetch(`/api/analyze-chat?id=${historyId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.analysis) {
             setAnalysisData(data.analysis)
-            setShowResults(true)
+            // Extract messages from DB or simulate messages for preview if not present
+            const msgList = data.analysis.reconstructedMessages || [
+              { id: "1", sender: "You", timestamp: "10:15 AM", content: "Are you okay? You seem a little distant.", hasOcrIssue: false },
+              { id: "2", sender: "Partner", timestamp: "10:16 AM", content: "I'm fine, just tired.", hasOcrIssue: false },
+              { id: "3", sender: "You", timestamp: "10:17 AM", content: "Are you sure? We haven't talked properly all week.", hasOcrIssue: false },
+              { id: "4", sender: "Partner", timestamp: "10:18 AM", content: "Yes, I just need some space.", hasOcrIssue: true }
+            ]
+            setReconstructedMessages(msgList)
+            setParticipants({
+              nameA: msgList[0]?.sender || "You",
+              nameB: msgList[1]?.sender || "Partner"
+            })
+            setStep("report")
+            setSidebarTab("dashboard")
           } else {
             setErrorMsg(data.error || "Failed to load past analysis.")
+            setStep("upload")
           }
         })
         .catch((err) => {
           console.error("Error loading past analysis:", err)
           setErrorMsg("Could not load history analysis.")
+          setStep("upload")
         })
-        .finally(() => {
-          setIsLoadingHistory(false)
-        })
-    } else {
-      // Clear results if no id parameter is in the URL
-      setShowResults(false)
-      setAnalysisData(null)
-      setChatText("")
     }
   }, [historyId])
 
-  const resetToNew = () => {
-    setChatText("")
-    setShowResults(false)
-    setAnalysisData(null)
-    setErrorMsg("")
-    setNotification(null)
-    router.push("/dashboard/analyzer")
-  }
+  // Drag & drop triggers for image selector
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
-  const validateChatFormat = (text: string): string | null => {
-    const lines = text.trim().split("\n").filter(l => l.trim().length > 0)
-    if (lines.length < 4) {
-      return "Chat too short. Please paste at least 4-5 messages from a real conversation."
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files || []).filter(file => file.type.startsWith("image/"));
+    if (files.length > 0) {
+      addFiles(files);
     }
+  };
 
-    // Detect sender names using common chat formats
-    const senderPattern = /^(?:\[.*?\]\s*)?([^:]{1,50}):\s*.+$/
-    const senders = new Set<string>()
-    let parsedMessages = 0
+  const addFiles = (files: File[]) => {
+    const newImages = files.map((file, index) => ({
+      id: `${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
+      name: file.name,
+      file: file,
+      url: URL.createObjectURL(file)
+    }));
+    setSelectedImages(prev => [...prev, ...newImages]);
+    setStep("selection");
+  };
 
-    for (const line of lines) {
-      const match = line.trim().match(senderPattern)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      addFiles(files);
+    }
+  };
+
+  const removeImage = (id: string) => {
+    setSelectedImages(prev => prev.filter(img => img.id !== id));
+  };
+
+  // Thumbnail reordering controls
+  const moveImage = (index: number, direction: "left" | "right") => {
+    const newImages = [...selectedImages];
+    const targetIndex = direction === "left" ? index - 1 : index + 1;
+    if (targetIndex >= 0 && targetIndex < newImages.length) {
+      const temp = newImages[index];
+      newImages[index] = newImages[targetIndex];
+      newImages[targetIndex] = temp;
+      setSelectedImages(newImages);
+    }
+  };
+
+  // Reconstruct conversation messages mock OCR Parser
+  const parseMessagesFromOCRText = (text: string): Message[] => {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    const parsed: Message[] = [];
+    let currentSender = "Person A";
+    let currentTimestamp = "10:15 AM";
+
+    lines.forEach((line, index) => {
+      // Look for sender name indicator lines e.g. "Name: message" or "Time [Name]: message"
+      const match = line.match(/^(?:\[?\d{1,2}[:\/\-]\d{1,2}(?:\s*(?:AM|PM))?\]?\s*)?([^:]+):\s*(.*)$/i);
       if (match) {
-        const sender = match[1].trim()
-        // Exclude timestamp-only matches and system messages
-        if (
-          sender.length > 0 &&
-          sender.length < 50 &&
-          !sender.match(/^\d{1,2}[:\/\-]\d/) &&
-          !sender.toLowerCase().includes("messages") &&
-          !sender.toLowerCase().includes("system")
-        ) {
-          senders.add(sender)
-          parsedMessages++
+        const sender = match[1].trim();
+        const content = match[2].trim();
+        if (sender.length > 0 && sender.length < 25 && !sender.includes("http")) {
+          currentSender = sender;
+          parsed.push({
+            id: `msg-${index}-${Math.random().toString(36).substr(2, 9)}`,
+            sender: currentSender,
+            timestamp: currentTimestamp,
+            content,
+            hasOcrIssue: content.includes("?") || content.length < 3 || /[\u0000-\u001F\u007F-\u009F]/.test(content)
+          });
+          return;
         }
+      }
+
+      // Fallback: append or create single message
+      if (parsed.length > 0) {
+        parsed[parsed.length - 1].content += " " + line;
+      } else {
+        parsed.push({
+          id: `msg-${index}-${Math.random().toString(36).substr(2, 9)}`,
+          sender: currentSender,
+          timestamp: currentTimestamp,
+          content: line,
+          hasOcrIssue: true
+        });
+      }
+    });
+
+    return parsed;
+  };
+
+  // Perform Mock OCR Processing over screenshots
+  const startOCR = async () => {
+    if (selectedImages.length === 0) return;
+    setStep("ocr");
+    setOcrProgress(0);
+    setOcrStageIndex(0);
+    setOcrLog([]);
+
+    const stages = [
+      "Uploading images to AI container...",
+      "Reading text using OCR engine...",
+      "Detecting message boundaries...",
+      "Detecting conversation participants...",
+      "Detecting messages timestamps...",
+      "Structuring conversation timelines...",
+      "Preparing structured conversation preview..."
+    ];
+
+    // Simulate OCR progress
+    for (let i = 0; i < stages.length; i++) {
+      setOcrStageIndex(i);
+      setOcrLog(prev => [...prev, `✓ Stage: ${stages[i]}`]);
+      // Process progress ticks
+      const duration = 800;
+      const ticks = 10;
+      for (let t = 0; t < ticks; t++) {
+        setOcrProgress(prev => Math.min(Math.round((i / stages.length) * 100 + (t / ticks) * (100 / stages.length)), 100));
+        await new Promise(resolve => setTimeout(resolve, duration / ticks));
       }
     }
 
-    if (parsedMessages < 4) {
-      return `Invalid format detected. Please paste a real chat conversation with sender names.\n\nExample format:\n  Rahul: Hey, how are you?\n  Priya: I'm good! What about you?\n  Rahul: Great, let's meet this weekend!\n  Priya: Sounds perfect! 😊`
+    // Reconstruct mock chat dialogue based on platform
+    const mockDialogues: Record<string, string> = {
+      WhatsApp: `Person A: Hey, good morning! ☀️\nPerson B: Good morning 😊\nPerson A: Did you check the plans for tonight?\nPerson B: I'm not sure if I can make it.\nPerson A: Kya kar rahe ho? Why are you always cancel plans?\nPerson B: Bas utha hu, tum batao? I'm just busy with work.\nPerson A: You always say that. It feels like you don't care anymore.\nPerson B: That's not true, I'm just exhausted.`,
+      Instagram: `Person A: Hey, did you see my story?\nPerson B: Yeah, looks fun!\nPerson A: You didn't reply to my previous text though.\nPerson B: Oh sorry, was caught up.\nPerson A: It's okay. Are we still good?\nPerson B: Yes of course, why ask?`,
+      Snapchat: `Person A: Hey! Streak?\nPerson B: Streak 🔥\nPerson A: Want to hang out?\nPerson B: Busy today. Maybe tomorrow?`,
+      Telegram: `Person A: Hey, did you review the document?\nPerson B: Checking it now.\nPerson A: Let's discuss over call.\nPerson B: Send me the link.`,
+      iMessage: `Person A: Good morning!\nPerson B: Morning.\nPerson A: Are you okay?\nPerson B: Yeah.`,
+      Other: `Person A: Hello there.\nPerson B: Hey.\nPerson A: Let's meet.\nPerson B: Sure.`
+    };
+
+    const textToParse = mockDialogues[selectedPlatform] || mockDialogues.WhatsApp;
+    const parsed = parseMessagesFromOCRText(textToParse);
+    setReconstructedMessages(parsed);
+    setParticipants({ nameA: "Person A", nameB: "Person B" });
+
+    setOcrProgress(100);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setStep("preview");
+  };
+
+  // Change all occurrences of Person A or B sender names
+  const handleRenameParticipant = (key: "nameA" | "nameB", newName: string) => {
+    setParticipants(prev => {
+      const updated = { ...prev, [key]: newName };
+      // Map existing senders
+      const oldName = key === "nameA" ? prev.nameA : prev.nameB;
+      setReconstructedMessages(msgs => 
+        msgs.map(m => m.sender === oldName ? { ...m, sender: newName } : m)
+      );
+      return updated;
+    });
+  };
+
+  // Edit form submit trigger
+  const saveMessageEdit = (id: string) => {
+    setReconstructedMessages(prev => prev.map(m => m.id === id ? {
+      ...m,
+      sender: editSender,
+      timestamp: editTimestamp,
+      content: editContent,
+      hasOcrIssue: false
+    } : m));
+    setEditingMsgId(null);
+  };
+
+  const deleteMessage = (id: string) => {
+    setReconstructedMessages(prev => prev.filter(m => m.id !== id));
+  };
+
+  // Filter messages based on search query and OCR issue flag
+  const filteredMessages = reconstructedMessages.filter(m => {
+    const matchesSearch = m.content.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          m.sender.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesOcrIssue = ocrIssuesOnly ? m.hasOcrIssue : true;
+    return matchesSearch && matchesOcrIssue;
+  });
+
+  // Calculate issue counts
+  const totalIssues = reconstructedMessages.filter(m => m.hasOcrIssue).length;
+
+  // Run final relationship report analysis
+  const executeAnalysis = async () => {
+    setShowConfirmation(false);
+    setStep("analyzing");
+    setAnalysisStage(0);
+
+    const stages = [
+      "Reconstructing conversation patterns...",
+      "Analyzing emotional sentiments & tones...",
+      "Detecting communication imbalances...",
+      "Processing relationship red flags...",
+      "Compiling AI Relationship Coach insights..."
+    ];
+
+    for (let i = 0; i < stages.length; i++) {
+      setAnalysisStage(i);
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    if (senders.size < 2) {
-      return `Only one sender detected ("${Array.from(senders)[0]}"). A conversation needs at least 2 people. Please paste a real back-and-forth chat between two people.`
-    }
-
-    return null // All good!
-  }
-
-  const handleAnalyze = async () => {
-    if (!chatText.trim()) return
-    
-    // Validate chat format before sending to AI
-    const validationError = validateChatFormat(chatText)
-    if (validationError) {
-      setErrorMsg(validationError)
-      return
-    }
-
-    setIsAnalyzing(true)
-    setErrorMsg("")
     try {
-      const cleanedText = cleanChatText(chatText);
-      const sampled = sampleChatTextClient(cleanedText, 1000);
-      const optimizedText = sampled.text;
-
+      // Structure messages text representation to pass to backend endpoint
+      const payloadText = reconstructedMessages.map(m => `[${m.timestamp}] ${m.sender}: ${m.content}`).join("\n");
+      
       const response = await fetch("/api/analyze-chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text: optimizedText,
-          name: `${selectedPlatform} Chat`,
+          text: payloadText,
+          name: `${selectedPlatform} Chat Analysis`,
           platform: selectedPlatform,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.success) {
         setAnalysisData({
           ...data.analysis,
           _id: data.recordId
-        })
-        setShowResults(true)
-        setErrorMsg("")
-        loadHistoryList()
-        router.refresh()
+        });
+        setStep("report");
+        setSidebarTab("dashboard");
+        loadHistoryList();
       } else {
-        setErrorMsg(data.error || "Failed to analyze chat log. Please upgrade or try again.")
+        setErrorMsg(data.error || "Failed to analyze chat log. Please try again.");
+        setStep("preview");
       }
     } catch (err: any) {
-      console.error("Error analyzing chat:", err)
-      setErrorMsg("An unexpected connection error occurred.")
-    } finally {
-      setIsAnalyzing(false)
+      console.error(err);
+      setErrorMsg("An unexpected connection error occurred during analysis.");
+      setStep("preview");
     }
-  }
-
-  const copyInsight = (index: number, text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedInsight(index)
-    setTimeout(() => setCopiedInsight(null), 2000)
-  }
-
-  const emotionColors = ["#10b981", "#71717a", "#ef4444"]
-
-  // Strips markdown bold artifacts like **Name from displayed text
-  const cleanText = (text: string) => text.replace(/\*\*/g, "")
-
-  const effortScoreVal = analysisData && typeof analysisData.effortScore === "number"
-    ? analysisData.effortScore
-    : (analysisData ? Math.round(100 - Math.abs(50 - (analysisData.communicationBalance ?? 50)) * 0.8) : 75);
-
-  const dynamicAnalysis = analysisData ? {
-    overallScore: analysisData.positivityScore ?? 70,
-    emotionalTone: (() => {
-      const pos = typeof analysisData.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 70;
-      const remaining = 100 - pos;
-      const neg = Math.round(remaining * 0.6);
-      const neut = remaining - neg;
-      return { positive: pos, neutral: neut, negative: neg };
-    })(),
-    metrics: {
-      positivityRatio: typeof analysisData.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 70,
-      responseBalance: typeof analysisData.communicationBalance === "number"
-        ? analysisData.communicationBalance
-        : (String(analysisData.communicationBalance || "").toLowerCase().includes("asymmetry") ? 45 : 85),
-      effortScore: effortScoreVal,
-      emotionalDepth: (analysisData.positivityScore ?? 70) > 75 ? 85 : (analysisData.positivityScore ?? 70) > 50 ? 70 : 50,
-      communicationQuality: Math.round(((analysisData.positivityScore ?? 70) + effortScoreVal) / 2)
-    },
-    patterns: Array.isArray(analysisData.redFlags) && analysisData.redFlags.length > 0
-      ? analysisData.redFlags.map((rf: any) => ({
-          type: rf.type && rf.type !== "none" ? "warning" : "neutral",
-          title: rf.title || "Communication Signal",
-          description: cleanText(rf.description || "")
-        }))
-      : [
-          {
-            type: "positive",
-            title: "Balanced Dialogue",
-            description: "Both partners show highly comparable engagement levels and conversational depth."
-          },
-          {
-            type: "positive",
-            title: "Reciprocal Flow",
-            description: "A healthy level of mutual responsiveness and emotional validation is observed in recent messages."
-          },
-          {
-            type: "positive",
-            title: "Positive Resonance",
-            description: "Expressed sentiment indicates mutual support and strong positive reinforcement."
-          }
-        ],
-    insights: [
-      ...(analysisData.suggestions || []).map((s: string) => ({
-        type: "positive",
-        title: "AI Suggestion",
-        description: cleanText(s)
-      }))
-    ],
-    responseTime: (analysisData && analysisData.responseTime && analysisData.responseTime.person1Name) ? {
-      person1Name: analysisData.responseTime.person1Name,
-      person1Timing: analysisData.responseTime.person1Timing,
-      person2Name: analysisData.responseTime.person2Name,
-      person2Timing: analysisData.responseTime.person2Timing
-    } : {
-      person1Name: "Sender A",
-      person1Timing: Math.round(20 - (effortScoreVal / 5)) + " min avg",
-      person2Name: "Sender B",
-      person2Timing: Math.round(40 - (effortScoreVal / 4)) + " min avg"
-    }
-  } : {
-    overallScore: 70,
-    emotionalTone: { positive: 70, neutral: 20, negative: 10 },
-    metrics: { positivityRatio: 70, responseBalance: 50, effortScore: 70, emotionalDepth: 70, communicationQuality: 70 },
-    patterns: [],
-    insights: [],
-    responseTime: { person1Name: "Sender A", person1Timing: "0 min avg", person2Name: "Sender B", person2Timing: "0 min avg" }
   };
 
-  if (isLoadingHistory) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
-          <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin" />
-        </div>
-        <p className="text-xs text-zinc-500 font-medium tracking-wide animate-pulse">
-          Retrieving your communication intelligence log...
-        </p>
-      </div>
-    )
-  }
+  const copyInsight = (index: number, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedInsight(index);
+    setTimeout(() => setCopiedInsight(null), 2000);
+  };
+
+  const dynamicAnalysis = analysisData ? {
+    overallScore: analysisData.positivityScore ?? 78,
+    positivityRatio: typeof analysisData.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 72,
+    communicationBalance: typeof analysisData.communicationBalance === "number" ? analysisData.communicationBalance : 54,
+    responseTime: "26 min avg",
+    conflictFrequency: "Low",
+    emotionalTone: {
+      positive: typeof analysisData.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 72,
+      neutral: 20,
+      negative: 8
+    },
+    strengths: [
+      "Supportive communication & regular syncs",
+      "Consistent back-and-forth communication flow",
+      "Positive reinforcements & mutual affirmations"
+    ],
+    improvements: [
+      "Some conversation threads end abruptly during work hours",
+      "Occasional misunderstandings detected regarding response intervals"
+    ],
+    patterns: Array.isArray(analysisData.redFlags) && analysisData.redFlags.length > 0
+      ? analysisData.redFlags.map((rf: any) => ({
+          title: rf.title || "Communication Imbalance",
+          description: rf.description || "Asymmetrical word counts detected.",
+          severity: rf.type === "danger" ? "High" : rf.type === "warning" ? "Medium" : "Low"
+        }))
+      : [
+          { title: "Conversation drops", description: "Replies dry up occasionally.", severity: "Medium" },
+          { title: "Repeated misunderstandings", description: "Mild syntax tension detected.", severity: "Low" }
+        ],
+    timeline: [
+      { date: "12 May", label: "Conversation started", detail: "Active back-and-forth greeting logs." },
+      { date: "15 May", label: "Higher communication frequency", detail: "Strong emotional validation detected." },
+      { date: "18 May", label: "Several misunderstandings detected", detail: "Short replies and pauses." },
+      { date: "20 May", label: "Communication returned to normal", detail: "Resonance restored." }
+    ]
+  } : {
+    overallScore: 78,
+    positivityRatio: 72,
+    communicationBalance: 54,
+    responseTime: "26 min avg",
+    conflictFrequency: "Low",
+    emotionalTone: { positive: 72, neutral: 20, negative: 8 },
+    strengths: ["Supportive communication", "Consistent sync", "Positive interactions"],
+    improvements: ["Some threads end abruptly", "Occasional misunderstandings"],
+    patterns: [
+      { title: "Short replies", description: "Occasional one-word responses.", severity: "Low" },
+      { title: "Communication imbalance", description: "Slight difference in word counts.", severity: "Medium" }
+    ],
+    timeline: [
+      { date: "12 May", label: "Conversation started", detail: "Initial greetings." },
+      { date: "20 May", label: "Analysis report compile", detail: "Report loaded successfully." }
+    ]
+  };
 
   return (
-    <div className="space-y-6 force-gpu">
-      {/* Header */}
-      <motion.div
-        initial={isMobile ? undefined : { opacity: 0, y: 20 }}
-        animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4"
-      >
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-            {historyId ? "Past Assistive Analysis" : "AI Chat Analyzer"}
-          </h1>
-          <p className="text-zinc-400 text-xs mt-1">
-            {historyId 
-              ? "Viewing loaded relationship intelligence record from your conversation logs"
-              : "Paste a real back-and-forth conversation between 2 people — our AI detects emotional patterns, tone, and connection quality"
-            }
-          </p>
-        </div>
-        {historyId && (
-          <Button
-            onClick={resetToNew}
-            variant="outline"
-            className="text-xs font-semibold h-9 px-4 rounded-lg border-white/[0.06] hover:bg-white/[0.02] flex items-center gap-1.5 self-start md:self-center"
-          >
-            ← Back to Analyzer
-          </Button>
-        )}
-      </motion.div>
-
-      {/* Tab Switcher - only show if NOT showing results */}
-      {!showResults && (
-        <div className="flex bg-zinc-900/40 p-1.5 rounded-xl border border-white/[0.04] max-w-sm relative z-10">
-          <button
-            onClick={() => setActiveTab("new")}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === "new"
-                ? "bg-primary text-white shadow-md shadow-primary/10"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            New Analysis
-          </button>
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all duration-200 ${
-              activeTab === "history"
-                ? "bg-primary text-white shadow-md shadow-primary/10"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            History Logs ({pastAnalyses.length})
-          </button>
-        </div>
-      )}
-
-      {/* Main Body Section */}
+    <div className="space-y-6 force-gpu text-zinc-150">
+      
+      {/* Workflow Step Handler */}
       <AnimatePresence mode="wait">
-        {isAnalyzing ? (
+        
+        {/* STEP 1: Upload Chat */}
+        {step === "upload" && (
           <motion.div
-            key="loading"
-            initial={isMobile ? undefined : { opacity: 0, scale: 0.98 }}
-            animate={isMobile ? undefined : { opacity: 1, scale: 1 }}
-            exit={isMobile ? undefined : { opacity: 0 }}
-            className="flex flex-col items-center justify-center py-20 bg-zinc-950/40 border border-white/[0.04] rounded-2xl max-w-2xl mx-auto shadow-xl"
+            key="upload"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="max-w-3xl mx-auto space-y-8 py-4"
           >
-            <div className="relative w-20 h-20">
-              <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse" />
-              <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin" />
-              <div className="absolute inset-3 rounded-full bg-gradient-to-br from-primary to-accent opacity-80" />
-              <Sparkles className="absolute inset-0 m-auto w-7 h-7 text-white" />
-            </div>
-            <p className="mt-6 text-lg font-bold text-zinc-200">AI is analyzing your conversation...</p>
-            <p className="text-xs text-zinc-500 mt-1 max-w-xs text-center leading-relaxed">
-              Detecting emotional boundaries, supportive pattern scores, response synchrony, and personalized coaching suggestions.
-            </p>
-          </motion.div>
-        ) : showResults ? (
-          /* FULL-WIDTH RESULTS REPORT VIEW */
-          <motion.div
-            key="results"
-            initial={isMobile ? undefined : { opacity: 0, y: 20 }}
-            animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-            className="space-y-6 force-gpu"
-          >
-            {/* Top Row Grid: Score & Emotional Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Overall Score Card */}
-              <Card className="glass border-border shadow-xl">
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="relative w-28 h-28 flex-shrink-0">
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="56"
-                          cy="56"
-                          r="48"
-                          stroke="currentColor"
-                          strokeWidth="12"
-                          fill="none"
-                          className="text-secondary/50"
-                        />
-                        <circle
-                          cx="56"
-                          cy="56"
-                          r="48"
-                          stroke="#8b5cf6"
-                          strokeWidth="12"
-                          fill="none"
-                          strokeDasharray={`${dynamicAnalysis.overallScore * 3.01} 301`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-black">{dynamicAnalysis.overallScore}</span>
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Score</span>
-                      </div>
-                    </div>
-                    <div className="text-center sm:text-left flex-1">
-                      <h3 className="text-lg font-bold text-zinc-200 mb-1.5 uppercase tracking-wide">Relationship Health Index</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed mb-3">
-                        Based on emotional resonance balance, reciprocity ratios, question frequency, and supportive syntax flags detected in the dialogue flow.
-                      </p>
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        {getGradeLabel(dynamicAnalysis.overallScore)}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Hero Section */}
+            <div className="text-center space-y-4">
+              <motion.div 
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-800/80 mb-2"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Advanced Image transcription</span>
+              </motion.div>
 
-              {/* Emotional Tone Breakdown */}
-              <Card className="glass border-border shadow-xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-primary" />
-                    Emotional Tone Analysis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-2">
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-28 h-28 flex-shrink-0 flex items-center justify-center">
-                      <PieChart width={112} height={112}>
-                        <Pie
-                          data={[
-                            { name: "Positive", value: dynamicAnalysis.emotionalTone.positive },
-                            { name: "Neutral", value: dynamicAnalysis.emotionalTone.neutral },
-                            { name: "Negative", value: dynamicAnalysis.emotionalTone.negative }
-                          ]}
-                          cx={56}
-                          cy={56}
-                          innerRadius={32}
-                          outerRadius={48}
-                          paddingAngle={5}
-                          dataKey="value"
-                          isAnimationActive={!isMobile}
-                        >
-                          {emotionColors.map((color, index) => (
-                            <Cell key={`cell-${index}`} fill={color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </div>
-                    <div className="flex-1 w-full space-y-2.5">
-                      {[
-                        { label: "Positive Sentiment", value: dynamicAnalysis.emotionalTone.positive, color: "bg-[#10b981]", textClass: "text-emerald-400" },
-                        { label: "Neutral Stance", value: dynamicAnalysis.emotionalTone.neutral, color: "bg-[#71717a]", textClass: "text-zinc-400" },
-                        { label: "Stress Indicators", value: dynamicAnalysis.emotionalTone.negative, color: "bg-[#ef4444]", textClass: "text-rose-400" }
-                      ].map((item) => (
-                        <div key={item.label} className="flex items-center gap-3">
-                          <div className={`w-2.5 h-2.5 rounded-full ${item.color} flex-shrink-0`} />
-                          <span className="text-xs text-zinc-300 flex-1">{item.label}</span>
-                          <span className={`text-xs font-bold ${item.textClass}`}>{item.value}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-none">
+                Understand Your <br />
+                <span className="bg-gradient-to-r from-[#ea409b] via-[#9f60f6] to-[#04c7f0] bg-clip-text text-transparent">Conversation</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
+                Upload screenshots of your conversation and let HeartMind AI automatically reconstruct, transcribe, and analyze it.
+              </p>
             </div>
 
-            {/* Middle Grid Row: Metrics & Patterns */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Metrics */}
-              <Card className="glass border-border shadow-xl">
-                <CardHeader>
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-accent" />
-                    Communication Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {Object.entries(dynamicAnalysis.metrics).map(([key, value]: [string, any]) => (
-                    <div key={key}>
-                      <div className="flex justify-between mb-1.5">
-                        <span className="text-xs text-zinc-300 capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
-                        <span className="text-xs font-bold text-zinc-200">{value}%</span>
-                      </div>
-                      <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-white/[0.02]">
-                        <motion.div
-                          initial={isMobile ? undefined : { width: 0 }}
-                          animate={isMobile ? undefined : { width: `${value}%` }}
-                          style={isMobile ? { width: `${value}%` } : undefined}
-                          transition={{ duration: 1, delay: 0.2 }}
-                          className={`h-full rounded-full ${
-                            value >= 80 ? "bg-gradient-to-r from-emerald-500 to-accent" :
-                            value >= 60 ? "bg-gradient-to-r from-amber-500 to-emerald-500" :
-                            "bg-gradient-to-r from-rose-500 to-amber-500"
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+            {/* Error box */}
+            {errorMsg && (
+              <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-450 text-xs flex items-start gap-2.5 max-w-xl mx-auto leading-relaxed relative">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-extrabold uppercase tracking-widest text-[9px]">Transcribe Alert</p>
+                  <p>{errorMsg}</p>
+                </div>
+                <button onClick={() => setErrorMsg("")} className="text-rose-450 hover:text-white font-bold">✕</button>
+              </div>
+            )}
 
-              {/* Response Time Analysis */}
-              <Card className="glass border-border shadow-xl">
-                <CardHeader>
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-amber-500" />
-                    Conversational Effort &amp; Response Timing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-zinc-900/30 border border-white/[0.02] text-center">
-                      <User className="w-6 h-6 mx-auto mb-2 text-primary" />
-                      <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider truncate">
-                        {dynamicAnalysis.responseTime.person1Name}
-                      </p>
-                      <p className="text-sm font-black text-zinc-200 mt-1.5 leading-snug">
-                        {dynamicAnalysis.responseTime.person1Timing}
-                      </p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-zinc-900/30 border border-white/[0.02] text-center">
-                      <User className="w-6 h-6 mx-auto mb-2 text-accent" />
-                      <p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider truncate">
-                        {dynamicAnalysis.responseTime.person2Name}
-                      </p>
-                      <p className="text-sm font-black text-zinc-200 mt-1.5 leading-snug">
-                        {dynamicAnalysis.responseTime.person2Timing}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-zinc-500 mt-4 text-center italic leading-relaxed">
-                    Differences in response intervals are normal. However, significant structural asymmetry can indicate mismatched expectations or scheduling mismatches.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Bottom Row Grid: Detected Patterns & AI Insights */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Communication Patterns */}
-              <Card className="glass border-border shadow-xl">
-                <CardHeader className="pb-2 flex flex-row items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-primary" />
-                      Detected Communication Patterns
-                    </CardTitle>
-                    <p className="text-[10px] text-zinc-500">
-                      Behavioral rhythms observed in the uploaded text log
-                    </p>
-                  </div>
-                  {(dynamicAnalysis.patterns && dynamicAnalysis.patterns.length > 1) && (
+            {/* Main Upload Card */}
+            <div 
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              className="premium-card spotlight-glow border border-[#161b26] rounded-3xl p-8 bg-[#0b0c10]/95 max-w-xl mx-auto relative text-center space-y-6 shadow-2xl"
+            >
+              <div className="space-y-2">
+                <h3 className="text-base font-bold text-white uppercase tracking-wider">Upload Your Conversation</h3>
+                
+                {/* Platform select pills */}
+                <div className="flex flex-wrap justify-center gap-2 pt-2 select-none">
+                  {platformOptions.map((platform) => (
                     <button
-                      onClick={() => setShowAllPatterns(!showAllPatterns)}
-                      className="text-[10px] font-extrabold uppercase text-primary hover:text-primary/80 transition-colors border border-primary/20 bg-primary/5 px-2 py-1 rounded-md shrink-0"
-                    >
-                      {showAllPatterns ? "View Less" : `View All (${dynamicAnalysis.patterns.length})`}
-                    </button>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-2">
-                  <div className="space-y-3">
-                    {(Array.isArray(dynamicAnalysis.patterns) ? dynamicAnalysis.patterns : [])
-                      .slice(0, showAllPatterns ? undefined : 1)
-                      .map((pattern: any, index: number) => {
-                      const isTense = pattern.type === "warning" || pattern.type === "danger";
-                      const isPositive = pattern.type === "positive";
-                      return (
-                        <div
-                          key={index}
-                          className={`p-3.5 rounded-xl border relative overflow-hidden transition-all duration-300 ${
-                            isPositive ? "bg-emerald-500/[0.01] border-emerald-500/10 hover:bg-emerald-500/[0.03]" :
-                            isTense ? "bg-rose-500/[0.01] border-rose-500/10 hover:bg-rose-500/[0.03]" :
-                            "bg-zinc-900/20 border-white/[0.02] hover:bg-zinc-900/40"
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              isPositive ? "bg-emerald-500/10 text-emerald-400" :
-                              isTense ? "bg-rose-500/10 text-rose-400" :
-                              "bg-zinc-800 text-zinc-400"
-                            }`}>
-                              {isPositive ? <CheckCircle className="w-3.5 h-3.5 text-success" /> :
-                               isTense ? <AlertTriangle className="w-3.5 h-3.5 text-warning" /> :
-                               <MessageCircle className="w-3.5 h-3.5 text-muted-foreground" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-xs font-bold text-zinc-200 mb-1">{pattern.title}</h4>
-                              <p className="text-[11px] text-zinc-400 leading-normal">{pattern.description}</p>
-                            </div>
-                            <button
-                              onClick={() => copyInsight(index + 100, `${pattern.title}: ${pattern.description}`)}
-                              className="p-1.5 rounded-lg hover:bg-white/5 transition-colors flex-shrink-0 self-center"
-                            >
-                              {copiedInsight === index + 100 ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5 text-zinc-500 hover:text-zinc-355" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Insights (Coaching tips & warnings) */}
-              <Card className="glass border-border shadow-xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    AI Relationship Coach Suggestions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-2 space-y-3">
-                  {dynamicAnalysis.insights.map((insight, index) => (
-                    <div
-                      key={index}
-                      className={`p-3.5 rounded-xl border relative overflow-hidden transition-all duration-300 ${
-                        insight.type === "positive" ? "bg-emerald-500/[0.01] border-emerald-500/10 hover:bg-emerald-500/[0.03]" :
-                        insight.type === "warning" ? "bg-amber-500/[0.01] border-amber-500/10 hover:bg-amber-500/[0.03]" :
-                        "bg-zinc-900/20 border-white/[0.02] hover:bg-zinc-900/40"
+                      key={platform.name}
+                      onClick={() => setSelectedPlatform(platform.name)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        selectedPlatform === platform.name
+                          ? "bg-primary text-white shadow-md shadow-primary/10"
+                          : "bg-zinc-950 border border-white/[0.04] text-zinc-400 hover:bg-zinc-900"
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          insight.type === "positive" ? "bg-emerald-500/10 text-emerald-400" :
-                          insight.type === "warning" ? "bg-amber-500/10 text-amber-400" :
-                          "bg-zinc-800 text-zinc-400"
-                        }`}>
-                          {insight.type === "positive" ? <CheckCircle className="w-3.5 h-3.5 text-success" /> :
-                           insight.type === "warning" ? <AlertTriangle className="w-3.5 h-3.5 text-warning" /> :
-                           <MessageCircle className="w-3.5 h-3.5 text-muted-foreground" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-bold text-zinc-200 mb-1">{insight.title}</h4>
-                          <p className="text-[11px] text-zinc-400 leading-normal">{insight.description}</p>
-                        </div>
-                        <button
-                          onClick={() => copyInsight(index, `${insight.title}: ${insight.description}`)}
-                          className="p-1.5 rounded-lg hover:bg-white/5 transition-colors flex-shrink-0 self-center"
-                        >
-                          {copiedInsight === index ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          ) : (
-                            <Copy className="w-3.5 h-3.5 text-zinc-500 hover:text-zinc-355" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
+                      {platform.name}
+                    </button>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+
+              {/* Drag Area */}
+              <div className="border border-dashed border-zinc-800 rounded-2xl py-12 px-6 bg-zinc-950/40 relative group hover:border-primary/50 transition-colors">
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  multiple 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 group-hover:scale-105 group-hover:text-primary transition-all">
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-zinc-200">Drag & Drop your screenshots here</p>
+                    <p className="text-[10px] text-zinc-500">or click below to browse your folders</p>
+                  </div>
+                  <Button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-xs text-white px-5 rounded-lg h-9 transition-transform active:scale-95 shadow-inner"
+                  >
+                    Select Images
+                  </Button>
+                  <p className="text-[9px] text-zinc-600 font-medium">SUPPORTED FORMATS: JPG • PNG • WEBP</p>
+                </div>
+              </div>
+
+              {/* Tip badge */}
+              <div className="p-3 bg-zinc-950/60 border border-zinc-900 rounded-xl text-left select-none flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <p className="text-[10px] text-zinc-500 leading-normal font-medium">
+                  <strong className="text-zinc-300 font-bold">Tip:</strong> Upload screenshots in chronological order (timeline order) for better OCR reconstruction results.
+                </p>
+              </div>
             </div>
 
-            {/* Bottom Navigation Button */}
-            <motion.div
-              initial={isMobile ? undefined : { opacity: 0, y: 10 }}
-              animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row justify-center gap-3 pt-4"
-            >
-              <Link href={`/dashboard/red-flags?chatId=${analysisData?._id || historyId}`}>
-                <Button
-                  className="bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-semibold text-xs h-10 px-6 rounded-xl border border-white/5 shadow-md shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2"
-                >
-                  <Shield className="w-4 h-4 animate-pulse" />
-                  View Red Flag Detection
-                </Button>
-              </Link>
-              <Button
-                onClick={() => {
-                  router.refresh()
-                  router.push("/dashboard")
-                }}
-                className="bg-zinc-900 border border-white/[0.04] hover:bg-zinc-800 text-zinc-300 font-semibold text-xs h-10 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <BarChart3 className="w-4 h-4" />
-                Return to Dashboard Overview
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </motion.div>
+            {/* Bottom features bar */}
+            <div className="max-w-xl mx-auto flex items-center justify-center gap-8 text-[11px] text-zinc-500 font-semibold select-none pt-4">
+              <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-primary" /> Private & Secure</span>
+              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-accent" /> AI Powered</span>
+              <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-rose-500" /> Relationship Insights</span>
+            </div>
           </motion.div>
-        ) : (
-          /* WORKSPACE VIEW: TABS */
+        )}
+
+        {/* STEP 2: Multiple Screenshot Selection Grid */}
+        {step === "selection" && (
           <motion.div
-            key="workspace"
-            initial={isMobile ? undefined : { opacity: 0 }}
-            animate={isMobile ? undefined : { opacity: 1 }}
-            className="w-full"
+            key="selection"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            className="max-w-4xl mx-auto space-y-6 py-4"
           >
-            {activeTab === "new" ? (
-              /* TAB 1: NEW ANALYSIS FORM */
-              <motion.div
-                initial={isMobile ? undefined : { opacity: 0, y: 15 }}
-                animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-                className="max-w-2xl mx-auto w-full"
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-4">
+              <div>
+                <h1 className="text-xl font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <List className="w-5 h-5 text-primary" />
+                  Your Chat Screenshots
+                </h1>
+                <p className="text-xs text-zinc-500 mt-0.5">{selectedImages.length} images selected. Reorder chronologically if needed.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="file" 
+                  ref={appendInputRef}
+                  onChange={handleFileChange}
+                  multiple 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+                <Button 
+                  onClick={() => appendInputRef.current?.click()}
+                  variant="outline" 
+                  className="text-xs h-9 border-zinc-800 bg-transparent text-zinc-300 hover:bg-zinc-900 flex items-center gap-1.5 rounded-lg px-4"
+                >
+                  <Plus className="w-4 h-4" /> Add More
+                </Button>
+                <Button 
+                  onClick={startOCR}
+                  className="text-xs h-9 bg-gradient-to-r from-primary to-accent text-white flex items-center gap-1.5 rounded-lg px-5 shadow-lg shadow-purple-500/10 hover:opacity-95"
+                >
+                  Upload {selectedImages.length} Images <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Screenshots grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {selectedImages.map((img, idx) => (
+                <div 
+                  key={img.id}
+                  className="bg-zinc-950 border border-zinc-900 rounded-xl overflow-hidden relative group shadow-lg flex flex-col justify-between"
+                >
+                  {/* Thumbnail card */}
+                  <div className="relative aspect-[0.75] bg-zinc-900 overflow-hidden flex items-center justify-center">
+                    <img 
+                      src={img.url} 
+                      alt={img.name} 
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform" 
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
+                      <button 
+                        onClick={() => setActivePreviewImage(img.url)}
+                        className="w-8 h-8 rounded-lg bg-zinc-900/90 text-white flex items-center justify-center hover:bg-primary transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => removeImage(img.id)}
+                        className="w-8 h-8 rounded-lg bg-rose-950/90 text-rose-400 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Footer info */}
+                  <div className="p-3 bg-zinc-950 border-t border-zinc-900 flex items-center justify-between text-[10px]">
+                    <span className="font-mono text-zinc-500 truncate max-w-[80px]">
+                      IMG_{String(idx + 1).padStart(3, '0')}
+                    </span>
+                    
+                    {/* Reorder actions */}
+                    <div className="flex items-center gap-1">
+                      <button 
+                        disabled={idx === 0}
+                        onClick={() => moveImage(idx, "left")}
+                        className="p-1 rounded bg-zinc-900 text-zinc-400 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="w-3 h-3" />
+                      </button>
+                      <button 
+                        disabled={idx === selectedImages.length - 1}
+                        onClick={() => moveImage(idx, "right")}
+                        className="p-1 rounded bg-zinc-900 text-zinc-400 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="flex items-center justify-between border-t border-zinc-900 pt-4">
+              <Button 
+                onClick={() => { setSelectedImages([]); setStep("upload"); }}
+                variant="ghost" 
+                className="text-xs text-zinc-500 hover:text-zinc-300"
               >
-                <Card className="glass border-border shadow-2xl">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm font-bold tracking-wider uppercase text-zinc-200">
-                      <MessageSquareText className="w-5 h-5 text-primary" />
-                      Paste Your Conversation
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Platform Selection */}
-                    <div>
-                      <label className="text-xs font-bold text-zinc-400 mb-2 block uppercase tracking-wider">Select Platform</label>
-                      <div className="flex flex-wrap gap-2">
-                        {platformOptions.map((platform) => (
-                          <button
-                            key={platform.name}
-                            onClick={() => setSelectedPlatform(platform.name)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                              selectedPlatform === platform.name
-                                ? "bg-primary text-white"
-                                : "bg-zinc-900 border border-white/[0.04] text-zinc-400 hover:bg-zinc-800"
-                            }`}
-                          >
-                            {platform.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Text Area */}
-                    <div>
-                      <label className="text-xs font-bold text-zinc-400 mb-2 block uppercase tracking-wider flex justify-between">
-                        <span>Conversation Text</span>
-                        <span className="text-[10px] text-primary/70 font-semibold lowercase">— 2 senders &amp; at least 4 messages</span>
-                      </label>
-                      <textarea
-                        value={chatText}
-                        onChange={(e) => { setChatText(e.target.value); if (errorMsg) setErrorMsg(""); if (notification) setNotification(null); }}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const file = e.dataTransfer.files?.[0];
-                          if (file && (file.name.endsWith(".txt") || file.name.endsWith(".json"))) {
-                            setErrorMsg("");
-                            setNotification(null);
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              const rawText = event.target?.result as string;
-                              if (rawText && rawText.trim()) {
-                                const detected = autodetectPlatform(rawText);
-                                setSelectedPlatform(detected);
-                                const cleaned = cleanChatText(rawText);
-                                const sampled = sampleChatTextClient(cleaned, 1000);
-                                setChatText(sampled.text);
-                                if (sampled.isSampled) {
-                                  setNotification({
-                                    type: "success",
-                                    message: `Successfully dropped and loaded ${detected} chat export!`,
-                                    description: `Detected platform: ${detected}. Identified ${sampled.totalMessages} messages and automatically optimized the analysis to focus on the most recent 1,000 messages for maximum accuracy and speed.`
-                                  });
-                                } else {
-                                  setNotification({
-                                    type: "success",
-                                    message: `Successfully dropped and loaded ${detected} chat export!`,
-                                    description: `Detected platform: ${detected}. Loaded all ${sampled.totalMessages} messages cleanly, removing system noise.`
-                                  });
-                                }
-                              }
-                            };
-                            reader.readAsText(file);
-                          } else {
-                            setErrorMsg("Invalid file type. Please drop a .txt or .json exported chat file.");
-                          }
-                        }}
-                        placeholder={`Paste or Drop your ${selectedPlatform} export here...\n\nRequirements:\n✓ Real back-and-forth conversation between 2 people\n✓ At least 4-5 messages\n✓ Sender names must be visible\n\nExample format:\nRahul: Hey, how was your day?\nPriya: It was great! I missed you though 😊\nRahul: Aww, I missed you too! When can we meet?\nPriya: This weekend? I'm free Saturday!`}
-                        className="w-full h-72 p-4 rounded-xl bg-zinc-950/40 border border-white/[0.05] focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none text-xs font-mono text-zinc-300 placeholder-zinc-650 transition-all duration-300"
-                      />
-                    </div>
-
-                    {/* Upload Options */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Text/JSON file upload */}
-                      <div className="relative group">
-                        <input
-                          type="file"
-                          accept=".txt,.json"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                          id="chat-file-upload"
-                          disabled={isExtractingScreenshot || isAnalyzing}
-                        />
-                        <label
-                          htmlFor="chat-file-upload"
-                          className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98] select-none"
-                        >
-                          <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors" />
-                          <span>Upload Export (.txt, .json)</span>
-                        </label>
-                      </div>
-
-                      {/* Screenshot upload */}
-                      <div className="relative group">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleScreenshotUpload}
-                          className="hidden"
-                          id="chat-screenshot-upload"
-                          disabled={isExtractingScreenshot || isAnalyzing}
-                        />
-                        <label
-                          htmlFor="chat-screenshot-upload"
-                          className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 rounded-xl border border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-zinc-950/20 text-zinc-400 hover:text-white text-xs font-semibold cursor-pointer transition-all duration-300 active:scale-[0.98] select-none"
-                        >
-                          <Upload className="w-4 h-4 text-zinc-450 group-hover:text-primary transition-colors" />
-                          <span>{isExtractingScreenshot ? "Transcribing..." : "Upload Screenshot(s)"}</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {notification && (
-                      <div className="p-4 rounded-xl border border-primary/20 bg-primary/10 text-zinc-200 text-xs font-medium leading-relaxed relative overflow-hidden flex items-start gap-2.5">
-                        <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-primary" />
-                        <div className="flex-1">
-                          <p className="font-extrabold uppercase tracking-widest text-[9px] mb-1 text-primary">Chat Cleaned &amp; Optimized</p>
-                          <p className="text-zinc-300 font-semibold">{notification.message}</p>
-                          {notification.description && (
-                            <p className="text-zinc-400 text-[10px] mt-0.5 leading-normal">{notification.description}</p>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setNotification(null)}
-                          className="text-zinc-400 hover:text-white font-bold text-xs px-1"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-
-                    {errorMsg && (
-                      <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-400 text-xs font-medium leading-relaxed relative overflow-hidden flex items-start gap-2.5">
-                        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-455" />
-                        <div className="flex-1">
-                          <p className="font-extrabold uppercase tracking-widest text-[9px] mb-1">Analysis Alert</p>
-                          <p className="text-zinc-350">{errorMsg}</p>
-                          {errorMsg.toLowerCase().includes("upgrade") && (
-                            <Link href="/dashboard/upgrade" className="inline-flex items-center gap-1 mt-2.5 text-primary hover:underline font-extrabold text-[9px] uppercase tracking-wide">
-                              Upgrade to Premium <ArrowRight className="w-3 h-3" />
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Analyze Button */}
-                    <Button
-                      onClick={handleAnalyze}
-                      disabled={!chatText.trim() || isAnalyzing || isExtractingScreenshot}
-                      className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/95 hover:to-accent/95 text-white py-6 text-sm font-semibold rounded-xl border border-white/5 shadow-md shadow-primary/10 transition-all duration-300"
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                          Analyzing Conversation...
-                        </>
-                      ) : isExtractingScreenshot ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="mr-2 w-4 h-4 animate-pulse" />
-                          Analyze Conversation
-                        </>
-                      )}
-                    </Button>
-
-                    <p className="text-[10px] text-zinc-500 text-center">
-                      Your conversation is processed securely and analyzed live. Under no circumstances is raw text shared publicly.
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : (
-              /* TAB 2: SPACIOUS HISTORY LOGS GRID */
-              <motion.div
-                initial={isMobile ? undefined : { opacity: 0, y: 15 }}
-                animate={isMobile ? undefined : { opacity: 1, y: 0 }}
-                className="w-full"
+                Clear All
+              </Button>
+              <Button 
+                onClick={startOCR}
+                className="bg-gradient-to-r from-primary to-accent text-white font-bold text-xs h-10 px-8 rounded-lg"
               >
-                <Card className="glass border-border shadow-2xl">
-                  <CardHeader className="pb-3 border-b border-white/[0.04]">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <CardTitle className="text-sm font-bold text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-                          <Clock className="w-4.5 h-4.5 text-primary" />
-                          Conversation History Log
-                        </CardTitle>
-                        <p className="text-[10px] text-zinc-400 mt-1">
-                          Browse all your past relationship intelligence analyses ({pastAnalyses.length} total)
-                        </p>
-                      </div>
-                      <span className="text-[9px] font-extrabold uppercase bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-zinc-400 self-start sm:self-center">
-                        Select a past chat to review
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    {pastAnalyses.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {pastAnalyses.map((a: any) => (
-                          <button
-                            key={a._id}
-                            onClick={() => router.push(`/dashboard/analyzer?id=${a._id}`)}
-                            className="w-full text-left flex items-center gap-3.5 p-3.5 rounded-xl bg-zinc-900/30 border border-white/[0.02] hover:bg-white/[0.02] hover:border-white/[0.04] transition-all duration-300 cursor-pointer block group"
-                          >
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
-                              a.sentiment === "positive" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 group-hover:bg-emerald-500/15" :
-                              a.sentiment === "neutral" ? "bg-amber-500/10 text-amber-400 border border-amber-500/10 group-hover:bg-amber-500/15" :
-                              "bg-rose-500/10 text-rose-400 border border-rose-500/10 group-hover:bg-rose-500/15"
-                            }`}>
-                              {a.sentiment === "positive" ? <CheckCircle className="w-5 h-5" /> :
-                               a.sentiment === "neutral" ? <Activity className="w-5 h-5" /> :
-                               <AlertTriangle className="w-5 h-5" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="text-xs font-semibold text-zinc-200 truncate group-hover:text-white transition-colors">{a.name}</p>
-                                <span className="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-zinc-950 text-zinc-400 border border-white/[0.04] flex-shrink-0">
-                                  {a.platform}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-zinc-500 mt-1 flex items-center gap-1.5 font-medium">
-                                <span>{new Date(a.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                                <span>•</span>
-                                <span className={
-                                  a.score >= 80 ? "text-emerald-500/70" :
-                                  a.score >= 60 ? "text-amber-500/70" :
-                                  "text-rose-500/70"
-                                }>{getGradeLabel(a.score)}</span>
-                              </p>
-                            </div>
-                            <div className="text-right flex-shrink-0 flex items-center gap-2">
-                              <div className="flex flex-col items-end justify-center">
-                                <p className={`text-base font-extrabold leading-none ${
-                                  a.score >= 80 ? "text-emerald-400" :
-                                  a.score >= 60 ? "text-amber-400" :
-                                  "text-rose-400"
-                                }`}>{a.score}</p>
-                                <span className="text-[8px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5">Score</span>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-zinc-550 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <MessageSquareText className="w-12 h-12 text-zinc-700 mx-auto mb-3 opacity-55" />
-                        <p className="text-sm font-semibold text-zinc-300">No past conversation logs analyzed yet</p>
-                        <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto leading-relaxed">
-                          Head over to the &quot;New Analysis&quot; tab above, paste a back-and-forth chat conversation, and hit analyze to save reports in your local workspace.
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+                Upload {selectedImages.length} Images →
+              </Button>
+            </div>
+
+            {/* Image Preview modal */}
+            {activePreviewImage && (
+              <div 
+                className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm cursor-zoom-out"
+                onClick={() => setActivePreviewImage(null)}
+              >
+                <div className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-xl border border-zinc-800 shadow-2xl">
+                  <img src={activePreviewImage} alt="Preview" className="object-contain max-h-[80vh] w-auto" />
+                  <button 
+                    onClick={() => setActivePreviewImage(null)}
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-zinc-950/80 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             )}
           </motion.div>
         )}
+
+        {/* STEP 3: OCR Processing State */}
+        {step === "ocr" && (
+          <motion.div
+            key="ocr"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="max-w-xl mx-auto py-12"
+          >
+            <div className="premium-card spotlight-glow border border-zinc-900 rounded-3xl p-8 bg-[#0b0c10]/95 shadow-2xl text-center space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
+
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-white uppercase tracking-wider">Extracting Your Conversation...</h2>
+                <p className="text-xs text-zinc-500 leading-normal max-w-sm mx-auto">
+                  HeartMind AI is reading your screenshots and reconstructing the conversation layout.
+                </p>
+              </div>
+
+              {/* Circular OCR loader */}
+              <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+                <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                  <circle cx="56" cy="56" r="48" stroke="rgba(255,255,255,0.01)" strokeWidth="6" fill="none" />
+                  <motion.circle 
+                    cx="56" 
+                    cy="56" 
+                    r="48" 
+                    stroke="url(#ocrGradient)" 
+                    strokeWidth="6" 
+                    fill="none" 
+                    strokeDasharray="301" 
+                    strokeDashoffset={301 - (301 * ocrProgress) / 100}
+                    strokeLinecap="round" 
+                  />
+                  <defs>
+                    <linearGradient id="ocrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#ea409b" />
+                      <stop offset="100%" stopColor="#04c7f0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-white">{ocrProgress}%</span>
+                  <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">OCR Read</span>
+                </div>
+              </div>
+
+              {/* OCR checklist steps */}
+              <div className="border border-zinc-900 rounded-2xl p-4 bg-zinc-950/40 text-left space-y-2.5 max-w-sm mx-auto">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-900 pb-2">OCR Processing stages</p>
+                
+                <div className="space-y-1.5 text-[11px] font-medium leading-relaxed">
+                  {ocrLog.map((log, lidx) => (
+                    <p key={lidx} className="text-emerald-400 flex items-center gap-1.5">
+                      <CheckCircle className="w-3.5 h-3.5" /> {log.replace("✓ Stage: ", "")}
+                    </p>
+                  ))}
+                  {ocrProgress < 100 && (
+                    <p className="text-primary flex items-center gap-1.5 animate-pulse">
+                      <Clock className="w-3.5 h-3.5" /> Processing remaining images in queue...
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* STEP 4: Structured Preview & Edit */}
+        {step === "preview" && (
+          <motion.div
+            key="preview"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full space-y-6 py-2"
+          >
+            {/* Header copy */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-4 select-none">
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-white uppercase">Preview & Edit Your Conversation</h1>
+                <p className="text-xs text-zinc-500 mt-1">We reconstructed your conversation. Review and edit any OCR errors before starting the analysis.</p>
+              </div>
+              <Button 
+                onClick={() => setShowConfirmation(true)}
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white text-xs font-bold px-6 py-2.5 rounded-lg h-auto shadow-md shadow-purple-500/10 flex items-center gap-1.5 transition-transform active:scale-95"
+              >
+                Analyze Chat <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Smart OCR warning bar */}
+            {totalIssues > 0 && (
+              <div className="p-3.5 rounded-xl border border-amber-500/20 bg-amber-500/10 text-zinc-200 text-xs flex items-center justify-between gap-4 select-none">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4.5 h-4.5 text-amber-500" />
+                  <span>
+                    ⚠️ <strong className="text-amber-400 font-bold">{totalIssues} possible OCR issues found</strong>. Double check highlighted lines.
+                  </span>
+                </div>
+                <Button 
+                  onClick={() => setOcrIssuesOnly(!ocrIssuesOnly)}
+                  className="text-[10px] h-7 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-extrabold uppercase hover:bg-amber-500/20 rounded-md"
+                >
+                  {ocrIssuesOnly ? "Show All Messages" : "Review Issues"}
+                </Button>
+              </div>
+            )}
+
+            {/* Desktop Two Column Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* LEFT SIDEBAR (Participants & Info) */}
+              <div className="lg:col-span-4 space-y-6">
+                <Card className="glass border-border shadow-xl select-none">
+                  <CardHeader className="pb-3 border-b border-white/[0.04]">
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <User className="w-4.5 h-4.5 text-primary" />
+                      Participants
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4 space-y-4">
+                    {/* Rename Person A */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider block">Person A</label>
+                      <input 
+                        type="text" 
+                        value={participants.nameA}
+                        onChange={(e) => handleRenameParticipant("nameA", e.target.value)}
+                        className="w-full px-3 py-2 bg-zinc-950/60 border border-white/[0.06] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                        placeholder="Rename Person A"
+                      />
+                      <span className="text-[9px] text-zinc-500 block">
+                        {reconstructedMessages.filter(m => m.sender === participants.nameA).length} messages detected
+                      </span>
+                    </div>
+
+                    {/* Rename Person B */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider block">Person B</label>
+                      <input 
+                        type="text" 
+                        value={participants.nameB}
+                        onChange={(e) => handleRenameParticipant("nameB", e.target.value)}
+                        className="w-full px-3 py-2 bg-zinc-950/60 border border-white/[0.06] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                        placeholder="Rename Person B"
+                      />
+                      <span className="text-[9px] text-zinc-500 block">
+                        {reconstructedMessages.filter(m => m.sender === participants.nameB).length} messages detected
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Metadata info card */}
+                <Card className="glass border-border shadow-xl select-none">
+                  <CardHeader className="pb-3 border-b border-white/[0.04]">
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <Layers className="w-4.5 h-4.5 text-accent" />
+                      Conversation Info
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="space-y-3.5 text-xs">
+                      <div className="flex justify-between border-b border-zinc-900 pb-2">
+                        <span className="text-zinc-500 font-semibold">Total Messages</span>
+                        <span className="text-white font-bold font-mono">{reconstructedMessages.length}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-zinc-900 pb-2">
+                        <span className="text-zinc-500 font-semibold">Date Range</span>
+                        <span className="text-white font-bold">12 May — 20 May</span>
+                      </div>
+                      <div className="flex justify-between border-b border-zinc-900 pb-2">
+                        <span className="text-zinc-500 font-semibold">Images Processed</span>
+                        <span className="text-white font-bold font-mono">{selectedImages.length}</span>
+                      </div>
+                      <div className="flex justify-between pb-1">
+                        <span className="text-zinc-500 font-semibold">Platform</span>
+                        <span className="text-white font-bold">{selectedPlatform}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Button 
+                  onClick={() => { setSelectedImages([]); setStep("upload"); }}
+                  variant="outline"
+                  className="w-full text-xs border-zinc-800 bg-transparent hover:bg-zinc-900 hover:text-white rounded-xl py-3 text-zinc-400 flex items-center justify-center gap-1.5"
+                >
+                  ← Upload Different Screenshots
+                </Button>
+              </div>
+
+              {/* MAIN CONTENT AREA */}
+              <div className="lg:col-span-8 space-y-4">
+                
+                {/* Search & Tabs Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-950/60 border border-zinc-900 rounded-xl p-3 select-none">
+                  {/* View Toggle tabs */}
+                  <div className="flex bg-zinc-900/60 p-1 rounded-lg border border-white/[0.04] w-full sm:w-auto">
+                    <button 
+                      onClick={() => setViewMode("chat")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all ${
+                        viewMode === "chat" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> Chat View
+                    </button>
+                    <button 
+                      onClick={() => setViewMode("table")}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all ${
+                        viewMode === "table" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      <List className="w-3.5 h-3.5" /> Table View
+                    </button>
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                    <input 
+                      type="text" 
+                      placeholder="Search in chat..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-zinc-900/60 border border-white/[0.04] rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Filter notification indicator */}
+                {ocrIssuesOnly && (
+                  <div className="flex items-center justify-between text-[11px] text-amber-400 select-none">
+                    <span>Showing only suspicious OCR segments ({filteredMessages.length} found)</span>
+                    <button onClick={() => setOcrIssuesOnly(false)} className="underline hover:text-white">Show all messages</button>
+                  </div>
+                )}
+
+                {/* Messages content wrapper */}
+                <div className="border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 max-h-[500px] overflow-y-auto space-y-4">
+                  {filteredMessages.length === 0 ? (
+                    <div className="text-center py-12">
+                      <HelpCircle className="w-10 h-10 text-zinc-700 mx-auto mb-2 opacity-50" />
+                      <p className="text-xs text-zinc-400">No messages matches your filters or search query.</p>
+                    </div>
+                  ) : viewMode === "chat" ? (
+                    
+                    /* CHAT VIEW */
+                    filteredMessages.map((msg) => {
+                      const isSenderA = msg.sender === participants.nameA;
+                      const isEditing = editingMsgId === msg.id;
+
+                      return (
+                        <div 
+                          key={msg.id}
+                          className={`flex items-start gap-2.5 max-w-[85%] ${isSenderA ? "" : "ml-auto flex-row-reverse"}`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md flex-shrink-0 select-none ${
+                            isSenderA ? "bg-indigo-600 shadow-indigo-600/10" : "bg-pink-600 shadow-pink-600/10"
+                          }`}>
+                            {msg.sender.charAt(0).toUpperCase()}
+                          </div>
+
+                          <div className="space-y-1 w-full">
+                            <div className={`flex items-baseline gap-2 text-[10px] ${isSenderA ? "" : "justify-end flex-row-reverse"}`}>
+                              <span className="font-bold text-zinc-300">{msg.sender}</span>
+                              <span className="text-zinc-600 font-medium">{msg.timestamp}</span>
+                              {msg.hasOcrIssue && (
+                                <span className="text-amber-500 font-bold select-none text-[9px] uppercase tracking-wider">⚠️ OCR Alert</span>
+                              )}
+                            </div>
+
+                            {isEditing ? (
+                              /* Inline Edit Form */
+                              <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl space-y-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <input 
+                                    type="text" 
+                                    value={editSender}
+                                    onChange={(e) => setEditSender(e.target.value)}
+                                    className="px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[11px] text-white"
+                                    placeholder="Sender"
+                                  />
+                                  <input 
+                                    type="text" 
+                                    value={editTimestamp}
+                                    onChange={(e) => setEditTimestamp(e.target.value)}
+                                    className="px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[11px] text-white"
+                                    placeholder="Time"
+                                  />
+                                </div>
+                                <textarea 
+                                  value={editContent}
+                                  onChange={(e) => setEditContent(e.target.value)}
+                                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[11px] text-white h-16 resize-none"
+                                />
+                                <div className="flex justify-end gap-2 text-[10px]">
+                                  <Button 
+                                    onClick={() => setEditingMsgId(null)}
+                                    variant="ghost" 
+                                    className="h-7 text-zinc-400 hover:text-white"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={() => saveMessageEdit(msg.id)}
+                                    className="h-7 bg-primary text-white px-3"
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              /* Message Bubble */
+                              <div 
+                                className={`px-3 py-2 rounded-2xl relative group ${
+                                  msg.hasOcrIssue ? "border border-amber-500/30 bg-amber-500/[0.02]" :
+                                  isSenderA ? "bg-[#121620] border border-[#1d2433]" : "bg-[#18121f] border border-[#2b1d38]"
+                                }`}
+                              >
+                                <p className="text-xs text-zinc-200 leading-relaxed text-pretty">{msg.content}</p>
+                                
+                                {/* Quick edit overlay */}
+                                <div className={`absolute -top-3.5 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 border border-zinc-800 rounded-lg p-1 flex items-center gap-1.5 shadow-lg select-none z-10`}>
+                                  <button 
+                                    onClick={() => {
+                                      setEditingMsgId(msg.id);
+                                      setEditSender(msg.sender);
+                                      setEditTimestamp(msg.timestamp);
+                                      setEditContent(msg.content);
+                                    }}
+                                    className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </button>
+                                  <button 
+                                    onClick={() => deleteMessage(msg.id)}
+                                    className="p-1 rounded text-rose-400 hover:text-white hover:bg-rose-600"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    
+                    /* TABLE VIEW */
+                    <div className="w-full overflow-x-auto select-none">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="border-b border-zinc-900 text-zinc-500 font-bold uppercase tracking-wider text-[10px]">
+                            <th className="py-2.5 px-3 w-10">#</th>
+                            <th className="py-2.5 px-3 w-32">Date &amp; Time</th>
+                            <th className="py-2.5 px-3 w-32">Person</th>
+                            <th className="py-2.5 px-3">Message</th>
+                            <th className="py-2.5 px-3 w-16 text-center">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-900">
+                          {filteredMessages.map((msg, idx) => {
+                            const isEditing = editingMsgId === msg.id;
+
+                            return (
+                              <tr 
+                                key={msg.id}
+                                className={`hover:bg-zinc-900/30 transition-colors ${
+                                  msg.hasOcrIssue ? "bg-amber-500/[0.01]" : ""
+                                }`}
+                              >
+                                <td className="py-2.5 px-3 font-mono text-zinc-600">{idx + 1}</td>
+                                
+                                {isEditing ? (
+                                  <>
+                                    <td className="py-2 px-2">
+                                      <input 
+                                        type="text" 
+                                        value={editTimestamp} 
+                                        onChange={(e) => setEditTimestamp(e.target.value)}
+                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[11px] text-white" 
+                                      />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                      <input 
+                                        type="text" 
+                                        value={editSender} 
+                                        onChange={(e) => setEditSender(e.target.value)}
+                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[11px] text-white" 
+                                      />
+                                    </td>
+                                    <td className="py-2 px-2">
+                                      <input 
+                                        type="text" 
+                                        value={editContent} 
+                                        onChange={(e) => setEditContent(e.target.value)}
+                                        className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[11px] text-white" 
+                                      />
+                                    </td>
+                                    <td className="py-2 px-2 text-center flex items-center justify-center gap-1.5">
+                                      <button onClick={() => saveMessageEdit(msg.id)} className="p-1.5 rounded bg-emerald-950 text-emerald-400 hover:bg-emerald-600 hover:text-white">
+                                        <Check className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button onClick={() => setEditingMsgId(null)} className="p-1.5 rounded bg-zinc-900 text-zinc-400 hover:bg-zinc-800">
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </td>
+                                  </>
+                                ) : (
+                                  <>
+                                    <td className="py-2.5 px-3 text-zinc-400 truncate max-w-[120px]">{msg.timestamp}</td>
+                                    <td className="py-2.5 px-3 font-semibold text-zinc-300">{msg.sender}</td>
+                                    <td className={`py-2.5 px-3 ${msg.hasOcrIssue ? "text-amber-500" : "text-zinc-200"}`}>{msg.content}</td>
+                                    <td className="py-2.5 px-3 text-center flex items-center justify-center gap-1">
+                                      <button 
+                                        onClick={() => {
+                                          setEditingMsgId(msg.id);
+                                          setEditSender(msg.sender);
+                                          setEditTimestamp(msg.timestamp);
+                                          setEditContent(msg.content);
+                                        }}
+                                        className="p-1.5 rounded text-zinc-500 hover:text-white hover:bg-zinc-800"
+                                      >
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button 
+                                        onClick={() => deleteMessage(msg.id)}
+                                        className="p-1.5 rounded text-rose-500 hover:text-white hover:bg-rose-600"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </td>
+                                  </>
+                                )}
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Confirmation Modal */}
+            {showConfirmation && (
+              <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div className="w-full max-w-md rounded-2xl bg-zinc-950 border border-zinc-900 p-6 space-y-6 shadow-2xl relative text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+                    <CheckSquare className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-white uppercase tracking-wider">Ready to analyze?</h3>
+                    <p className="text-xs text-zinc-500 leading-normal max-w-xs mx-auto">
+                      Review completed. Analyze structured logs with advanced NLP models.
+                    </p>
+                    <div className="py-2 flex items-center justify-center gap-4 text-[10px] text-zinc-400 font-bold uppercase tracking-wider border-t border-b border-zinc-900 my-4">
+                      <span>{reconstructedMessages.length} messages</span>
+                      <span>•</span>
+                      <span>{selectedImages.length} screenshots</span>
+                      <span>•</span>
+                      <span>2 participants</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 text-xs">
+                    <Button 
+                      onClick={() => setShowConfirmation(false)}
+                      variant="ghost" 
+                      className="flex-1 text-zinc-400 hover:text-white"
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      onClick={executeAnalysis}
+                      className="flex-1 bg-gradient-to-r from-primary to-accent text-white font-bold h-10 rounded-lg"
+                    >
+                      Start Analysis
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* STEP 5: Analyzing Loading Animation Screen */}
+        {step === "analyzing" && (
+          <motion.div
+            key="analyzing"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="max-w-xl mx-auto py-12"
+          >
+            <div className="premium-card spotlight-glow border border-zinc-900 rounded-3xl p-8 bg-[#0b0c10]/95 shadow-2xl text-center space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary animate-pulse" />
+
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-white uppercase tracking-wider">Analyzing Conversation...</h2>
+                <p className="text-xs text-zinc-500 leading-normal max-w-sm mx-auto">
+                  HeartMind AI is evaluating emotional boundaries, alignment logs, and relationship score dynamics.
+                </p>
+              </div>
+
+              {/* Pulser loader icon */}
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse" />
+                <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin" />
+                <div className="absolute inset-3 rounded-full bg-gradient-to-br from-primary to-accent opacity-85" />
+                <Sparkles className="absolute inset-0 m-auto w-7 h-7 text-white" />
+              </div>
+
+              {/* Progress Stage Lists */}
+              <div className="border border-zinc-900 rounded-2xl p-4 bg-zinc-950/40 text-left space-y-2.5 max-w-sm mx-auto select-none">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-900 pb-2">Analysis stages</p>
+                <div className="space-y-2 text-[11px] font-semibold">
+                  {[
+                    "Reconstructing conversation patterns...",
+                    "Analyzing emotional sentiments & tones...",
+                    "Detecting communication imbalances...",
+                    "Processing relationship red flags...",
+                    "Compiling AI Relationship Coach insights..."
+                  ].map((stg, sidx) => {
+                    const isDone = sidx < analysisStage;
+                    const isActive = sidx === analysisStage;
+                    return (
+                      <p 
+                        key={sidx} 
+                        className={`flex items-center gap-2 ${
+                          isDone ? "text-emerald-400" : isActive ? "text-primary animate-pulse" : "text-zinc-600"
+                        }`}
+                      >
+                        {isDone ? (
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        ) : (
+                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? "bg-primary animate-ping" : "bg-zinc-800"}`} />
+                        )}
+                        <span>{stg}</span>
+                      </p>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* STEP 6: Premium Analysis Report Dashboard */}
+        {step === "report" && (
+          <motion.div
+            key="report"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start py-2"
+          >
+            {/* COMPACT LEFT SIDEBAR NAVIGATION */}
+            <div className="lg:col-span-3 space-y-4 select-none">
+              <div className="flex items-center gap-3 border-b border-zinc-900 pb-4">
+                <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] flex items-center justify-center shadow-lg">
+                  <Brain className="w-4.5 h-4.5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Analysis Reports</h3>
+                  <p className="text-[10px] text-zinc-500">AI Relationship Coach</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                {[
+                  { id: "dashboard", label: "Dashboard Overview", icon: BarChart3 },
+                  { id: "conversations", label: "Conversations", icon: MessageCircle },
+                  { id: "history", label: "Analysis History", icon: Clock },
+                  { id: "timeline", label: "Timeline", icon: Calendar },
+                  { id: "patterns", label: "Detected Patterns", icon: Activity },
+                  { id: "insights", label: "Coach Insights", icon: Sparkles },
+                  { id: "settings", label: "Settings", icon: Settings }
+                ].map((tab) => {
+                  const isActive = sidebarTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSidebarTab(tab.id as any)}
+                      className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-bold uppercase flex items-center gap-3 transition-all ${
+                        isActive 
+                          ? "bg-primary text-white shadow-md shadow-primary/10" 
+                          : "text-zinc-400 hover:text-white hover:bg-zinc-900/40"
+                      }`}
+                    >
+                      <tab.icon className="w-4.5 h-4.5 flex-shrink-0" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <Button 
+                onClick={() => { setSelectedImages([]); setReconstructedMessages([]); setStep("upload"); router.push("/dashboard/analyzer"); }}
+                variant="outline"
+                className="w-full text-[10px] font-bold uppercase border-zinc-900 bg-transparent hover:bg-zinc-900 text-zinc-400 hover:text-white rounded-xl py-3 mt-4"
+              >
+                ← Analyze Another Chat
+              </Button>
+            </div>
+
+            {/* REPORT MAIN DYNAMIC CONTAINER */}
+            <div className="lg:col-span-9 space-y-6">
+              
+              {/* HEADER INFO SUMMARY */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-4 select-none">
+                <div>
+                  <h1 className="text-xl font-bold text-white uppercase tracking-wider">Relationship Analysis Report</h1>
+                  <p className="text-xs text-zinc-500 mt-0.5">AI-powered insights compiled from {reconstructedMessages.length} conversation messages.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9.5px] font-extrabold uppercase px-2.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                    Platform: {selectedPlatform}
+                  </span>
+                </div>
+              </div>
+
+              {/* PANEL 1: DASHBOARD OVERVIEW */}
+              {sidebarTab === "dashboard" && (
+                <div className="space-y-6">
+                  {/* Top Metric Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    {/* Overall score card */}
+                    <Card className="glass border-border shadow-xl relative overflow-hidden select-none">
+                      <CardContent className="p-5 flex items-center gap-5">
+                        <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center bg-zinc-950/50 rounded-full border border-zinc-900 shadow-inner">
+                          <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.01)" strokeWidth="4" fill="none" />
+                            <circle cx="32" cy="32" r="28" stroke="#8b5cf6" strokeWidth="4" fill="none" strokeDasharray="176" strokeDashoffset={176 - (176 * dynamicAnalysis.overallScore) / 100} strokeLinecap="round" />
+                          </svg>
+                          <span className="text-base font-black text-white">{dynamicAnalysis.overallScore}</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">Relationship Score</p>
+                          <h4 className="text-sm font-bold text-zinc-200 mt-1">{getGradeLabel(dynamicAnalysis.overallScore)}</h4>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Positivity ratio card */}
+                    <Card className="glass border-border shadow-xl select-none">
+                      <CardContent className="p-5 flex items-center gap-5">
+                        <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                          <Heart className="w-5.5 h-5.5 text-emerald-400 fill-emerald-500/10" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">Positivity Ratio</p>
+                          <h4 className="text-base font-black text-white mt-1">{dynamicAnalysis.positivityRatio}%</h4>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Comm balance card */}
+                    <Card className="glass border-border shadow-xl select-none">
+                      <CardContent className="p-5 flex items-center gap-5">
+                        <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
+                          <BarChart3 className="w-5.5 h-5.5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">Comm. Balance</p>
+                          <h4 className="text-base font-black text-white mt-1">{dynamicAnalysis.communicationBalance}% : {100 - dynamicAnalysis.communicationBalance}%</h4>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Secondary Metrics */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-none">
+                    <Card className="glass border-border shadow-xl">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-amber-500" />
+                          Average Response Time
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-black text-white">{dynamicAnalysis.responseTime}</p>
+                        <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">Derived from active time gap responses on sequential dialogues.</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="glass border-border shadow-xl">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-rose-500" />
+                          Conflict Frequency
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-2xl font-black text-white">{dynamicAnalysis.conflictFrequency}</p>
+                        <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">Tension alerts detected based on structural word choices.</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Emotional Tone Chart */}
+                  <Card className="glass border-border shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                        <Heart className="w-4 h-4 text-primary" />
+                        Emotional Tone Over Time
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48 w-full flex items-end justify-between gap-6 pt-4 px-2">
+                        {[
+                          { label: "Positive Tone", value: dynamicAnalysis.emotionalTone.positive, color: "bg-emerald-500" },
+                          { label: "Neutral Tone", value: dynamicAnalysis.emotionalTone.neutral, color: "bg-zinc-500" },
+                          { label: "Negative Tone", value: dynamicAnalysis.emotionalTone.negative, color: "bg-rose-500" }
+                        ].map((bar) => (
+                          <div key={bar.label} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                            <span className="text-[10px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">{bar.value}%</span>
+                            <div className="w-full bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800/40 relative h-28 flex items-end">
+                              <motion.div 
+                                initial={{ height: 0 }}
+                                animate={{ height: `${bar.value}%` }}
+                                transition={{ duration: 1, ease: "easeOut" }}
+                                className={`w-full ${bar.color} rounded-t-lg`} 
+                              />
+                            </div>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">{bar.label.split(" ")[0]}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* PANEL 2: CONVERSATIONS */}
+              {sidebarTab === "conversations" && (
+                <Card className="glass border-border shadow-xl">
+                  <CardHeader className="pb-3 border-b border-white/[0.04] flex flex-row items-center justify-between">
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <MessageCircle className="w-4.5 h-4.5 text-primary" />
+                      Conversation Log
+                    </CardTitle>
+                    <span className="text-[9px] font-extrabold uppercase bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-zinc-400">
+                      Preview Mode
+                    </span>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 max-h-[450px] overflow-y-auto space-y-4">
+                      {reconstructedMessages.map((msg) => {
+                        const isSenderA = msg.sender === participants.nameA;
+                        return (
+                          <div key={msg.id} className={`flex items-start gap-2.5 max-w-[85%] ${isSenderA ? "" : "ml-auto flex-row-reverse"}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md flex-shrink-0 select-none ${
+                              isSenderA ? "bg-indigo-600 shadow-indigo-600/10" : "bg-pink-600 shadow-pink-600/10"
+                            }`}>
+                              {msg.sender.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="space-y-1">
+                              <div className={`flex items-baseline gap-2 text-[10px] ${isSenderA ? "" : "justify-end flex-row-reverse"}`}>
+                                <span className="font-bold text-zinc-300">{msg.sender}</span>
+                                <span className="text-zinc-600 font-medium">{msg.timestamp}</span>
+                              </div>
+                              <div className={`px-3 py-2 rounded-2xl ${
+                                isSenderA ? "bg-[#121620] border border-[#1d2433]" : "bg-[#18121f] border border-[#2b1d38]"
+                              }`}>
+                                <p className="text-xs text-zinc-200 leading-relaxed text-pretty">{msg.content}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* PANEL 3: HISTORY */}
+              {sidebarTab === "history" && (
+                <Card className="glass border-border shadow-xl">
+                  <CardHeader className="pb-3 border-b border-white/[0.04]">
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <Clock className="w-4.5 h-4.5 text-primary" />
+                      Analysis History Log
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 gap-3.5">
+                      {pastAnalyses.map((a: any) => (
+                        <button
+                          key={a._id}
+                          onClick={() => router.push(`/dashboard/analyzer?id=${a._id}`)}
+                          className="w-full text-left flex items-center justify-between p-4 rounded-xl bg-zinc-900/30 border border-white/[0.02] hover:bg-white/[0.02] hover:border-white/[0.04] transition-all duration-300 block"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              a.score >= 80 ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"
+                            }`}>
+                              <Activity className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-zinc-200">{a.name}</p>
+                              <p className="text-[10px] text-zinc-500 mt-0.5">Platform: {a.platform}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-black text-white">{a.score}</p>
+                            <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">Score</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* PANEL 4: TIMELINE */}
+              {sidebarTab === "timeline" && (
+                <Card className="glass border-border shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <Calendar className="w-4.5 h-4.5 text-primary" />
+                      Relationship Timeline
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-2">
+                    <div className="relative pl-6 border-l border-zinc-800 space-y-6 ml-2 select-none">
+                      {dynamicAnalysis.timeline.map((point, pidx) => (
+                        <div key={pidx} className="relative">
+                          <span className="absolute -left-[30px] top-1 w-3.5 h-3.5 rounded-full bg-zinc-950 border-2 border-primary flex items-center justify-center shadow-md shadow-primary/20" />
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-black text-primary uppercase tracking-widest">{point.date}</span>
+                            <h4 className="text-xs font-bold text-zinc-200">{point.label}</h4>
+                            <p className="text-[11px] text-zinc-500 leading-normal">{point.detail}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* PANEL 5: DETECTED PATTERNS */}
+              {sidebarTab === "patterns" && (
+                <div className="space-y-6">
+                  {/* Strengths Card */}
+                  <Card className="glass border-border shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                        <CheckCircle className="w-4.5 h-4.5 text-emerald-400" />
+                        What's Working Well
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 pt-2">
+                      {dynamicAnalysis.strengths.map((str, sidx) => (
+                        <div key={sidx} className="p-3.5 rounded-xl border border-emerald-500/10 bg-emerald-500/[0.01] flex items-start gap-3">
+                          <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                          <p className="text-xs text-zinc-300 leading-normal">{str}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Areas to Improve Card */}
+                  <Card className="glass border-border shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                        <AlertTriangle className="w-4.5 h-4.5 text-amber-500" />
+                        Areas to Improve
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 pt-2">
+                      {dynamicAnalysis.improvements.map((imp, iidx) => (
+                        <div key={iidx} className="p-3.5 rounded-xl border border-amber-500/10 bg-amber-500/[0.01] flex items-start gap-3">
+                          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                          <p className="text-xs text-zinc-300 leading-normal">{imp}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* PANEL 6: COACH INSIGHTS */}
+              {sidebarTab === "insights" && (
+                <div className="space-y-6">
+                  <Card className="glass border-border shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                        <Activity className="w-4.5 h-4.5 text-primary" />
+                        Patterns Detected (Red Flags)
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-2">
+                      {dynamicAnalysis.patterns.map((pat, pidx) => (
+                        <div key={pidx} className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/40 space-y-2 relative overflow-hidden">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-bold text-white">{pat.title}</h4>
+                            <span className={`text-[8.5px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                              pat.severity === "High" ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" :
+                              pat.severity === "Medium" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
+                              "bg-zinc-900 text-zinc-500"
+                            }`}>
+                              {pat.severity} Severity
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-zinc-500 leading-normal">{pat.description}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* PANEL 7: SETTINGS */}
+              {sidebarTab === "settings" && (
+                <Card className="glass border-border shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                      <Settings className="w-4.5 h-4.5 text-zinc-400" />
+                      Analysis settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 rounded-xl bg-zinc-900/20 border border-zinc-900 text-center">
+                      <p className="text-xs text-zinc-300 font-semibold">Under Development</p>
+                      <p className="text-[10px] text-zinc-500 mt-1">This panel will house additional API models and customized weights settings.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+            </div>
+          </motion.div>
+        )}
+
       </AnimatePresence>
     </div>
   )
