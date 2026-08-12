@@ -44,6 +44,25 @@ const staggerContainer = {
   }
 }
 
+// Particle data defined statically to prevent SSR hydration mismatch errors
+const backgroundParticles = [
+  { top: "5%", left: "10%", x: [0, 80, -40, 0], y: [0, -60, 40, 0], duration: 18 },
+  { top: "15%", left: "60%", x: [0, -90, 50, 0], y: [0, 80, -70, 0], duration: 24 },
+  { top: "25%", left: "30%", x: [0, 50, -80, 0], y: [0, -70, 50, 0], duration: 20 },
+  { top: "35%", left: "80%", x: [0, -60, 90, 0], y: [0, 50, -80, 0], duration: 28 },
+  { top: "45%", left: "15%", x: [0, 70, -50, 0], y: [0, -80, 60, 0], duration: 22 },
+  { top: "50%", left: "70%", x: [0, -80, 70, 0], y: [0, 60, -90, 0], duration: 26 },
+  { top: "60%", left: "40%", x: [0, 90, -40, 0], y: [0, -50, 80, 0], duration: 19 },
+  { top: "70%", left: "85%", x: [0, -50, 60, 0], y: [0, 80, -50, 0], duration: 25 },
+  { top: "80%", left: "20%", x: [0, 80, -70, 0], y: [0, -60, 70, 0], duration: 21 },
+  { top: "85%", left: "65%", x: [0, -70, 80, 0], y: [0, 50, -80, 0], duration: 27 },
+  { top: "90%", left: "5%", x: [0, 60, -90, 0], y: [0, -80, 50, 0], duration: 23 },
+  { top: "95%", left: "50%", x: [0, -80, 60, 0], y: [0, 70, -60, 0], duration: 29 },
+  { top: "8%", left: "88%", x: [0, 50, -50, 0], y: [0, -40, 50, 0], duration: 17 },
+  { top: "18%", left: "22%", x: [0, -50, 50, 0], y: [0, 40, -50, 0], duration: 23 },
+  { top: "58%", left: "92%", x: [0, 60, -60, 0], y: [0, -60, 60, 0], duration: 25 }
+]
+
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -90,6 +109,28 @@ export default function LandingPage() {
           }}
           className="absolute top-[40%] left-[45%] w-[400px] h-[400px] bg-[#8b5cf6]/10 rounded-full blur-[155px]"
         />
+
+        {/* Dynamic Flying/Floating Light Particles all across entire page height */}
+        {backgroundParticles.map((p, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-accent opacity-35 blur-[0.5px]"
+            style={{
+              top: p.top,
+              left: p.left,
+            }}
+            animate={{
+              x: p.x,
+              y: p.y,
+              opacity: [0.15, 0.6, 0.15]
+            }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
       </div>
 
       {/* Navigation */}
@@ -229,7 +270,7 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Hero Right Side: High-Fidelity Mockup Dashboard (Refined & Larger) */}
+          {/* Hero Right Side: High-Fidelity Mockup Dashboard (Expanded Height aspect-[1.12]) */}
           <div className="lg:col-span-7 flex justify-center lg:justify-end relative pr-0 lg:pr-4">
             <motion.div 
               animate={{
@@ -240,10 +281,10 @@ export default function LandingPage() {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="relative w-full max-w-[650px] aspect-[1.22] rounded-[24px] bg-[#0b0c10]/95 border border-[#161b26] p-6 shadow-2xl select-none"
+              className="relative w-full max-w-[650px] aspect-[1.12] rounded-[24px] bg-[#0b0c10]/95 border border-[#161b26] p-6 shadow-2xl select-none"
             >
               {/* Header inside mockup */}
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">
                     <div className="w-1.5 h-3 bg-indigo-500 rounded-full animate-pulse" />
@@ -304,6 +345,61 @@ export default function LandingPage() {
                 </motion.div>
               </div>
 
+              {/* Emotional Resonance Area Chart (Fills Mockup Box Space) */}
+              <div className="bg-[#0c0d12]/50 border border-zinc-900/60 rounded-2xl p-4 mb-6 relative">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Emotional Resonance (24h)</span>
+                  <span className="text-[9px] text-[#04c7f0] font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#04c7f0] animate-ping" />
+                    Syncing Live
+                  </span>
+                </div>
+                <div className="h-16 w-full relative">
+                  {/* SVG Grid Lines */}
+                  <svg className="w-full h-full stroke-zinc-900/80 fill-none" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <line x1="0" y1="5" x2="100" y2="5" strokeWidth="0.1" strokeDasharray="1 1" />
+                    <line x1="0" y1="10" x2="100" y2="10" strokeWidth="0.1" strokeDasharray="1 1" />
+                    <line x1="0" y1="15" x2="100" y2="15" strokeWidth="0.1" strokeDasharray="1 1" />
+                  </svg>
+                  {/* SVG Area Chart */}
+                  <svg className="absolute inset-0 w-full h-full fill-none" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.0" />
+                      </linearGradient>
+                      <linearGradient id="areaGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#ea409b" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#ea409b" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Line 1 (Person A Sync) */}
+                    <motion.path 
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 1.2, duration: 1.8, ease: "easeInOut" }}
+                      d="M0,14 Q15,4 30,11 T60,5 T90,13 L100,9" 
+                      stroke="#8b5cf6" 
+                      strokeWidth="0.75" 
+                      strokeLinecap="round"
+                    />
+                    <path d="M0,14 Q15,4 30,11 T60,5 T90,13 L100,9 L100,20 L0,20 Z" fill="url(#areaGradient)" />
+                    
+                    {/* Line 2 (Person B Sync) */}
+                    <motion.path 
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 1.4, duration: 2.2, ease: "easeInOut" }}
+                      d="M0,11 Q20,15 40,7 T70,11 T100,5" 
+                      stroke="#ea409b" 
+                      strokeWidth="0.75" 
+                      strokeLinecap="round"
+                    />
+                    <path d="M0,11 Q20,15 40,7 T70,11 T100,5 L100,20 L0,20 Z" fill="url(#areaGradient2)" />
+                  </svg>
+                </div>
+              </div>
+
               {/* Glowing visualizer line */}
               <div className="relative h-12 flex items-center justify-center mb-6 overflow-hidden select-none">
                 <div className="absolute inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#04c7f0] to-transparent opacity-25" />
@@ -313,7 +409,7 @@ export default function LandingPage() {
                 </svg>
               </div>
 
-              {/* AI Insight Card (Refined with interactive circular loader and mini trend charts) */}
+              {/* AI Insight Card (Refined with interactive Radar Scanner Confidence chart) */}
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -325,62 +421,55 @@ export default function LandingPage() {
                   <span>AI Insight</span>
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
                     <p className="text-[9px] text-zinc-500 mb-0.5">Emotional tone detected</p>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-xs font-bold text-white mb-2">
                       <span className="text-zinc-400">Calm</span>
                       <span className="mx-1.5 text-zinc-600">→</span>
                       <span className="text-pink-400 font-semibold">Slightly Distant</span>
                     </p>
-                  </div>
-
-                  {/* High-tech animated circular chart & mini trend graph */}
-                  <div className="flex items-center gap-4">
-                    {/* Mini trend chart */}
-                    <div className="w-14 h-8 flex items-end gap-[3px] select-none bg-zinc-950/40 p-1 rounded border border-zinc-900/50">
-                      <motion.div initial={{ height: 0 }} animate={{ height: '40%' }} transition={{ delay: 1.2, duration: 0.6 }} className="w-[4px] bg-zinc-800 rounded-t" />
-                      <motion.div initial={{ height: 0 }} animate={{ height: '60%' }} transition={{ delay: 1.3, duration: 0.6 }} className="w-[4px] bg-zinc-700 rounded-t" />
-                      <motion.div initial={{ height: 0 }} animate={{ height: '35%' }} transition={{ delay: 1.4, duration: 0.6 }} className="w-[4px] bg-[#ea409b]/60 rounded-t" />
-                      <motion.div initial={{ height: 0 }} animate={{ height: '80%' }} transition={{ delay: 1.5, duration: 0.6 }} className="w-[4px] bg-[#8b5cf6] rounded-t" />
-                      <motion.div initial={{ height: 0 }} animate={{ height: '70%' }} transition={{ delay: 1.6, duration: 0.6 }} className="w-[4px] bg-[#04c7f0] rounded-t" />
-                    </div>
-
-                    <div className="relative w-11 h-11 flex items-center justify-center">
-                      <div className="absolute inset-0 rounded-full border border-[#8b5cf6]/10 animate-ping" style={{ animationDuration: '3s' }} />
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,0.03)" strokeWidth="3" fill="none" />
-                        <motion.circle 
-                          cx="22" 
-                          cy="22" 
-                          r="18" 
-                          stroke="url(#insightGradient)" 
-                          strokeWidth="3" 
-                          fill="none" 
-                          strokeDasharray="113" 
-                          initial={{ strokeDashoffset: 113 }}
-                          animate={{ strokeDashoffset: 14.7 }} // 87% progress
-                          transition={{ delay: 1.7, duration: 1.5, ease: "easeOut" }}
-                          strokeLinecap="round" 
-                        />
-                        <defs>
-                          <linearGradient id="insightGradient" x1="0%" x2="100%" y1="0%" y2="100%">
-                            <stop offset="0%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#ea409b" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-[9px] font-extrabold text-white leading-none">
-                        <span>87%</span>
-                      </div>
+                    
+                    {/* Small tags */}
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-blue-950/40 text-blue-400 border border-blue-900/30">Shift</span>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-purple-950/40 text-purple-400 border border-purple-900/30">Distance</span>
                     </div>
                   </div>
-                </div>
 
-                {/* Small tags */}
-                <div className="flex flex-wrap items-center gap-1 mt-3">
-                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-blue-950/40 text-blue-400 border border-blue-900/30">Communication Shift</span>
-                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-purple-950/40 text-purple-400 border border-purple-900/30">Emotional Distance</span>
+                  {/* High-tech Radar/Scanner Confidence Chart */}
+                  <div className="flex-shrink-0 relative w-16 h-16 flex items-center justify-center bg-zinc-950/50 rounded-full border border-zinc-900 shadow-inner">
+                    <div className="absolute inset-1 rounded-full border border-dashed border-[#04c7f0]/20 animate-spin" style={{ animationDuration: '10s' }} />
+                    <div className="absolute top-1/2 left-2 right-2 h-[1px] bg-zinc-900/60" />
+                    <div className="absolute left-1/2 top-2 bottom-2 w-[1px] bg-zinc-900/60" />
+                    <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                      <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.01)" strokeWidth="2" fill="none" />
+                      <motion.circle 
+                        cx="32" 
+                        cy="32" 
+                        r="28" 
+                        stroke="url(#radarGradient)" 
+                        strokeWidth="2.5" 
+                        fill="none" 
+                        strokeDasharray="176" 
+                        initial={{ strokeDashoffset: 176 }}
+                        animate={{ strokeDashoffset: 22.8 }} 
+                        transition={{ delay: 1.6, duration: 1.5, ease: "easeOut" }}
+                        strokeLinecap="round" 
+                      />
+                      <defs>
+                        <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ea409b" />
+                          <stop offset="100%" stopColor="#04c7f0" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center shadow-lg relative">
+                      <div className="absolute inset-0 rounded-full bg-[#ea409b]/5 animate-pulse" />
+                      <span className="text-xs font-black text-white tracking-tighter">87%</span>
+                      <span className="text-[7px] text-[#04c7f0] font-bold uppercase scale-90">CONF</span>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
 
@@ -897,7 +986,7 @@ export default function LandingPage() {
               },
               {
                 question: "What platforms are supported for chat import?",
-                answer: "You can paste conversations from WhatsApp, Instagram, Telegram, Snapchat, iMessage, and any standard text format. We also support voice message analysis."
+                answer: "You can paste conversations from WhatsApp, iMessage, Instagram, Telegram, and standard text formats. We also support voice message analysis."
               }
             ].map((faq) => (
               <motion.div
