@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 
+import { sendRecoveryEmail } from "@/lib/recovery-email";
+
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
@@ -28,19 +30,15 @@ export async function POST(req: Request) {
 
       await user.save();
 
-      // 3. Print reset URL in dev logs
+      // 3. Send reset URL email
       const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
       
-      console.log("\n=======================================================");
-      console.log("🔑 DEVELOPMENT PASSWORD RESET REQUEST 🔑");
-      console.log(`User: ${user.name} (${email})`);
-      console.log(`Link: ${resetUrl}`);
-      console.log("=======================================================\n");
+      await sendRecoveryEmail(user.name, email, resetUrl);
     }
 
     // Always return a generic success message to prevent user enumeration / security leaks
     return NextResponse.json(
-      { message: "If this email is registered in our system, a recovery link has been generated. Check terminal logs." },
+      { message: "If this email is registered in our system, a recovery link has been sent to your email address." },
       { status: 200 }
     );
   } catch (error: any) {

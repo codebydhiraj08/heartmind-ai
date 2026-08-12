@@ -97,9 +97,9 @@ export default function ForgotPasswordPage() {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Recovery Link Generated!</h3>
+                <h3 className="text-lg font-bold text-white">Recovery Link Sent!</h3>
                 <p className="text-xs text-zinc-400 mt-2 leading-relaxed max-w-sm mx-auto">
-                  If this email exists in our records, a secure link has been generated. Please check your **development terminal logs** to fetch and click the password reset URL.
+                  If this email exists in our records, a secure link has been sent to your email address. Please check your inbox (and spam folder) to reset your password.
                 </p>
               </div>
               <div className="pt-4">
