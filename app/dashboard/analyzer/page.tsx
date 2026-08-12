@@ -259,6 +259,15 @@ function ChatAnalyzerInner() {
         
         // Ensure sender doesn't look like a timestamp or url
         if (!sender.match(/^\d+$/) && !sender.includes("http") && !sender.toLowerCase().includes("am") && !sender.toLowerCase().includes("pm")) {
+          // Check for WhatsApp quoted replies duplication (colon-terminated format)
+          const isDuplicateQuote = parsed.slice(-4).some(prev => 
+            prev.content.toLowerCase().trim() === content.toLowerCase().trim() && 
+            content.length > 3
+          );
+          if (isDuplicateQuote) {
+            return; // Skip duplicate message!
+          }
+
           currentSender = sender;
           parsed.push({
             id: `msg-${index}-${Math.random().toString(36).substr(2, 9)}`,
@@ -280,7 +289,17 @@ function ChatAnalyzerInner() {
 
       // Fallback: append to previous message or create a new message
       if (parsed.length > 0) {
-        parsed[parsed.length - 1].content += " " + line;
+        const lastMsg = parsed[parsed.length - 1];
+        
+        // Check for WhatsApp quoted replies duplication (multiline/individual line format)
+        if (
+          line.toLowerCase() === lastMsg.sender.toLowerCase() || 
+          lastMsg.content.toLowerCase().includes(line.toLowerCase())
+        ) {
+          return; // Skip duplicate quote line!
+        }
+
+        lastMsg.content += " " + line;
       } else {
         parsed.push({
           id: `msg-${index}-${Math.random().toString(36).substr(2, 9)}`,
