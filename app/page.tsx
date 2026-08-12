@@ -50,7 +50,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background animated-gradient">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong">
+      <motion.nav 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed top-0 left-0 right-0 z-50 glass-strong"
+      >
         <div className="w-full mx-auto px-4 sm:px-8 lg:px-12">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2 ml-[-4px] md:ml-[-12px]">
@@ -76,7 +81,7 @@ export default function LandingPage() {
                 </Button>
               </Link>
               <Link href="/dashboard">
-                <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white neon-glow-pink">
+                <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white neon-glow-pink transition-transform hover:scale-105 active:scale-95">
                   Get Started
                 </Button>
               </Link>
@@ -93,7 +98,11 @@ export default function LandingPage() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden glass-strong border-t border-border">
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="md:hidden glass-strong border-t border-border"
+          >
             <div className="px-4 py-4 space-y-3">
               <Link href="#features" className="block py-2 text-muted-foreground hover:text-foreground">
                 Features
@@ -111,9 +120,9 @@ export default function LandingPage() {
                 <Button className="w-full bg-gradient-to-r from-primary to-accent">Get Started</Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden hero-container">
@@ -123,38 +132,52 @@ export default function LandingPage() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
         </div>
 
-        <div className="max-w-7xl mx-auto relative">
+        <motion.div 
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="max-w-7xl mx-auto relative"
+        >
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
+            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-sm text-muted-foreground">AI-Powered Relationship Intelligence</span>
-            </div>
+            </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight tracking-tight mb-6">
+            <motion.h1 
+              variants={fadeInUp} 
+              className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight tracking-tight mb-6"
+            >
               Understand Your
               <span className="block gradient-text">Relationships Deeper</span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-xl sm:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto text-pretty">
+            <motion.p 
+              variants={fadeInUp} 
+              className="text-xl sm:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto text-pretty"
+            >
               Advanced AI that analyzes conversations, detects emotional patterns, identifies red flags, and helps you build healthier, more meaningful connections.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link href="/dashboard">
-                <Button size="lg" className="btn-lg w-full sm:w-auto bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white neon-glow-pink">
+                <Button size="lg" className="btn-lg w-full sm:w-auto bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white neon-glow-pink transition-transform hover:scale-105 active:scale-95">
                   Start Free Analysis
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="#features">
-                <Button size="lg" variant="outline" className="btn-lg w-full sm:w-auto border-border hover:bg-secondary">
+                <Button size="lg" variant="outline" className="btn-lg w-full sm:w-auto border-border hover:bg-secondary transition-transform hover:scale-105 active:scale-95">
                   See How It Works
                 </Button>
               </Link>
-            </div>
+            </motion.div>
 
             {/* Trust Indicators */}
-            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 text-muted-foreground">
+            <motion.div 
+              variants={fadeInUp} 
+              className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-6 text-muted-foreground"
+            >
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-success" />
                 <span className="text-sm">Privacy-First</span>
@@ -167,15 +190,25 @@ export default function LandingPage() {
                 <Users className="w-5 h-5 text-primary" />
                 <span className="text-sm">500K+ Users Trust Us</span>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Hero Dashboard Preview */}
-          <div className="mt-20 relative">
+          <motion.div 
+            variants={fadeInUp}
+            className="mt-20 relative"
+          >
             <div className="glass rounded-3xl p-8 neon-glow-purple">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <motion.div 
+                variants={staggerContainer}
+                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+              >
                 {/* Analysis Card */}
-                <div className="glass rounded-xl p-4">
+                <motion.div 
+                  variants={fadeInUp}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="glass rounded-xl p-4 transition-all duration-200 cursor-pointer"
+                >
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
                       <MessageSquareText className="w-5 h-5 text-primary" />
@@ -194,10 +227,14 @@ export default function LandingPage() {
                       <div className="h-full w-[78%] bg-gradient-to-r from-success to-accent rounded-full" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Health Score Card */}
-                <div className="glass rounded-xl p-4">
+                <motion.div 
+                  variants={fadeInUp}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="glass rounded-xl p-4 transition-all duration-200 cursor-pointer"
+                >
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
                       <Heart className="w-5 h-5 text-success" />
@@ -226,10 +263,14 @@ export default function LandingPage() {
                       <p>Trust Level: High</p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Alert Card */}
-                <div className="glass rounded-xl p-4">
+                <motion.div 
+                  variants={fadeInUp}
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  className="glass rounded-xl p-4 transition-all duration-200 cursor-pointer"
+                >
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
                       <AlertTriangle className="w-5 h-5 text-warning" />
@@ -242,17 +283,23 @@ export default function LandingPage() {
                   <div className="p-3 rounded-lg bg-warning/10 border border-warning/20">
                     <p className="text-sm text-warning">Possible avoidant pattern detected in recent conversations</p>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Features Section */}
       <section id="features" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <p className="text-primary font-medium mb-4">
               POWERFUL FEATURES
             </p>
@@ -263,9 +310,15 @@ export default function LandingPage() {
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Advanced AI tools to analyze, understand, and improve your relationships
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div 
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {[
               {
                 icon: MessageSquareText,
@@ -340,18 +393,20 @@ export default function LandingPage() {
                 gradient: "from-warning to-accent"
               }
             ].map((feature) => (
-              <div
+              <motion.div
                 key={feature.title}
-                className="group glass rounded-xl p-6 hover:neon-glow-pink transition-all duration-300"
+                variants={fadeInUp}
+                whileHover={{ y: -6, scale: 1.03 }}
+                className="group glass rounded-xl p-6 hover:neon-glow-pink transition-all duration-300 cursor-pointer"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -363,7 +418,13 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <p className="text-primary font-medium mb-4">
               HOW IT WORKS
             </p>
@@ -371,9 +432,15 @@ export default function LandingPage() {
               Three Simple Steps to
               <span className="block gradient-text">Better Relationships</span>
             </h2>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {[
               {
                 step: "01",
@@ -391,8 +458,10 @@ export default function LandingPage() {
                 description: "Receive detailed reports, red flag alerts, and actionable suggestions."
               }
             ].map((item, index) => (
-              <div
+              <motion.div
                 key={item.step}
+                variants={fadeInUp}
+                whileHover={{ scale: 1.03 }}
                 className="relative"
               >
                 <div className="glass rounded-xl p-8 text-center h-full">
@@ -405,13 +474,11 @@ export default function LandingPage() {
                     <ChevronRight className="w-8 h-8 text-primary" />
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
-
-
 
       {/* Pricing Section */}
       <section id="pricing" className="py-20 px-4 relative">
@@ -420,7 +487,13 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <p className="text-primary font-medium mb-4">
               PRICING
             </p>
@@ -430,9 +503,15 @@ export default function LandingPage() {
             <p className="text-muted-foreground text-lg">
               Start free, upgrade when you need more
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <motion.div 
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+          >
             {[
               {
                 name: "HeartMind Free",
@@ -486,9 +565,11 @@ export default function LandingPage() {
                 pill: "DEEPEST UNDERSTANDING"
               }
             ].map((plan) => (
-              <div
+              <motion.div
                 key={plan.name}
-                className={`relative glass rounded-2xl p-8 flex flex-col justify-between ${plan.popular ? 'neon-glow-pink border-2 border-primary' : 'border border-white/[0.04]'}`}
+                variants={fadeInUp}
+                whileHover={{ y: -8, scale: plan.popular ? 1.05 : 1.03 }}
+                className={`relative glass rounded-2xl p-8 flex flex-col justify-between transition-all duration-300 ${plan.popular ? 'neon-glow-pink border-2 border-primary md:scale-105 z-10' : 'border border-white/[0.04]'}`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-primary to-accent rounded-full text-[10px] font-bold text-white uppercase tracking-wider">
@@ -537,31 +618,43 @@ export default function LandingPage() {
 
                 <Link href="/dashboard">
                   <Button
-                    className={`w-full text-xs font-semibold h-9 rounded-lg ${plan.popular ? 'bg-gradient-to-r from-primary to-accent text-white border-none shadow-md shadow-primary/10 hover:opacity-90' : 'bg-transparent hover:bg-white/[0.02] text-white border border-white/[0.08]'}`}
+                    className={`w-full text-xs font-semibold h-9 rounded-lg transition-transform hover:scale-105 active:scale-95 ${plan.popular ? 'bg-gradient-to-r from-primary to-accent text-white border-none shadow-md shadow-primary/10 hover:opacity-90' : 'bg-transparent hover:bg-white/[0.02] text-white border border-white/[0.08]'}`}
                     variant={plan.popular ? "default" : "outline"}
                   >
                     {plan.cta}
                   </Button>
                 </Link>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* FAQ Section */}
       <section id="faq" className="py-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <p className="text-primary font-medium mb-4">
               FAQ
             </p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Frequently Asked Questions
             </h2>
-          </div>
+          </motion.div>
 
-          <div className="space-y-4">
+          <motion.div 
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="space-y-4"
+          >
             {[
               {
                 question: "Is my conversation data private and secure?",
@@ -588,22 +681,30 @@ export default function LandingPage() {
                 answer: "You can paste conversations from WhatsApp, Instagram, Telegram, Snapchat, iMessage, and any standard text format. We also support voice message analysis."
               }
             ].map((faq) => (
-              <div
+              <motion.div
                 key={faq.question}
-                className="glass rounded-xl p-6"
+                variants={fadeInUp}
+                whileHover={{ scale: 1.01 }}
+                className="glass rounded-xl p-6 cursor-pointer transition-all duration-200"
               >
                 <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
-                <p className="text-muted-foreground">{faq.answer}</p>
-              </div>
+                <p className="text-muted-foreground text-sm">{faq.answer}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="glass rounded-3xl p-8 md:p-12 text-center neon-glow-pink">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="glass rounded-3xl p-8 md:p-12 text-center neon-glow-pink"
+          >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
               Ready to Understand Your
               <span className="block gradient-text">Relationships Better?</span>
@@ -612,13 +713,13 @@ export default function LandingPage() {
               Join 500,000+ users who are building healthier, more meaningful connections with HeartMind AI.
             </p>
             <Link href="/dashboard">
-              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white text-lg px-8 py-6">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white text-lg px-8 py-6 transition-transform hover:scale-105 active:scale-95">
                 Start Free Analysis
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground mt-4">No credit card required. Start analyzing in seconds.</p>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -662,7 +763,6 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-
         </div>
       </footer>
     </div>
