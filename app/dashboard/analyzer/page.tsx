@@ -259,12 +259,15 @@ function ChatAnalyzerInner() {
         
         // Ensure sender doesn't look like a timestamp or url
         if (!sender.match(/^\d+$/) && !sender.includes("http") && !sender.toLowerCase().includes("am") && !sender.toLowerCase().includes("pm")) {
-          // Check for WhatsApp quoted replies duplication (colon-terminated format)
-          const isDuplicateQuote = parsed.slice(-4).some(prev => 
-            prev.content.toLowerCase().trim() === content.toLowerCase().trim() && 
-            content.length > 3
-          );
-          if (isDuplicateQuote) {
+          // Check for WhatsApp quoted replies or screenshot overlap duplication (sliding window)
+          const isDuplicate = parsed.slice(-15).some(prev => {
+            const sameContent = prev.content.toLowerCase().trim() === content.toLowerCase().trim();
+            const sameSender = prev.sender.toLowerCase().trim() === sender.toLowerCase().trim();
+            // Discard duplicate sender+content, or if same content is unique and length > 5
+            return sameContent && (sameSender || content.length > 5);
+          });
+          
+          if (isDuplicate) {
             return; // Skip duplicate message!
           }
 
@@ -297,6 +300,15 @@ function ChatAnalyzerInner() {
           lastMsg.content.toLowerCase().includes(line.toLowerCase())
         ) {
           return; // Skip duplicate quote line!
+        }
+
+        // Check if the fallback line matches any recently parsed message content exactly to prevent duplicate overlap appends
+        const isLineOverlap = parsed.slice(-10).some(prev => 
+          prev.content.toLowerCase().trim() === line.toLowerCase().trim() && 
+          line.length > 4
+        );
+        if (isLineOverlap) {
+          return; // Skip overlap duplicate line!
         }
 
         lastMsg.content += " " + line;
