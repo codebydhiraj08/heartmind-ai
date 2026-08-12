@@ -243,7 +243,7 @@ function ChatAnalyzerInner() {
     }
   };
 
-  // Reconstruct conversation messages mock OCR Parser
+  // Reconstruct conversation messages OCR Parser
   const parseMessagesFromOCRText = (text: string): Message[] => {
     const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
     const parsed: Message[] = [];
@@ -251,25 +251,34 @@ function ChatAnalyzerInner() {
     let currentTimestamp = "10:15 AM";
 
     lines.forEach((line, index) => {
-      // Look for sender name indicator lines e.g. "Name: message" or "Time [Name]: message"
-      const match = line.match(/^(?:\[?\d{1,2}[:\/\-]\d{1,2}(?:\s*(?:AM|PM))?\]?\s*)?([^:]+):\s*(.*)$/i);
-      if (match) {
-        const sender = match[1].trim();
-        const content = match[2].trim();
-        if (sender.length > 0 && sender.length < 25 && !sender.includes("http")) {
+      // Look for format: "Sender: message" or "[Timestamp] Sender: message"
+      const colonIndex = line.indexOf(":");
+      if (colonIndex > 0 && colonIndex < 30) {
+        const sender = line.substring(0, colonIndex).trim();
+        const content = line.substring(colonIndex + 1).trim();
+        
+        // Ensure sender doesn't look like a timestamp or url
+        if (!sender.match(/^\d+$/) && !sender.includes("http") && !sender.toLowerCase().includes("am") && !sender.toLowerCase().includes("pm")) {
           currentSender = sender;
           parsed.push({
             id: `msg-${index}-${Math.random().toString(36).substr(2, 9)}`,
             sender: currentSender,
             timestamp: currentTimestamp,
             content,
-            hasOcrIssue: content.includes("?") || content.length < 3 || /[\u0000-\u001F\u007F-\u009F]/.test(content)
+            hasOcrIssue: content.includes("?") || content.length < 3
           });
           return;
         }
       }
 
-      // Fallback: append or create single message
+      // Check if line itself looks like a timestamp, we update it
+      const timeMatch = line.match(/^\d{1,2}:\d{2}\s*(?:AM|PM)?$/i);
+      if (timeMatch) {
+        currentTimestamp = line;
+        return;
+      }
+
+      // Fallback: append to previous message or create a new message
       if (parsed.length > 0) {
         parsed[parsed.length - 1].content += " " + line;
       } else {
@@ -286,7 +295,7 @@ function ChatAnalyzerInner() {
     return parsed;
   };
 
-  // Perform Mock OCR Processing over screenshots
+  // Perform Real OCR Processing over screenshots via /api/analyze-image
   const startOCR = async () => {
     if (selectedImages.length === 0) return;
     setStep("ocr");
@@ -294,47 +303,98 @@ function ChatAnalyzerInner() {
     setOcrStageIndex(0);
     setOcrLog([]);
 
-    const stages = [
-      "Uploading images to AI container...",
-      "Reading text using OCR engine...",
-      "Detecting message boundaries...",
-      "Detecting conversation participants...",
-      "Detecting messages timestamps...",
-      "Structuring conversation timelines...",
-      "Preparing structured conversation preview..."
-    ];
+    const readAndTranscribeImage = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const base64Data = event.target?.result as string;
+          if (!base64Data) {
+            reject(new Error(`Failed to read file: ${file.name}`));
+            return;
+          }
 
-    // Simulate OCR progress
-    for (let i = 0; i < stages.length; i++) {
-      setOcrStageIndex(i);
-      setOcrLog(prev => [...prev, `✓ Stage: ${stages[i]}`]);
-      // Process progress ticks
-      const duration = 800;
-      const ticks = 10;
-      for (let t = 0; t < ticks; t++) {
-        setOcrProgress(prev => Math.min(Math.round((i / stages.length) * 100 + (t / ticks) * (100 / stages.length)), 100));
-        await new Promise(resolve => setTimeout(resolve, duration / ticks));
-      }
-    }
+          try {
+            const response = await fetch("/api/analyze-image", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ imageBase64: base64Data }),
+            });
 
-    // Reconstruct mock chat dialogue based on platform
-    const mockDialogues: Record<string, string> = {
-      WhatsApp: `Person A: Hey, good morning! ☀️\nPerson B: Good morning 😊\nPerson A: Did you check the plans for tonight?\nPerson B: I'm not sure if I can make it.\nPerson A: Kya kar rahe ho? Why are you always cancel plans?\nPerson B: Bas utha hu, tum batao? I'm just busy with work.\nPerson A: You always say that. It feels like you don't care anymore.\nPerson B: That's not true, I'm just exhausted.`,
-      Instagram: `Person A: Hey, did you see my story?\nPerson B: Yeah, looks fun!\nPerson A: You didn't reply to my previous text though.\nPerson B: Oh sorry, was caught up.\nPerson A: It's okay. Are we still good?\nPerson B: Yes of course, why ask?`,
-      Snapchat: `Person A: Hey! Streak?\nPerson B: Streak 🔥\nPerson A: Want to hang out?\nPerson B: Busy today. Maybe tomorrow?`,
-      Telegram: `Person A: Hey, did you review the document?\nPerson B: Checking it now.\nPerson A: Let's discuss over call.\nPerson B: Send me the link.`,
-      iMessage: `Person A: Good morning!\nPerson B: Morning.\nPerson A: Are you okay?\nPerson B: Yeah.`,
-      Other: `Person A: Hello there.\nPerson B: Hey.\nPerson A: Let's meet.\nPerson B: Sure.`
+            const data = await response.json();
+            if (data.success && data.text) {
+              resolve(data.text.trim());
+            } else {
+              reject(new Error(data.error || `Failed to read ${file.name}`));
+            }
+          } catch (err) {
+            reject(new Error(`Network error transcribing ${file.name}`));
+          }
+        };
+        reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+        reader.readAsDataURL(file);
+      });
     };
 
-    const textToParse = mockDialogues[selectedPlatform] || mockDialogues.WhatsApp;
-    const parsed = parseMessagesFromOCRText(textToParse);
-    setReconstructedMessages(parsed);
-    setParticipants({ nameA: "Person A", nameB: "Person B" });
+    try {
+      const transcribedTexts: string[] = [];
+      const totalSteps = selectedImages.length;
+      
+      setOcrLog(prev => [...prev, "🔄 Uploading images to AI OCR container..."]);
+      
+      const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-    setOcrProgress(100);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setStep("preview");
+      for (let i = 0; i < selectedImages.length; i++) {
+        const img = selectedImages[i];
+        setOcrLog(prev => [...prev, `◉ Image ${i + 1} — Processing...`]);
+        
+        if (i > 0) {
+          // Delay to stay clear of rate limits
+          await sleep(1500);
+        }
+
+        try {
+          const text = await readAndTranscribeImage(img.file);
+          transcribedTexts.push(text);
+          setOcrLog(prev => {
+            const list = [...prev];
+            const filterIndex = list.indexOf(`◉ Image ${i + 1} — Processing...`);
+            if (filterIndex !== -1) {
+              list[filterIndex] = `✓ Image ${i + 1} — Processed`;
+            } else {
+              list.push(`✓ Image ${i + 1} — Processed`);
+            }
+            return list;
+          });
+        } catch (error: any) {
+          console.error(error);
+          setOcrLog(prev => [...prev, `⚠️ Image ${i + 1} — OCR reading failed (Skipped)`]);
+          transcribedTexts.push(`[System: Could not read image ${i + 1} clearly]`);
+        }
+
+        setOcrProgress(Math.round(((i + 1) / totalSteps) * 100));
+      }
+
+      const combinedText = transcribedTexts.join("\n\n");
+      const parsed = parseMessagesFromOCRText(combinedText);
+      setReconstructedMessages(parsed);
+
+      // Auto detect participant names from OCR text
+      const senders = Array.from(new Set(parsed.map(m => m.sender)));
+      setParticipants({
+        nameA: senders[0] || "Person A",
+        nameB: senders[1] || "Person B"
+      });
+
+      setOcrProgress(100);
+      await sleep(1000);
+      setStep("preview");
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || "Failed to transcribe one or more screenshots. Please try again.");
+      setStep("upload");
+    }
   };
 
   // Change all occurrences of Person A or B sender names
