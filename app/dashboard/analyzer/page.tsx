@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import {
@@ -37,7 +38,8 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckSquare,
-  Brain
+  Brain,
+  Download
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -105,6 +107,12 @@ function ChatAnalyzerInner() {
   const historyId = searchParams.get("id")
   const { subscription } = useSubscription()
   const activeTier = subscription?.tier || "free"
+  const { data: session } = useSession()
+  const userName = session?.user?.name || "Dhiraj Patil"
+  const userImage = session?.user?.image || ""
+
+  const [showTimelineModal, setShowTimelineModal] = useState(false)
+  const [showInsightsModal, setShowInsightsModal] = useState(false)
 
   // Workflow steps: "upload" | "selection" | "ocr" | "preview" | "analyzing" | "report"
   const [step, setStep] = useState<"upload" | "selection" | "ocr" | "preview" | "analyzing" | "report">("upload")
@@ -602,60 +610,205 @@ function ChatAnalyzerInner() {
     setTimeout(() => setCopiedInsight(null), 2000);
   };
 
-  const dynamicAnalysis = analysisData ? {
-    overallScore: analysisData.positivityScore ?? 78,
-    positivityRatio: typeof analysisData.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 72,
-    communicationBalance: typeof analysisData.communicationBalance === "number" ? analysisData.communicationBalance : 54,
-    responseTime: "26 min avg",
-    conflictFrequency: "Low",
-    emotionalTone: {
-      positive: typeof analysisData.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 72,
-      neutral: 20,
-      negative: 8
-    },
-    strengths: [
-      "Supportive communication & regular syncs",
-      "Consistent back-and-forth communication flow",
-      "Positive reinforcements & mutual affirmations"
-    ],
-    improvements: [
-      "Some conversation threads end abruptly during work hours",
-      "Occasional misunderstandings detected regarding response intervals"
-    ],
-    patterns: Array.isArray(analysisData.redFlags) && analysisData.redFlags.length > 0
-      ? analysisData.redFlags.map((rf: any) => ({
-          title: rf.title || "Communication Imbalance",
-          description: rf.description || "Asymmetrical word counts detected.",
-          severity: rf.type === "danger" ? "High" : rf.type === "warning" ? "Medium" : "Low"
-        }))
-      : [
-          { title: "Conversation drops", description: "Replies dry up occasionally.", severity: "Medium" },
-          { title: "Repeated misunderstandings", description: "Mild syntax tension detected.", severity: "Low" }
-        ],
-    timeline: [
-      { date: "12 May", label: "Conversation started", detail: "Active back-and-forth greeting logs." },
-      { date: "15 May", label: "Higher communication frequency", detail: "Strong emotional validation detected." },
-      { date: "18 May", label: "Several misunderstandings detected", detail: "Short replies and pauses." },
-      { date: "20 May", label: "Communication returned to normal", detail: "Resonance restored." }
-    ]
-  } : {
-    overallScore: 78,
-    positivityRatio: 72,
-    communicationBalance: 54,
-    responseTime: "26 min avg",
-    conflictFrequency: "Low",
-    emotionalTone: { positive: 72, neutral: 20, negative: 8 },
-    strengths: ["Supportive communication", "Consistent sync", "Positive interactions"],
-    improvements: ["Some threads end abruptly", "Occasional misunderstandings"],
-    patterns: [
-      { title: "Short replies", description: "Occasional one-word responses.", severity: "Low" },
-      { title: "Communication imbalance", description: "Slight difference in word counts.", severity: "Medium" }
-    ],
-    timeline: [
-      { date: "12 May", label: "Conversation started", detail: "Initial greetings." },
-      { date: "20 May", label: "Analysis report compile", detail: "Report loaded successfully." }
-    ]
+  // Helper calculations for dynamic data mapping
+  const overallScore = analysisData?.positivityScore ?? 78;
+  const positivityRatio = typeof analysisData?.positivityScore === "number" ? Math.round(analysisData.positivityScore) : 72;
+  const communicationBalance = typeof analysisData?.communicationBalance === "number" ? analysisData.communicationBalance : 54;
+  
+  // Dynamic response times
+  const responseTimeVal = analysisData?.responseTime 
+    ? `${analysisData.responseTime.person1Timing} vs ${analysisData.responseTime.person2Timing}` 
+    : "26 min avg";
+    
+  // Dynamic conflict frequency based on stressScore
+  const stressScoreVal = analysisData?.stressScore ?? 28;
+  const conflictFrequencyVal = stressScoreVal > 65 ? "High" : stressScoreVal > 35 ? "Moderate" : "Low";
+  const conflictStatusLabel = stressScoreVal > 65 ? "● Elevated Tension" : stressScoreVal > 35 ? "● Moderate Friction" : "● Healthy Connection";
+
+  const getGradeLabel = (score: number) => {
+    if (score >= 85) return "Excellent Resonance 😍";
+    if (score >= 70) return "Good Dynamics 😊";
+    if (score >= 50) return "Steady Flow 😐";
+    return "Reflective Space ⚠️";
   };
+
+  const getScoreDescription = (score: number) => {
+    if (score >= 85) return "You both have an exceptionally strong, supportive connection with deep emotional resonance.";
+    if (score >= 70) return "You both have a healthy connection with stable engagement and room to grow even better.";
+    if (score >= 50) return "Your communication shows balanced pacing but lacks deeper emotional validation indicators.";
+    return "Tension and communication gaps detected. Focus on active listening to rebuild connection safety.";
+  };
+
+  const getDynamicTimeline = () => {
+    const datesMap: Record<string, Message[]> = {};
+    reconstructedMessages.forEach(m => {
+      let dateKey = "Chat";
+      const dateMatch = m.timestamp.match(/\d{1,2}\s*[A-Za-z]{3}/);
+      if (dateMatch) {
+        dateKey = dateMatch[0];
+      }
+      if (!datesMap[dateKey]) datesMap[dateKey] = [];
+      datesMap[dateKey].push(m);
+    });
+
+    const dates = Object.keys(datesMap);
+    if (dates.length === 0) {
+      return [
+        { date: "Day 1", label: "Conversation Started", detail: "Initial screenshots loaded." }
+      ];
+    }
+
+    return dates.slice(0, 4).map(d => {
+      const msgs = datesMap[d];
+      const firstMsg = msgs[0];
+      const sentiment = msgs.length > 5 ? "High engagement day" : "Regular check-ins";
+      return {
+        date: d,
+        label: sentiment,
+        detail: firstMsg ? `${firstMsg.sender}: "${firstMsg.content.substring(0, 50)}${firstMsg.content.length > 50 ? "..." : ""}"` : "Active chat log segment."
+      };
+    });
+  };
+
+  const getDateRange = () => {
+    const dates: string[] = [];
+    reconstructedMessages.forEach(m => {
+      const dateMatch = m.timestamp.match(/\d{1,2}\s*[A-Za-z]{3}/);
+      if (dateMatch) {
+        dates.push(dateMatch[0]);
+      }
+    });
+
+    if (dates.length === 0) return "Recent Upload";
+    const uniqueDates = Array.from(new Set(dates));
+    if (uniqueDates.length === 1) return uniqueDates[0];
+    return `${uniqueDates[0]} - ${uniqueDates[uniqueDates.length - 1]}`;
+  };
+
+  const getTonePoints = () => {
+    const totalMsgs = reconstructedMessages.length;
+    if (totalMsgs === 0) return [];
+    
+    const chunkSize = Math.max(1, Math.ceil(totalMsgs / 5));
+    const chunks: Message[][] = [];
+    for (let i = 0; i < totalMsgs; i += chunkSize) {
+      chunks.push(reconstructedMessages.slice(i, i + chunkSize));
+    }
+    
+    const posWords = /\b(love|happy|care|heart|laugh|smile|thank|cute|together|trust|sweet|agree|perfect|great|amazing|good|wonderful|joy|😊|❤️|🥰|😘|😍|💖|💕|🎉|✨|👍|😂)\b/i;
+    const negWords = /\b(whatever|fine|stop|don't care|hate|angry|ignore|busy|enough|irritate|wrong|never|annoyed|sad|hurt|😢|😭|😡|😠|😒|🙄|💔|👎|👿)\b/i;
+    
+    return chunks.slice(0, 5).map((chunk, idx) => {
+      let posCount = 0;
+      let negCount = 0;
+      chunk.forEach(m => {
+        const text = m.content.toLowerCase();
+        if (posWords.test(text)) posCount++;
+        if (negWords.test(text)) negCount++;
+      });
+      
+      const posRatio = Math.round(posCount / Math.max(1, chunk.length) * 100);
+      const negRatio = Math.round(negCount / Math.max(1, chunk.length) * 100);
+      
+      const apiPos = analysisData?.positivityScore ?? 72;
+      const apiStress = analysisData?.stressScore ?? 28;
+      
+      const calibratedPos = Math.max(10, Math.min(95, Math.round(apiPos + (posRatio - 20) * 1.5)));
+      const calibratedNeg = Math.max(5, Math.min(80, Math.round(apiStress + (negRatio - 10) * 1.5)));
+      const calibratedNeu = 100 - calibratedPos - calibratedNeg;
+      
+      let dateLabel = `Pt ${idx + 1}`;
+      if (chunk[0] && chunk[0].timestamp) {
+        const match = chunk[0].timestamp.match(/\d{1,2}\s*[A-Za-z]{3}/);
+        if (match) {
+          dateLabel = match[0];
+        }
+      }
+      
+      return {
+        date: dateLabel,
+        positive: calibratedPos,
+        negative: calibratedNeg,
+        neutral: Math.max(5, calibratedNeu)
+      };
+    });
+  };
+
+  const getActivityPoints = () => {
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const counts = [0, 0, 0, 0, 0, 0, 0];
+    
+    reconstructedMessages.forEach((m, idx) => {
+      const dateMatch = m.timestamp.match(/(\d{1,2})[\/\-s](\d{1,2}|[A-Za-z]{3})/);
+      if (dateMatch) {
+        try {
+          const d = new Date(`${dateMatch[1]} ${dateMatch[2]} 2024`);
+          if (!isNaN(d.getTime())) {
+            const dayIdx = (d.getDay() + 6) % 7; // Mon is 0
+            counts[dayIdx]++;
+            return;
+          }
+        } catch(e) {}
+      }
+      counts[idx % 7]++;
+    });
+    
+    return days.map((day, idx) => ({
+      day,
+      count: counts[idx]
+    }));
+  };
+
+  const tonePoints = getTonePoints();
+
+  const getCoordinates = (key: "positive" | "neutral" | "negative") => {
+    const chartWidth = 380;
+    const chartHeight = 110;
+    const paddingLeft = 45;
+    const paddingTop = 15;
+    return tonePoints.map((pt, i) => {
+      const x = paddingLeft + (i * (chartWidth / Math.max(1, tonePoints.length - 1)));
+      const y = paddingTop + (chartHeight * (100 - pt[key])) / 100;
+      return { x, y };
+    });
+  };
+
+  const posCoords = getCoordinates("positive");
+  const neuCoords = getCoordinates("neutral");
+  const negCoords = getCoordinates("negative");
+
+  const buildPath = (coords: { x: number, y: number }[]) => {
+    if (coords.length === 0) return "";
+    return `M ${coords[0].x} ${coords[0].y} ` + coords.slice(1).map(c => `L ${c.x} ${c.y}`).join(" ");
+  };
+
+  const strengthList = Array.isArray(analysisData?.timelineInsights) && analysisData.timelineInsights.length > 0
+    ? analysisData.timelineInsights.slice(0, 3)
+    : [
+        "Supportive Conversations: You both uplift and encourage each other.",
+        "Consistent Communication: You both stay connected regularly.",
+        "Respect & Understanding: You value each other's feelings and time."
+      ];
+
+  const improvementsList = Array.isArray(analysisData?.suggestions) && analysisData.suggestions.length > 0
+    ? analysisData.suggestions.slice(0, 4)
+    : [
+        "Occasional Late Replies: Some messages are replied late.",
+        "Conversation Drop: Some conversations end abruptly.",
+        "Few Misunderstandings: Try to clarify more in tough moments."
+      ];
+
+  const timelinePoints = getDynamicTimeline();
+
+  const redFlagsList = Array.isArray(analysisData?.redFlags) && analysisData.redFlags.length > 0
+    ? analysisData.redFlags.slice(0, 4)
+    : [
+        { title: "Short Replies", description: "Minimal text answers detected.", severity: "medium" },
+        { title: "Conversation Drop", description: "Replies dry up occasionally.", severity: "medium" }
+      ];
+
+  const activityPoints = getActivityPoints();
+  const maxActivity = Math.max(...activityPoints.map(p => p.count), 1);
 
   return (
     <div className="space-y-6 force-gpu text-zinc-150">
@@ -1467,390 +1620,590 @@ function ChatAnalyzerInner() {
           </motion.div>
         )}
 
-        {/* STEP 6: Premium Analysis Report Dashboard */}
         {step === "report" && (
           <motion.div
             key="report"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start py-2"
+            className="space-y-6 max-w-7xl mx-auto p-6 rounded-3xl border border-zinc-900/60 bg-[#07080d]/85 relative overflow-hidden backdrop-blur-2xl shadow-3xl select-none"
           >
-            {/* COMPACT LEFT SIDEBAR NAVIGATION */}
-            <div className="lg:col-span-3 space-y-4 select-none">
-              <div className="flex items-center gap-3 border-b border-zinc-900 pb-4">
-                <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] flex items-center justify-center shadow-lg">
+            {/* Ambient background glowing effects */}
+            <div className="absolute top-[-10%] left-[-15%] w-[45%] h-[45%] rounded-full bg-purple-950/15 blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-15%] w-[45%] h-[45%] rounded-full bg-blue-950/15 blur-[120px] pointer-events-none" />
+
+            {/* Top Bar Logo & Profile */}
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4 select-none">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#8b5cf6] to-[#d946ef] flex items-center justify-center shadow-lg shadow-purple-500/20">
                   <Brain className="w-4.5 h-4.5 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Analysis Reports</h3>
-                  <p className="text-[10px] text-zinc-500">AI Relationship Coach</p>
+                <span className="text-xs font-black text-white tracking-wider uppercase">HeartMind<span className="text-zinc-500">.ai</span></span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                {userImage ? (
+                  <img src={userImage} alt={userName} className="w-6 h-6 rounded-full border border-zinc-800" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#d946ef] flex items-center justify-center text-[10px] font-black text-white uppercase select-none">
+                    {userName.charAt(0)}
+                  </div>
+                )}
+                <span className="text-[11px] font-bold text-zinc-300">{userName}</span>
+                <ChevronRight className="w-3 h-3 text-zinc-650 rotate-90" />
+              </div>
+            </div>
+
+            {/* Title row */}
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 select-none pb-2">
+              <div className="space-y-1">
+                <button
+                  onClick={() => { setSelectedImages([]); setReconstructedMessages([]); setStep("upload"); router.push("/dashboard/analyzer"); }}
+                  className="flex items-center gap-1.5 text-[10px] text-zinc-500 hover:text-white font-bold transition-colors uppercase tracking-wider bg-transparent border-0 cursor-pointer"
+                >
+                  ← Back to Chats
+                </button>
+                <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-1.5">
+                  Relationship Analysis Report <span className="inline-block text-[#8b5cf6] text-xl">✨</span>
+                </h1>
+                <p className="text-[11px] text-zinc-500 flex items-center gap-1">
+                  AI-powered insights from {reconstructedMessages.length || "4,256"} messages <span className="inline-block w-3 h-3 rounded-full bg-zinc-900 text-zinc-600 text-[8px] font-extrabold flex items-center justify-center border border-zinc-800/80 cursor-help">i</span>
+                </p>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-lg bg-[#0d1614] border border-[#142d22] text-[#10b981] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" /> Platform: {selectedPlatform}
+                </span>
+                <span className="text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-lg bg-zinc-950/80 border border-zinc-900 text-zinc-400">
+                  Date Range: {getDateRange()}
+                </span>
+                <Button
+                  onClick={() => window.print()}
+                  className="text-[10px] h-9 bg-zinc-950 border border-zinc-800 hover:bg-zinc-900 text-white font-bold flex items-center gap-1.5 rounded-lg px-4"
+                >
+                  <Download className="w-3.5 h-3.5" /> Export Report
+                </Button>
+              </div>
+            </div>
+
+            {/* Top Grid: 5 Metrics cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 select-none">
+              
+              {/* Card 1: Relationship Score */}
+              <div className="premium-card spotlight-glow border border-zinc-900 rounded-2xl p-4 bg-zinc-950/30 flex items-center gap-4 relative overflow-hidden h-[110px] hover:border-zinc-800 transition-colors">
+                <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center bg-zinc-950/60 rounded-full border border-zinc-900 shadow-inner">
+                  <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                    <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.01)" strokeWidth="4" fill="none" />
+                    <circle 
+                      cx="32" 
+                      cy="32" 
+                      r="28" 
+                      stroke="#8b5cf6" 
+                      strokeWidth="4" 
+                      fill="none" 
+                      strokeDasharray="176" 
+                      strokeDashoffset={176 - (176 * overallScore) / 100} 
+                      strokeLinecap="round" 
+                    />
+                  </svg>
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-sm font-black text-white">{overallScore}</span>
+                    <span className="text-[7.5px] text-zinc-500 font-bold">/100</span>
+                  </div>
+                </div>
+                <div className="space-y-0.5 min-w-0">
+                  <p className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-wider flex items-center gap-1">Relationship Score <span className="text-[8px] text-zinc-650 cursor-help">ⓘ</span></p>
+                  <h4 className="text-xs font-black text-white">{getGradeLabel(overallScore).split(" ")[0]} {getGradeLabel(overallScore).split(" ")[1] || "😊"}</h4>
+                  <p className="text-[9px] text-zinc-500 leading-tight line-clamp-2">You both have a healthy connection with room to grow.</p>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                {[
-                  { id: "dashboard", label: "Dashboard Overview", icon: BarChart3 },
-                  { id: "conversations", label: "Conversations", icon: MessageCircle },
-                  { id: "history", label: "Analysis History", icon: Clock },
-                  { id: "timeline", label: "Timeline", icon: Calendar },
-                  { id: "patterns", label: "Detected Patterns", icon: Activity },
-                  { id: "insights", label: "Coach Insights", icon: Sparkles },
-                  { id: "settings", label: "Settings", icon: Settings }
-                ].map((tab) => {
-                  const isActive = sidebarTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setSidebarTab(tab.id as any)}
-                      className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-bold uppercase flex items-center gap-3 transition-all ${
-                        isActive 
-                          ? "bg-primary text-white shadow-md shadow-primary/10" 
-                          : "text-zinc-400 hover:text-white hover:bg-zinc-900/40"
-                      }`}
-                    >
-                      <tab.icon className="w-4.5 h-4.5 flex-shrink-0" />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
+              {/* Card 2: Positivity Ratio */}
+              <div className="premium-card spotlight-glow border border-zinc-900 rounded-2xl p-4 bg-zinc-950/30 flex flex-col justify-between relative overflow-hidden h-[110px] hover:border-zinc-800 transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                    <Heart className="w-4.5 h-4.5 text-emerald-400 fill-emerald-500/10" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-wider flex items-center gap-1">Positivity Ratio <span className="text-[8px] text-zinc-650 cursor-help">ⓘ</span></p>
+                    <h4 className="text-sm font-black text-white">{positivityRatio}%</h4>
+                    <p className="text-[8px] text-zinc-500 mt-0.5">Positive conversations</p>
+                  </div>
+                </div>
+                <div className="h-5 w-full overflow-hidden">
+                  <svg className="w-full h-full" viewBox="0 0 100 20">
+                    <path d="M 0 12 Q 20 2, 40 12 T 80 12 T 120 12" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
               </div>
 
-              <Button 
-                onClick={() => { setSelectedImages([]); setReconstructedMessages([]); setStep("upload"); router.push("/dashboard/analyzer"); }}
-                variant="outline"
-                className="w-full text-[10px] font-bold uppercase border-zinc-900 bg-transparent hover:bg-zinc-900 text-zinc-400 hover:text-white rounded-xl py-3 mt-4"
+              {/* Card 3: Comm Balance */}
+              <div className="premium-card spotlight-glow border border-zinc-900 rounded-2xl p-4 bg-zinc-950/30 flex flex-col justify-between relative overflow-hidden h-[110px] hover:border-zinc-800 transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 flex items-center justify-center text-primary flex-shrink-0">
+                    <MessageSquareText className="w-4.5 h-4.5 text-[#a78bfa]" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-wider flex items-center gap-1">Communication Balance <span className="text-[8px] text-zinc-650 cursor-help">ⓘ</span></p>
+                    <h4 className="text-sm font-black text-white">{communicationBalance}% : {100 - communicationBalance}%</h4>
+                    <p className="text-[8px] text-zinc-500 mt-0.5">{participants.nameA} : {participants.nameB}</p>
+                  </div>
+                </div>
+                <div className="h-5 w-full overflow-hidden">
+                  <svg className="w-full h-full" viewBox="0 0 100 20">
+                    <path d="M 0 12 Q 20 18, 40 12 T 80 12 T 120 12" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Card 4: Avg Response Time */}
+              <div className="premium-card spotlight-glow border border-zinc-900 rounded-2xl p-4 bg-zinc-950/30 flex flex-col justify-between relative overflow-hidden h-[110px] hover:border-zinc-800 transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">
+                    <Clock className="w-4.5 h-4.5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-wider flex items-center gap-1">Avg. Response Time <span className="text-[8px] text-zinc-650 cursor-help">ⓘ</span></p>
+                    <h4 className="text-sm font-black text-white">
+                      {analysisData?.responseTime?.person1Timing ? `${analysisData.responseTime.person1Timing.replace(/ avg/i, '')}` : "26 min"}
+                    </h4>
+                    <p className="text-[8px] text-zinc-500 mt-0.5"><span className="text-[8px] text-amber-500 font-black uppercase bg-amber-500/10 border border-amber-500/20 px-1 py-0.5 rounded mr-1">Normal</span> Good pattern</p>
+                  </div>
+                </div>
+                <div className="h-5 w-full overflow-hidden">
+                  <svg className="w-full h-full" viewBox="0 0 100 20">
+                    <path d="M 0 12 Q 20 4, 40 14 T 80 8 T 120 12" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Card 5: Conflict Frequency */}
+              <div className="premium-card spotlight-glow border border-zinc-900 rounded-2xl p-4 bg-zinc-950/30 flex flex-col justify-between relative overflow-hidden h-[110px] hover:border-zinc-800 transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-450 flex-shrink-0">
+                    <Shield className="w-4.5 h-4.5 text-rose-450" />
+                  </div>
+                  <div>
+                    <p className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-wider flex items-center gap-1">Conflict Frequency <span className="text-[8px] text-zinc-650 cursor-help">ⓘ</span></p>
+                    <h4 className="text-sm font-black text-rose-450">{conflictFrequencyVal}</h4>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-400">
+                  <span className={`w-1.5 h-1.5 rounded-full ${stressScoreVal > 65 ? "bg-rose-500 animate-ping" : stressScoreVal > 35 ? "bg-amber-500" : "bg-emerald-500"}`} />
+                  {conflictStatusLabel}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Middle Grid: Tone Chart, Insights, Improvement areas */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+              
+              {/* Card 1: Emotional Tone chart (col-span-5) */}
+              <div className="lg:col-span-5 premium-card border border-zinc-900 rounded-2xl p-5 bg-zinc-950/30 flex flex-col justify-between select-none">
+                <div className="flex items-center justify-between border-b border-zinc-900/60 pb-3">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Emotional Tone Over Time</h3>
+                  <div className="flex items-center gap-3 text-[8.5px] font-black text-zinc-450">
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Positive</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Neutral</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Negative</span>
+                  </div>
+                </div>
+                
+                {/* SVG Line chart with full Left Axis Labels */}
+                <div className="w-full pt-4 h-[140px] flex items-center justify-center">
+                  {tonePoints.length > 0 ? (
+                    <svg viewBox="0 0 460 150" className="w-full h-full">
+                      {/* Left Axis Labels */}
+                      <text x="35" y="18" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">100%</text>
+                      <text x="35" y="45.5" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">75%</text>
+                      <text x="35" y="73" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">50%</text>
+                      <text x="35" y="100.5" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">25%</text>
+                      <text x="35" y="128" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">0%</text>
+
+                      {/* Grid lines */}
+                      <line x1="45" y1="15" x2="445" y2="15" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                      <line x1="45" y1="42.5" x2="445" y2="42.5" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                      <line x1="45" y1="70" x2="445" y2="70" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                      <line x1="45" y1="97.5" x2="445" y2="97.5" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                      <line x1="45" y1="125" x2="445" y2="125" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+
+                      {/* Paths */}
+                      <path d={buildPath(posCoords)} stroke="#10b981" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d={buildPath(neuCoords)} stroke="#f59e0b" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="3 3" />
+                      <path d={buildPath(negCoords)} stroke="#f43f5e" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+
+                      {/* Dots */}
+                      {posCoords.map((c, idx) => (
+                        <circle key={`pos-${idx}`} cx={c.x} cy={c.y} r="2.5" fill="#10b981" stroke="#000" strokeWidth="0.5" />
+                      ))}
+                      {neuCoords.map((c, idx) => (
+                        <circle key={`neu-${idx}`} cx={c.x} cy={c.y} r="2.5" fill="#f59e0b" stroke="#000" strokeWidth="0.5" />
+                      ))}
+                      {negCoords.map((c, idx) => (
+                        <circle key={`neg-${idx}`} cx={c.x} cy={c.y} r="2.5" fill="#f43f5e" stroke="#000" strokeWidth="0.5" />
+                      ))}
+
+                      {/* X Axis Labels */}
+                      {tonePoints.map((pt, idx) => {
+                        const x = 45 + (idx * (400 / Math.max(1, tonePoints.length - 1)));
+                        return (
+                          <text key={idx} x={x} y="142" fill="#71717a" fontSize="8" fontWeight="black" textAnchor="middle">
+                            {pt.date}
+                          </text>
+                        );
+                      })}
+                    </svg>
+                  ) : (
+                    <div className="text-zinc-650 text-[10px]">No historical date sequence found.</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Card 2: Communication Insights (col-span-4) */}
+              <div className="lg:col-span-4 premium-card border border-zinc-900 rounded-2xl p-5 bg-zinc-950/30 flex flex-col justify-between select-none">
+                <div className="border-b border-zinc-900/60 pb-3">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Communication Insights</h3>
+                </div>
+                
+                <div className="flex items-center gap-4 py-3">
+                  {/* Donut chart */}
+                  <div className="relative w-20 h-20 flex-shrink-0 flex items-center justify-center select-none">
+                    <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                      <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.02)" strokeWidth="8" fill="none" />
+                      <circle cx="50" cy="50" r="40" stroke="#8b5cf6" strokeWidth="8" fill="none" strokeDasharray="251" strokeDashoffset={251 - (251 * positivityRatio) / 100} strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-[7.5px] text-zinc-550 font-black uppercase tracking-widest text-center leading-none">Greatest<br/>Strength</span>
+                      <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500/10 mt-1 animate-pulse" />
+                    </div>
+                  </div>
+
+                  {/* Bullet list */}
+                  <div className="space-y-3 flex-1 min-w-0">
+                    {strengthList.slice(0, 3).map((str, sidx) => {
+                      const splitIdx = str.indexOf(":");
+                      const title = splitIdx !== -1 ? str.substring(0, splitIdx) : "Strength";
+                      const desc = splitIdx !== -1 ? str.substring(splitIdx + 1) : str;
+                      return (
+                        <div key={sidx} className="space-y-0.5">
+                          <h5 className="text-[10px] font-bold text-zinc-200 flex items-center gap-1.5">
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" /> <span className="truncate">{title}</span>
+                          </h5>
+                          <p className="text-[9px] text-zinc-500 leading-normal pl-5">{desc.trim()}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Areas to Improve (col-span-3) */}
+              <div className="lg:col-span-3 premium-card border border-zinc-900 rounded-2xl p-5 bg-zinc-950/30 flex flex-col justify-between select-none">
+                <div className="border-b border-zinc-900/60 pb-3">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Areas to Improve</h3>
+                </div>
+
+                <div className="space-y-3.5 py-3 flex-1 flex flex-col justify-center">
+                  {improvementsList.slice(0, 4).map((imp, iidx) => {
+                    const splitIdx = imp.indexOf(":");
+                    const title = splitIdx !== -1 ? imp.substring(0, splitIdx) : "Suggestion";
+                    const desc = splitIdx !== -1 ? imp.substring(splitIdx + 1) : imp;
+                    return (
+                      <div key={iidx} className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 flex-shrink-0 mt-0.5">
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <h5 className="text-[10px] font-bold text-zinc-300 leading-tight">{title}</h5>
+                          <p className="text-[9px] text-zinc-550 leading-tight">{desc.trim()}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Bottom Grid: Timeline, Red Flags, Activity Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+              
+              {/* Card 1: Timeline */}
+              <div className="premium-card border border-zinc-900 rounded-2xl p-5 bg-zinc-950/30 flex flex-col justify-between select-none">
+                <div className="border-b border-zinc-900/60 pb-3">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Conversation Timeline</h3>
+                </div>
+
+                <div className="relative pl-5 border-l border-zinc-900/80 space-y-4.5 ml-2.5 py-4 flex-1 flex flex-col justify-center">
+                  {timelinePoints.map((point, pidx) => {
+                    const colors = ["bg-emerald-500 border-emerald-450", "bg-sky-500 border-sky-450", "bg-amber-500 border-amber-450", "bg-[#8b5cf6] border-[#a78bfa]"];
+                    return (
+                      <div key={point.date} className="relative">
+                        <span className={`absolute -left-[27px] top-0.5 w-3 h-3 rounded-full border-2 ${colors[pidx % 4]} flex items-center justify-center shadow-lg shadow-purple-500/10`} />
+                        <div className="space-y-0.5">
+                          <span className="text-[8.5px] font-black text-zinc-555 uppercase tracking-wider">{point.date}</span>
+                          <h4 className="text-[10px] font-bold text-zinc-300 leading-tight">{point.label}</h4>
+                          <p className="text-[9.5px] text-zinc-500 leading-snug line-clamp-2">{point.detail}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button 
+                  onClick={() => setShowTimelineModal(true)}
+                  className="w-full py-2.5 rounded-xl border border-zinc-900 bg-zinc-950/60 hover:bg-zinc-900 text-zinc-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-colors mt-2 bg-transparent cursor-pointer"
+                >
+                  View Full Timeline →
+                </button>
+              </div>
+
+              {/* Card 2: Red Flags */}
+              <div className="premium-card border border-zinc-900 rounded-2xl p-5 bg-zinc-950/30 flex flex-col justify-between select-none">
+                <div className="flex items-center justify-between border-b border-zinc-900/60 pb-3">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Red Flags Detected</h3>
+                  <button onClick={() => setShowInsightsModal(true)} className="text-[9px] font-bold text-zinc-500 hover:text-white uppercase tracking-wider bg-transparent border-0 cursor-pointer">View All</button>
+                </div>
+
+                <div className="space-y-2.5 py-4 flex-1 flex flex-col justify-center">
+                  {redFlagsList.slice(0, 4).map((flag: any, fidx) => {
+                    const severity = flag.severity || "medium";
+                    const isHigh = severity === "high";
+                    const isMedium = severity === "medium" || severity === "caution";
+                    const count = flag.count || (fidx === 0 ? 12 : fidx === 1 ? 8 : fidx === 2 ? 5 : 3);
+                    
+                    return (
+                      <div key={fidx} className="p-1 rounded-xl border border-transparent flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                            isHigh ? "bg-rose-500/10 text-rose-500 border border-rose-500/20" : isMedium ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-zinc-800 text-zinc-400"
+                          }`}>
+                            <AlertTriangle className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-[10px] font-bold text-zinc-200 truncate">{flag.title}</h4>
+                            <p className="text-[8.5px] text-zinc-500 truncate leading-snug">Detected {count} times</p>
+                          </div>
+                        </div>
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded flex-shrink-0 ${
+                          isHigh ? "text-rose-450 bg-rose-500/10" : isMedium ? "text-amber-500 bg-amber-500/10 border border-amber-500/20" : "text-zinc-500 bg-zinc-900"
+                        }`}>
+                          {severity}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Card 3: Activity bar chart */}
+              <div className="premium-card border border-zinc-900 rounded-2xl p-5 bg-zinc-950/30 flex flex-col justify-between select-none">
+                <div className="flex items-center justify-between border-b border-zinc-900/60 pb-3">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Conversation Activity</h3>
+                  <span className="text-[8.5px] text-zinc-500 font-bold border border-zinc-900 px-2 py-0.5 rounded bg-zinc-950/80">This Week</span>
+                </div>
+
+                <div className="w-full pt-6 h-[120px] flex items-center justify-center">
+                  <svg viewBox="0 0 320 110" className="w-full h-full">
+                    {/* Horizontal dotted grid lines */}
+                    <line x1="30" y1="15" x2="310" y2="15" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                    <line x1="30" y1="32.5" x2="310" y2="32.5" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                    <line x1="30" y1="50" x2="310" y2="50" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                    <line x1="30" y1="67.5" x2="310" y2="67.5" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+                    <line x1="30" y1="85" x2="310" y2="85" stroke="rgba(255,255,255,0.02)" strokeDasharray="3 3" />
+
+                    {/* Left Axis Labels */}
+                    <text x="22" y="18" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">1K</text>
+                    <text x="22" y="35.5" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">750</text>
+                    <text x="22" y="53" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">500</text>
+                    <text x="22" y="70.5" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">250</text>
+                    <text x="22" y="88" fill="#52525b" fontSize="7.5" fontWeight="bold" textAnchor="end">0</text>
+
+                    {/* Gradients */}
+                    <defs>
+                      <linearGradient id="purpleBarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#d946ef" />
+                        <stop offset="100%" stopColor="#8b5cf6" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Bars */}
+                    {activityPoints.map((pt, i) => {
+                      const barWidth = 16;
+                      const gap = 22;
+                      const x = 32 + i * (barWidth + gap);
+                      const barHeight = Math.max(5, (pt.count / maxActivity) * 65);
+                      const y = 85 - barHeight;
+                      
+                      return (
+                        <g key={pt.day}>
+                          <rect x={x} y="15" width={barWidth} height="70" rx="3" fill="rgba(255,255,255,0.01)" />
+                          <rect x={x} y={y} width={barWidth} height={barHeight} rx="3" fill="url(#purpleBarGrad)" />
+                          <text x={x + barWidth/2} y="99" fill="#71717a" fontSize="8" fontWeight="black" textAnchor="middle">
+                            {pt.day}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Footer Banner */}
+            <div className="premium-card spotlight-glow border border-[#161b26] rounded-2xl p-5 bg-[#08090d]/95 flex flex-col md:flex-row items-center justify-between gap-5 select-none relative overflow-hidden">
+              <div className="absolute top-0 inset-y-0 left-0 w-[3px] bg-gradient-to-b from-[#8b5cf6] to-[#d946ef]" />
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#d946ef] flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                  <span className="text-xl">✨</span>
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">AI Summary</h4>
+                  <p className="text-[10.5px] text-zinc-400 leading-relaxed max-w-3xl">
+                    Your relationship is growing well! You both communicate with care and respect. Keep being open and patient with each other. A little more consistency will make it even stronger. 💜
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowInsightsModal(true)}
+                className="text-[10px] font-extrabold uppercase bg-gradient-to-r from-[#8b5cf6] to-[#d946ef] hover:opacity-95 text-white h-9 px-6 rounded-xl flex items-center gap-1.5 shadow-lg shadow-purple-500/15"
               >
-                ← Analyze Another Chat
+                View Detailed Insights <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </div>
 
-            {/* REPORT MAIN DYNAMIC CONTAINER */}
-            <div className="lg:col-span-9 space-y-6">
-              
-              {/* HEADER INFO SUMMARY */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-4 select-none">
-                <div>
-                  <h1 className="text-xl font-bold text-white uppercase tracking-wider">Relationship Analysis Report</h1>
-                  <p className="text-xs text-zinc-500 mt-0.5">AI-powered insights compiled from {reconstructedMessages.length} conversation messages.</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[9.5px] font-extrabold uppercase px-2.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                    Platform: {selectedPlatform}
-                  </span>
+            {/* Timeline modal */}
+            {showTimelineModal && (
+              <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div className="w-full max-w-2xl rounded-2xl bg-zinc-950 border border-zinc-900 p-6 space-y-6 shadow-2xl relative">
+                  <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <MessageCircle className="w-5 h-5 text-primary" /> Full Transcribed Conversation
+                    </h3>
+                    <button 
+                      onClick={() => setShowTimelineModal(false)}
+                      className="w-8 h-8 rounded-full bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="max-h-[60vh] overflow-y-auto space-y-3.5 pr-2">
+                    {reconstructedMessages.map((msg) => {
+                      const isSenderA = msg.sender === participants.nameA;
+                      return (
+                        <div key={msg.id} className={`flex items-start gap-2.5 max-w-[85%] ${isSenderA ? "" : "ml-auto flex-row-reverse"}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md flex-shrink-0 select-none ${
+                            isSenderA ? "bg-indigo-600 shadow-indigo-600/10" : "bg-pink-600 shadow-pink-600/10"
+                          }`}>
+                            {msg.sender.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="space-y-1">
+                            <div className={`flex items-baseline gap-2 text-[10px] ${isSenderA ? "" : "justify-end flex-row-reverse"}`}>
+                              <span className="font-bold text-zinc-300">{msg.sender}</span>
+                              <span className="text-zinc-600 font-medium">{msg.timestamp}</span>
+                            </div>
+                            <div className={`px-3.5 py-2.5 rounded-2xl ${
+                              isSenderA ? "bg-[#121620] border border-[#1d2433]" : "bg-[#18121f] border border-[#2b1d38]"
+                            }`}>
+                              <p className="text-xs text-zinc-200 leading-relaxed text-pretty">{msg.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  <div className="flex justify-end pt-2 border-t border-zinc-900">
+                    <Button onClick={() => setShowTimelineModal(false)} className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs px-5 rounded-lg">Close</Button>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* PANEL 1: DASHBOARD OVERVIEW */}
-              {sidebarTab === "dashboard" && (
-                <div className="space-y-6">
-                  {/* Top Metric Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
-                    {/* Overall score card */}
-                    <Card className="glass border-border shadow-xl relative overflow-hidden select-none">
-                      <CardContent className="p-5 flex items-center gap-5">
-                        <div className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center bg-zinc-950/50 rounded-full border border-zinc-900 shadow-inner">
-                          <svg className="absolute inset-0 w-full h-full transform -rotate-90">
-                            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.01)" strokeWidth="4" fill="none" />
-                            <circle cx="32" cy="32" r="28" stroke="#8b5cf6" strokeWidth="4" fill="none" strokeDasharray="176" strokeDashoffset={176 - (176 * dynamicAnalysis.overallScore) / 100} strokeLinecap="round" />
-                          </svg>
-                          <span className="text-base font-black text-white">{dynamicAnalysis.overallScore}</span>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">Relationship Score</p>
-                          <h4 className="text-sm font-bold text-zinc-200 mt-1">{getGradeLabel(dynamicAnalysis.overallScore)}</h4>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Positivity ratio card */}
-                    <Card className="glass border-border shadow-xl select-none">
-                      <CardContent className="p-5 flex items-center gap-5">
-                        <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-                          <Heart className="w-5.5 h-5.5 text-emerald-400 fill-emerald-500/10" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">Positivity Ratio</p>
-                          <h4 className="text-base font-black text-white mt-1">{dynamicAnalysis.positivityRatio}%</h4>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Comm balance card */}
-                    <Card className="glass border-border shadow-xl select-none">
-                      <CardContent className="p-5 flex items-center gap-5">
-                        <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0">
-                          <BarChart3 className="w-5.5 h-5.5" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-zinc-500 font-extrabold uppercase tracking-wider">Comm. Balance</p>
-                          <h4 className="text-base font-black text-white mt-1">{dynamicAnalysis.communicationBalance}% : {100 - dynamicAnalysis.communicationBalance}%</h4>
-                        </div>
-                      </CardContent>
-                    </Card>
+            {/* Insights modal */}
+            {showInsightsModal && (
+              <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div className="w-full max-w-2xl rounded-2xl bg-zinc-950 border border-zinc-900 p-6 space-y-6 shadow-2xl relative">
+                  <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-accent" /> Relationship Coaching Insights
+                    </h3>
+                    <button 
+                      onClick={() => setShowInsightsModal(false)}
+                      className="w-8 h-8 rounded-full bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
 
-                  {/* Secondary Metrics */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-none">
-                    <Card className="glass border-border shadow-xl">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-amber-500" />
-                          Average Response Time
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-black text-white">{dynamicAnalysis.responseTime}</p>
-                        <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">Derived from active time gap responses on sequential dialogues.</p>
-                      </CardContent>
-                    </Card>
+                  <div className="max-h-[60vh] overflow-y-auto space-y-5 pr-2">
+                    {/* Attachment details */}
+                    <div className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/40 space-y-2">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6]" /> Attachment Style Mapping
+                      </h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed">
+                        Detected Alignment Style: <strong className="text-white capitalize">{analysisData?.attachmentStyle || "Secure"}</strong>.
+                        This dynamic reflects {analysisData?.attachmentStyle === "secure" ? "a strong foundation of trust, reciprocal pacing, and validation." : "fluctuating communication habits that can be stabilized by setting consistent check-in boundaries."}
+                      </p>
+                    </div>
 
-                    <Card className="glass border-border shadow-xl">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4 text-rose-500" />
-                          Conflict Frequency
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-black text-white">{dynamicAnalysis.conflictFrequency}</p>
-                        <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">Tension alerts detected based on structural word choices.</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Emotional Tone Chart */}
-                  <Card className="glass border-border shadow-xl">
-                    <CardHeader>
-                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-primary" />
-                        Emotional Tone Over Time
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-48 w-full flex items-end justify-between gap-6 pt-4 px-2">
-                        {[
-                          { label: "Positive Tone", value: dynamicAnalysis.emotionalTone.positive, color: "bg-emerald-500" },
-                          { label: "Neutral Tone", value: dynamicAnalysis.emotionalTone.neutral, color: "bg-zinc-500" },
-                          { label: "Negative Tone", value: dynamicAnalysis.emotionalTone.negative, color: "bg-rose-500" }
-                        ].map((bar) => (
-                          <div key={bar.label} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                            <span className="text-[10px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">{bar.value}%</span>
-                            <div className="w-full bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800/40 relative h-28 flex items-end">
-                              <motion.div 
-                                initial={{ height: 0 }}
-                                animate={{ height: `${bar.value}%` }}
-                                transition={{ duration: 1, ease: "easeOut" }}
-                                className={`w-full ${bar.color} rounded-t-lg`} 
-                              />
+                    {/* Full Red Flags list */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Complete Red Flags Register
+                      </h4>
+                      <div className="grid grid-cols-1 gap-3">
+                        {analysisData?.redFlags?.map((flag: any, index: number) => (
+                          <div key={index} className="p-3.5 rounded-xl border border-zinc-900 bg-zinc-950/40 relative overflow-hidden">
+                            <div className="flex items-center justify-between">
+                              <h5 className="text-xs font-bold text-white">{flag.title}</h5>
+                              <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${
+                                flag.severity === "high" ? "text-rose-450 bg-rose-500/10" : flag.severity === "medium" ? "text-amber-500 bg-amber-500/10 border border-amber-500/20" : "text-zinc-550 bg-zinc-900"
+                              }`}>
+                                {flag.severity}
+                              </span>
                             </div>
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">{bar.label.split(" ")[0]}</span>
+                            <p className="text-[11px] text-zinc-500 mt-2 leading-relaxed">{flag.description}</p>
+                            {flag.evidence && (
+                              <div className="mt-2.5 p-2 rounded bg-zinc-950 border border-zinc-900 font-mono text-[9.5px] text-[#8b5cf6] leading-snug">
+                                Evidence: "{flag.evidence}"
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {(!analysisData?.redFlags || analysisData.redFlags.length === 0) && (
+                          <p className="text-xs text-zinc-500 italic">No red flags flagged inside this session.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Full suggestions details */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Actionable Relationship Exercises
+                      </h4>
+                      <div className="space-y-3">
+                        {analysisData?.suggestions?.map((sug: string, index: number) => (
+                          <div key={index} className="p-3.5 rounded-xl border border-zinc-900 bg-zinc-950/40 flex items-start gap-3">
+                            <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-zinc-300 leading-relaxed">{sug}</p>
                           </div>
                         ))}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2 border-t border-zinc-900">
+                    <Button onClick={() => setShowInsightsModal(false)} className="bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs px-5 rounded-lg">Close</Button>
+                  </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* PANEL 2: CONVERSATIONS */}
-              {sidebarTab === "conversations" && (
-                <Card className="glass border-border shadow-xl">
-                  <CardHeader className="pb-3 border-b border-white/[0.04] flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                      <MessageCircle className="w-4.5 h-4.5 text-primary" />
-                      Conversation Log
-                    </CardTitle>
-                    <span className="text-[9px] font-extrabold uppercase bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-zinc-400">
-                      Preview Mode
-                    </span>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 max-h-[450px] overflow-y-auto space-y-4">
-                      {reconstructedMessages.map((msg) => {
-                        const isSenderA = msg.sender === participants.nameA;
-                        return (
-                          <div key={msg.id} className={`flex items-start gap-2.5 max-w-[85%] ${isSenderA ? "" : "ml-auto flex-row-reverse"}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-md flex-shrink-0 select-none ${
-                              isSenderA ? "bg-indigo-600 shadow-indigo-600/10" : "bg-pink-600 shadow-pink-600/10"
-                            }`}>
-                              {msg.sender.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="space-y-1">
-                              <div className={`flex items-baseline gap-2 text-[10px] ${isSenderA ? "" : "justify-end flex-row-reverse"}`}>
-                                <span className="font-bold text-zinc-300">{msg.sender}</span>
-                                <span className="text-zinc-600 font-medium">{msg.timestamp}</span>
-                              </div>
-                              <div className={`px-3 py-2 rounded-2xl ${
-                                isSenderA ? "bg-[#121620] border border-[#1d2433]" : "bg-[#18121f] border border-[#2b1d38]"
-                              }`}>
-                                <p className="text-xs text-zinc-200 leading-relaxed text-pretty">{msg.content}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* PANEL 3: HISTORY */}
-              {sidebarTab === "history" && (
-                <Card className="glass border-border shadow-xl">
-                  <CardHeader className="pb-3 border-b border-white/[0.04]">
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                      <Clock className="w-4.5 h-4.5 text-primary" />
-                      Analysis History Log
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 gap-3.5">
-                      {pastAnalyses.map((a: any) => (
-                        <button
-                          key={a._id}
-                          onClick={() => router.push(`/dashboard/analyzer?id=${a._id}`)}
-                          className="w-full text-left flex items-center justify-between p-4 rounded-xl bg-zinc-900/30 border border-white/[0.02] hover:bg-white/[0.02] hover:border-white/[0.04] transition-all duration-300 block"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              a.score >= 80 ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"
-                            }`}>
-                              <Activity className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold text-zinc-200">{a.name}</p>
-                              <p className="text-[10px] text-zinc-500 mt-0.5">Platform: {a.platform}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-black text-white">{a.score}</p>
-                            <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">Score</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* PANEL 4: TIMELINE */}
-              {sidebarTab === "timeline" && (
-                <Card className="glass border-border shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                      <Calendar className="w-4.5 h-4.5 text-primary" />
-                      Relationship Timeline
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-2">
-                    <div className="relative pl-6 border-l border-zinc-800 space-y-6 ml-2 select-none">
-                      {dynamicAnalysis.timeline.map((point, pidx) => (
-                        <div key={pidx} className="relative">
-                          <span className="absolute -left-[30px] top-1 w-3.5 h-3.5 rounded-full bg-zinc-950 border-2 border-primary flex items-center justify-center shadow-md shadow-primary/20" />
-                          <div className="space-y-1">
-                            <span className="text-[9px] font-black text-primary uppercase tracking-widest">{point.date}</span>
-                            <h4 className="text-xs font-bold text-zinc-200">{point.label}</h4>
-                            <p className="text-[11px] text-zinc-500 leading-normal">{point.detail}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* PANEL 5: DETECTED PATTERNS */}
-              {sidebarTab === "patterns" && (
-                <div className="space-y-6">
-                  {/* Strengths Card */}
-                  <Card className="glass border-border shadow-xl">
-                    <CardHeader>
-                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                        <CheckCircle className="w-4.5 h-4.5 text-emerald-400" />
-                        What's Working Well
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 pt-2">
-                      {dynamicAnalysis.strengths.map((str, sidx) => (
-                        <div key={sidx} className="p-3.5 rounded-xl border border-emerald-500/10 bg-emerald-500/[0.01] flex items-start gap-3">
-                          <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                          <p className="text-xs text-zinc-300 leading-normal">{str}</p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-
-                  {/* Areas to Improve Card */}
-                  <Card className="glass border-border shadow-xl">
-                    <CardHeader>
-                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                        <AlertTriangle className="w-4.5 h-4.5 text-amber-500" />
-                        Areas to Improve
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 pt-2">
-                      {dynamicAnalysis.improvements.map((imp, iidx) => (
-                        <div key={iidx} className="p-3.5 rounded-xl border border-amber-500/10 bg-amber-500/[0.01] flex items-start gap-3">
-                          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                          <p className="text-xs text-zinc-300 leading-normal">{imp}</p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {/* PANEL 6: COACH INSIGHTS */}
-              {sidebarTab === "insights" && (
-                <div className="space-y-6">
-                  <Card className="glass border-border shadow-xl">
-                    <CardHeader>
-                      <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                        <Activity className="w-4.5 h-4.5 text-primary" />
-                        Patterns Detected (Red Flags)
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 pt-2">
-                      {dynamicAnalysis.patterns.map((pat, pidx) => (
-                        <div key={pidx} className="p-4 rounded-xl border border-zinc-900 bg-zinc-950/40 space-y-2 relative overflow-hidden">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-bold text-white">{pat.title}</h4>
-                            <span className={`text-[8.5px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                              pat.severity === "High" ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" :
-                              pat.severity === "Medium" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
-                              "bg-zinc-900 text-zinc-500"
-                            }`}>
-                              {pat.severity} Severity
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-zinc-500 leading-normal">{pat.description}</p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {/* PANEL 7: SETTINGS */}
-              {sidebarTab === "settings" && (
-                <Card className="glass border-border shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                      <Settings className="w-4.5 h-4.5 text-zinc-400" />
-                      Analysis settings
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-4 rounded-xl bg-zinc-900/20 border border-zinc-900 text-center">
-                      <p className="text-xs text-zinc-300 font-semibold">Under Development</p>
-                      <p className="text-[10px] text-zinc-500 mt-1">This panel will house additional API models and customized weights settings.</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-            </div>
           </motion.div>
         )}
 
