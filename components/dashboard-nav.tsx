@@ -129,6 +129,22 @@ export function DashboardNav({
   const [mounted, setMounted] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("heartmind_sidebar_collapsed") === "true"
+    }
+    return false
+  })
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev
+      if (typeof window !== "undefined") {
+        localStorage.setItem("heartmind_sidebar_collapsed", String(next))
+      }
+      return next
+    })
+  }
 
   const [notifications, setNotifications] = useState<any[]>([])
   const [readIds, setReadIds] = useState<string[]>([])
@@ -424,16 +440,39 @@ export function DashboardNav({
       </AnimatePresence>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col fixed top-0 left-0 bottom-0 w-72 glass-strong border-r border-border overflow-y-auto">
+      <aside className={cn(
+        "hidden lg:flex lg:flex-col fixed top-0 left-0 bottom-0 z-40 glass-strong border-r border-border overflow-y-auto transition-all duration-300",
+        isCollapsed ? "w-0 -translate-x-full pointer-events-none overflow-hidden" : "w-72 translate-x-0"
+      )}>
         <SidebarContent pathname={cleanPath} />
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-72 pt-16 lg:pt-0 min-h-screen">
+      <main className={cn(
+        "pt-16 lg:pt-0 min-h-screen transition-all duration-300",
+        isCollapsed ? "lg:ml-0" : "lg:ml-72"
+      )}>
         {/* Desktop Header */}
         <header className="hidden lg:flex items-center justify-between h-16 px-6 glass-strong border-b border-border sticky top-0 z-30">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="text-zinc-400 hover:text-white transition-colors"
+              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+            {isCollapsed && (
+              <Link href="/dashboard" className="flex items-center gap-2 mr-2 select-none">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Brain className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-sm text-white">HeartMind</span>
+              </Link>
+            )}
+            <h1 className="text-lg font-semibold ml-1">
               {currentPage}
             </h1>
           </div>
