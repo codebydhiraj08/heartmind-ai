@@ -166,6 +166,9 @@ function ChatAnalyzerInner() {
 
   useEffect(() => {
     loadHistoryList()
+    if (typeof window !== "undefined" && window.location.search.includes("id=")) {
+      router.replace("/dashboard/analyzer")
+    }
   }, [])
 
   // Auto-load past analysis if ID is present in query parameters
@@ -829,7 +832,7 @@ function ChatAnalyzerInner() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
-            className="max-w-3xl mx-auto space-y-8 py-4"
+            className="max-w-6xl mx-auto space-y-8 py-4"
           >
             {/* Hero Section */}
             <div className="text-center space-y-4">
@@ -863,69 +866,123 @@ function ChatAnalyzerInner() {
               </div>
             )}
 
-            {/* Main Upload Card */}
-            <div 
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              className="premium-card spotlight-glow border border-[#161b26] rounded-3xl p-8 bg-[#0b0c10]/95 max-w-xl mx-auto relative text-center space-y-6 shadow-2xl"
-            >
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-white uppercase tracking-wider">Upload Your Conversation</h3>
-                
-                {/* Platform select pills */}
-                <div className="flex flex-wrap justify-center gap-2 pt-2 select-none">
-                  {platformOptions.map((platform) => (
-                    <button
-                      key={platform.name}
-                      onClick={() => setSelectedPlatform(platform.name)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                        selectedPlatform === platform.name
-                          ? "bg-primary text-white shadow-md shadow-primary/10"
-                          : "bg-zinc-950 border border-white/[0.04] text-zinc-400 hover:bg-zinc-900"
-                      }`}
-                    >
-                      {platform.name}
-                    </button>
-                  ))}
+            {/* Two-Column Grid: Upload on Left, History on Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              
+              {/* Left Column: Upload box */}
+              <div className="lg:col-span-7 flex flex-col justify-between">
+                <div 
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  className="premium-card spotlight-glow border border-zinc-900 rounded-3xl p-6 bg-zinc-950/40 relative text-center space-y-6 shadow-2xl h-full flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <h3 className="text-base font-bold text-white uppercase tracking-wider">Upload Your Conversation</h3>
+                    
+                    {/* Platform select pills */}
+                    <div className="flex flex-wrap justify-center gap-1.5 pt-1 select-none">
+                      {platformOptions.map((platform) => (
+                        <button
+                          key={platform.name}
+                          onClick={() => setSelectedPlatform(platform.name)}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all ${
+                            selectedPlatform === platform.name
+                              ? "bg-primary text-white shadow-md shadow-primary/10"
+                              : "bg-zinc-950 border border-zinc-900 text-zinc-400 hover:bg-zinc-900"
+                          }`}
+                        >
+                          {platform.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Drag Area */}
+                  <div className="border border-dashed border-zinc-800 rounded-2xl py-12 px-6 bg-zinc-950/50 relative group hover:border-primary/50 transition-colors flex-1 flex flex-col items-center justify-center">
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      multiple 
+                      accept="image/*" 
+                      className="hidden" 
+                    />
+                    
+                    <div className="flex flex-col items-center justify-center space-y-4">
+                      <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 group-hover:scale-105 group-hover:text-primary transition-all">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-zinc-200">Drag & Drop your screenshots here</p>
+                        <p className="text-[10px] text-zinc-555">or click below to browse your folders</p>
+                      </div>
+                      <Button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-xs text-white px-5 rounded-lg h-9 transition-transform active:scale-95 shadow-inner"
+                      >
+                        Select Images
+                      </Button>
+                      <p className="text-[9px] text-zinc-650 font-medium">SUPPORTED FORMATS: JPG • PNG • WEBP</p>
+                    </div>
+                  </div>
+
+                  {/* Tip badge */}
+                  <div className="p-3 bg-zinc-950/60 border border-zinc-900 rounded-xl text-left select-none flex items-start gap-2.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <p className="text-[9.5px] text-zinc-500 leading-normal font-medium">
+                      <strong className="text-zinc-300 font-bold">Tip:</strong> Upload screenshots in chronological order (timeline order) for better OCR reconstruction results.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Drag Area */}
-              <div className="border border-dashed border-zinc-800 rounded-2xl py-12 px-6 bg-zinc-950/40 relative group hover:border-primary/50 transition-colors">
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  multiple 
-                  accept="image/*" 
-                  className="hidden" 
-                />
-                
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 group-hover:scale-105 group-hover:text-primary transition-all">
-                    <Upload className="w-5 h-5" />
+              {/* Right Column: History List */}
+              <div className="lg:col-span-5 flex flex-col justify-between">
+                <div className="premium-card border border-zinc-900 rounded-3xl p-6 bg-zinc-950/40 shadow-2xl h-full flex flex-col">
+                  <div className="border-b border-zinc-900 pb-3 mb-4 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-primary" /> Past Analysis Reports
+                    </h3>
+                    <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded bg-zinc-900 text-zinc-500">
+                      Count: {pastAnalyses.length}
+                    </span>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-zinc-200">Drag & Drop your screenshots here</p>
-                    <p className="text-[10px] text-zinc-500">or click below to browse your folders</p>
+
+                  <div className="space-y-3 flex-1 overflow-y-auto max-h-[360px] pr-1">
+                    {pastAnalyses.map((item) => (
+                      <div 
+                        key={item._id}
+                        onClick={() => {
+                          router.push(`/dashboard/analyzer?id=${item._id}`)
+                        }}
+                        className="p-3.5 rounded-xl border border-zinc-900 bg-zinc-950/30 hover:bg-zinc-900/60 hover:border-zinc-800 transition-all cursor-pointer flex flex-col gap-1.5"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-zinc-200 truncate flex-1 leading-tight">
+                            {item.name || "WhatsApp Chat Analysis"}
+                          </span>
+                          <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-[#8b5cf6]/10 text-primary border border-[#8b5cf6]/20 flex-shrink-0">
+                            Score: {item.score || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[9px] text-zinc-550 font-semibold">
+                          <span className="capitalize">{item.platform || "WhatsApp"}</span>
+                          <span>{new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {pastAnalyses.length === 0 && (
+                      <div className="flex-1 flex flex-col items-center justify-center py-12 text-center text-zinc-550">
+                        <MessageSquareText className="w-8 h-8 text-zinc-700 mb-2" />
+                        <p className="text-xs font-bold text-zinc-400">No reports generated yet</p>
+                        <p className="text-[9.5px] text-zinc-550 max-w-[200px] mt-1 leading-relaxed">Upload screenshots of your conversation to get your first relationship analysis.</p>
+                      </div>
+                    )}
                   </div>
-                  <Button 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-xs text-white px-5 rounded-lg h-9 transition-transform active:scale-95 shadow-inner"
-                  >
-                    Select Images
-                  </Button>
-                  <p className="text-[9px] text-zinc-600 font-medium">SUPPORTED FORMATS: JPG • PNG • WEBP</p>
                 </div>
               </div>
 
-              {/* Tip badge */}
-              <div className="p-3 bg-zinc-950/60 border border-zinc-900 rounded-xl text-left select-none flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                <p className="text-[10px] text-zinc-500 leading-normal font-medium">
-                  <strong className="text-zinc-300 font-bold">Tip:</strong> Upload screenshots in chronological order (timeline order) for better OCR reconstruction results.
-                </p>
-              </div>
             </div>
 
             {/* Bottom features bar */}
