@@ -202,6 +202,12 @@ function ChatAnalyzerInner() {
           setErrorMsg("Could not load history analysis.")
           setStep("upload")
         })
+    } else {
+      // Clear past loaded details if URL parameter is cleared (sidebar menu clicked)
+      setAnalysisData(null)
+      setReconstructedMessages([])
+      setSelectedImages([])
+      setStep("upload")
     }
   }, [historyId])
 
