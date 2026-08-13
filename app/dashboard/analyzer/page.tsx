@@ -263,6 +263,29 @@ function ChatAnalyzerInner() {
     return intersection / union;
   };
 
+  // Helper to check if a line/content is a combined duplicate of words already parsed recently
+  const isWordSubsetOfRecent = (line: string, recentMessages: Message[]): boolean => {
+    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
+    const lineWords = clean(line);
+    if (lineWords.length === 0) return false;
+    
+    const recentWordsSet = new Set<string>();
+    recentMessages.forEach(m => {
+      clean(m.content).forEach(w => recentWordsSet.add(w));
+      clean(m.sender).forEach(w => recentWordsSet.add(w));
+    });
+    
+    let matchedWordsCount = 0;
+    lineWords.forEach(w => {
+      if (recentWordsSet.has(w)) {
+        matchedWordsCount++;
+      }
+    });
+    
+    const matchRatio = matchedWordsCount / lineWords.length;
+    return matchRatio >= 0.82 && lineWords.length > 2; // Require at least 3 words to avoid false positives on short words
+  };
+
   // Reconstruct conversation messages OCR Parser
   const parseMessagesFromOCRText = (text: string): Message[] => {
     const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
@@ -279,6 +302,11 @@ function ChatAnalyzerInner() {
         
         // Ensure sender doesn't look like a timestamp or url
         if (!sender.match(/^\d+$/) && !sender.includes("http") && !sender.toLowerCase().includes("am") && !sender.toLowerCase().includes("pm")) {
+          // Check if content is a word subset of recent messages (handles quote boxes that contain colons)
+          if (isWordSubsetOfRecent(content, parsed.slice(-6))) {
+            return; // Skip duplicate quote!
+          }
+
           // Check for WhatsApp quoted replies or screenshot overlap duplication (sliding window with fuzzy check)
           const isDuplicate = parsed.slice(-15).some(prev => {
             const cleanPrev = prev.content.toLowerCase().trim();
@@ -328,6 +356,11 @@ function ChatAnalyzerInner() {
       if (parsed.length > 0) {
         const lastMsg = parsed[parsed.length - 1];
         
+        // Check if the fallback line itself is a word subset of recent messages (prevents double scan quote combinations)
+        if (isWordSubsetOfRecent(line, parsed.slice(-6))) {
+          return; // Skip duplicate quote line!
+        }
+
         // Check for WhatsApp quoted replies duplication (multiline/individual line format)
         if (
           line.toLowerCase() === lastMsg.sender.toLowerCase() || 
