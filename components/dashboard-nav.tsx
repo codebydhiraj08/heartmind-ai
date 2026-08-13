@@ -761,7 +761,13 @@ function SidebarContent({
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={onNavigate}
+                    onClick={(e) => {
+                      if (onNavigate) onNavigate();
+                      if (item.href === "/dashboard/analyzer" && typeof window !== "undefined" && window.location.pathname === "/dashboard/analyzer") {
+                        e.preventDefault();
+                        window.location.href = "/dashboard/analyzer";
+                      }
+                    }}
                     className={cn(
                       "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-300 border text-xs font-medium relative group",
                       isActive
