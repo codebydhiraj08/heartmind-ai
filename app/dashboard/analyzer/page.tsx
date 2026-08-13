@@ -36,7 +36,8 @@ import {
   Lock,
   ChevronLeft,
   ChevronRight,
-  CheckSquare
+  CheckSquare,
+  Brain
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -243,6 +244,25 @@ function ChatAnalyzerInner() {
     }
   };
 
+  // Jaccard word-similarity checker to detect OCR transcription variances
+  const getSimilarity = (str1: string, str2: string): number => {
+    const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
+    const words1 = clean(str1);
+    const words2 = clean(str2);
+    if (words1.length === 0 || words2.length === 0) return 0;
+    
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+    
+    let intersection = 0;
+    set1.forEach(word => {
+      if (set2.has(word)) intersection++;
+    });
+    
+    const union = set1.size + set2.size - intersection;
+    return intersection / union;
+  };
+
   // Reconstruct conversation messages OCR Parser
   const parseMessagesFromOCRText = (text: string): Message[] => {
     const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
@@ -259,12 +279,26 @@ function ChatAnalyzerInner() {
         
         // Ensure sender doesn't look like a timestamp or url
         if (!sender.match(/^\d+$/) && !sender.includes("http") && !sender.toLowerCase().includes("am") && !sender.toLowerCase().includes("pm")) {
-          // Check for WhatsApp quoted replies or screenshot overlap duplication (sliding window)
+          // Check for WhatsApp quoted replies or screenshot overlap duplication (sliding window with fuzzy check)
           const isDuplicate = parsed.slice(-15).some(prev => {
-            const sameContent = prev.content.toLowerCase().trim() === content.toLowerCase().trim();
+            const cleanPrev = prev.content.toLowerCase().trim();
+            const cleanCurr = content.toLowerCase().trim();
             const sameSender = prev.sender.toLowerCase().trim() === sender.toLowerCase().trim();
-            // Discard duplicate sender+content, or if same content is unique and length > 5
-            return sameContent && (sameSender || content.length > 5);
+            
+            // Exact content match
+            if (cleanPrev === cleanCurr) {
+              return sameSender || content.length > 3;
+            }
+            
+            // Fuzzy similarity check for longer content
+            if (content.length > 8 && prev.content.length > 8) {
+              const sim = getSimilarity(prev.content, content);
+              if (sim > 0.75) {
+                return sameSender || content.length > 10;
+              }
+            }
+            
+            return false;
           });
           
           if (isDuplicate) {
@@ -303,10 +337,16 @@ function ChatAnalyzerInner() {
         }
 
         // Check if the fallback line matches any recently parsed message content exactly to prevent duplicate overlap appends
-        const isLineOverlap = parsed.slice(-10).some(prev => 
-          prev.content.toLowerCase().trim() === line.toLowerCase().trim() && 
-          line.length > 4
-        );
+        const isLineOverlap = parsed.slice(-12).some(prev => {
+          const cleanPrev = prev.content.toLowerCase().trim();
+          const cleanLine = line.toLowerCase().trim();
+          if (cleanPrev === cleanLine) return true;
+          if (line.length > 8 && prev.content.length > 8) {
+            return getSimilarity(prev.content, line) > 0.75;
+          }
+          return false;
+        });
+        
         if (isLineOverlap) {
           return; // Skip overlap duplicate line!
         }
