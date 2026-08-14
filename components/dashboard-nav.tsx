@@ -177,6 +177,19 @@ export function DashboardNav({
     }
 
     fetchNotifications()
+
+    // Listen for sidebar toggle event from child pages
+    const handleToggle = () => {
+      setIsCollapsed(prev => {
+        const next = !prev
+        if (typeof window !== "undefined") {
+          localStorage.setItem("heartmind_sidebar_collapsed", String(next))
+        }
+        return next
+      })
+    }
+    window.addEventListener("toggle-sidebar", handleToggle)
+    return () => window.removeEventListener("toggle-sidebar", handleToggle)
   }, [])
 
   const unreadCount = useMemo(() => {

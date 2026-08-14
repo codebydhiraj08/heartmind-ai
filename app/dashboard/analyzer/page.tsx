@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, Suspense, useRef } from "react"
+import { useState, useEffect, Suspense, useRef, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import {
@@ -44,7 +44,11 @@ import {
   Send,
   MoreHorizontal,
   Play,
-  Bell
+  Bell,
+  ChevronDown,
+  LogOut,
+  Crown,
+  Menu
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -143,8 +147,19 @@ function ChatAnalyzerInner() {
   const { subscription } = useSubscription()
   const activeTier = subscription?.tier || "free"
   const { data: session } = useSession()
-  const userName = session?.user?.name || "Dhiraj Patil"
+  const userName = session?.user?.name || "Guest"
   const userImage = session?.user?.image || ""
+
+  const userInitials = useMemo(() => {
+    if (!userName) return "U"
+    const parts = userName.trim().split(/\s+/)
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+    }
+    return userName.slice(0, 2).toUpperCase()
+  }, [userName])
+
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const [showTimelineModal, setShowTimelineModal] = useState(false)
   const [showInsightsModal, setShowInsightsModal] = useState(false)
@@ -920,6 +935,15 @@ function ChatAnalyzerInner() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-900 pb-5 select-none">
               <div className="space-y-1">
                 <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.dispatchEvent(new Event("toggle-sidebar"))}
+                    className="hidden lg:inline-flex text-zinc-400 hover:text-white transition-colors p-0 w-8 h-8 -ml-2 bg-transparent border-0 cursor-pointer"
+                    title="Toggle Sidebar"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </Button>
                   Chat Analyzer <Sparkles className="w-5 h-5 text-indigo-400 fill-indigo-400/20" />
                 </h1>
                 <p className="text-xs md:text-sm text-zinc-400 leading-normal">
@@ -934,17 +958,77 @@ function ChatAnalyzerInner() {
                   <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
                 </button>
 
-                <div className="flex items-center gap-2.5 bg-zinc-950/40 border border-zinc-900 pl-2.5 pr-3.5 py-1.5 rounded-xl select-none">
-                  <div className="w-7 h-7 rounded-lg overflow-hidden bg-gradient-to-tr from-indigo-500 to-pink-500 border border-white/10 flex items-center justify-center text-xs font-black text-white uppercase">
-                    {userImage ? (
-                      <img src={userImage} alt={userName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{userName.charAt(0)}</span>
+                <div className="relative">
+                  <button
+                    onClick={() => setUserMenuOpen((prev) => !prev)}
+                    className="flex items-center gap-2.5 bg-zinc-950/40 border border-zinc-900 pl-2.5 pr-3.5 py-1.5 rounded-xl text-left hover:bg-zinc-900/40 transition-colors select-none cursor-pointer"
+                  >
+                    <div className="w-7 h-7 rounded-lg overflow-hidden bg-gradient-to-tr from-indigo-500 to-pink-500 border border-white/10 flex items-center justify-center text-xs font-black text-white uppercase shrink-0">
+                      {userImage ? (
+                        <img src={userImage} alt={userName} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{userInitials}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-zinc-200 leading-none truncate max-w-[100px]">{userName}</p>
+                    </div>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 text-zinc-450 transition-transform ${
+                        userMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40 bg-transparent" 
+                          onClick={() => setUserMenuOpen(false)} 
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute right-0 top-full mt-2 w-48 bg-[#071022]/98 border border-zinc-900 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                        >
+                          <Link
+                            href="/dashboard/settings"
+                            className="flex items-center gap-2 px-4 py-3 hover:bg-zinc-900 text-zinc-300 hover:text-white transition-colors"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <Settings className="w-4 h-4 text-zinc-400" />
+                            <span className="text-xs font-bold uppercase tracking-wide">Settings</span>
+                          </Link>
+
+                          <Link
+                            href="/dashboard/upgrade"
+                            className="flex items-center gap-2 px-4 py-3 hover:bg-zinc-900 text-zinc-300 hover:text-white transition-colors"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <Crown className="w-4 h-4 text-indigo-400" />
+                            <span className="text-xs font-bold uppercase tracking-wide">
+                              {activeTier === "free" ? "Upgrade to Pro" : activeTier === "pro" ? "Upgrade to Premium" : "View Subscription"}
+                            </span>
+                          </Link>
+
+                          <hr className="border-zinc-900" />
+
+                          <button
+                            onClick={() => {
+                              setUserMenuOpen(false)
+                              signOut()
+                            }}
+                            className="flex w-full items-center gap-2 px-4 py-3 hover:bg-zinc-900 transition-colors text-rose-500 hover:text-rose-450 text-left font-bold uppercase bg-transparent border-0 cursor-pointer text-xs tracking-wide"
+                          >
+                            <LogOut className="w-4 h-4 text-rose-500" />
+                            Sign Out
+                          </button>
+                        </motion.div>
+                      </>
                     )}
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-zinc-200 leading-none">{userName}</p>
-                  </div>
+                  </AnimatePresence>
                 </div>
               </div>
             </div>
