@@ -453,249 +453,251 @@ export function DashboardNav({
         isCollapsed ? "lg:ml-0" : "lg:ml-72"
       )}>
         {/* Desktop Header */}
-        <header className="hidden lg:flex items-center justify-between h-16 px-6 glass-strong border-b border-border sticky top-0 z-30">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="text-zinc-400 hover:text-white transition-colors"
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            {isCollapsed && (
-              <Link href="/dashboard" className="flex items-center gap-2 mr-2 select-none">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Brain className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-bold text-sm text-white">HeartMind</span>
-              </Link>
-            )}
-            <h1 className="text-lg font-semibold ml-1">
-              {currentPage}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="relative">
+        {cleanPath !== "/dashboard/analyzer" && (
+          <header className="hidden lg:flex items-center justify-between h-16 px-6 glass-strong border-b border-border sticky top-0 z-30">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative"
-                onClick={() => {
-                  setNotificationsOpen((prev) => !prev)
-                  setUserMenuOpen(false)
-                }}
+                onClick={toggleSidebar}
+                className="text-zinc-400 hover:text-white transition-colors"
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
               >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
-                )}
+                <Menu className="w-5 h-5" />
               </Button>
+              {isCollapsed && (
+                <Link href="/dashboard" className="flex items-center gap-2 mr-2 select-none">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <Brain className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-bold text-sm text-white">HeartMind</span>
+                </Link>
+              )}
+              <h1 className="text-lg font-semibold ml-1">
+                {currentPage}
+              </h1>
+            </div>
 
-              <AnimatePresence>
-                {notificationsOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40 bg-transparent" 
-                      onClick={() => setNotificationsOpen(false)} 
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-96 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
-                    >
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/30 select-none">
-                        <span className="text-xs font-bold tracking-wider uppercase text-zinc-300">
-                          Notifications
-                        </span>
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-[10px] font-semibold text-primary hover:underline transition-all"
-                          >
-                            Mark all as read
-                          </button>
-                        )}
-                      </div>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  onClick={() => {
+                    setNotificationsOpen((prev) => !prev)
+                    setUserMenuOpen(false)
+                  }}
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  )}
+                </Button>
 
-                      <div className="max-h-[360px] overflow-y-auto divide-y divide-white/[0.06] bg-black/10">
-                        {notifications.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                            <Sparkles className="w-8 h-8 text-zinc-600 mb-2 animate-pulse" />
-                            <p className="text-xs text-zinc-400 font-semibold">All quiet here</p>
-                            <p className="text-[10px] text-zinc-500 mt-0.5">No notifications yet.</p>
-                          </div>
-                        ) : (
-                          notifications.map((notif) => {
-                            const isRead = readIds.includes(notif.id)
-                            const IconComponent = getNotificationIcon(notif.type)
-                            
-                            const itemContent = (
-                              <div className="flex gap-3.5 p-3.5 items-start">
-                                <div className={cn(
-                                  "w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 border",
-                                  notif.type === "system" && "bg-blue-500/10 border-blue-500/20 text-blue-400",
-                                  notif.type === "user" && "bg-green-500/10 border-green-500/20 text-green-400",
-                                  notif.type === "promo" && "bg-pink-500/10 border-pink-500/20 text-pink-400",
-                                  notif.type === "tip" && "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                                )}>
-                                  <IconComponent className="w-4 h-4" />
-                                </div>
+                <AnimatePresence>
+                  {notificationsOpen && (
+                    <>
+                      <div 
+                        className="fixed inset-0 z-40 bg-transparent" 
+                        onClick={() => setNotificationsOpen(false)} 
+                      />
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 top-full mt-2 w-96 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-black/30 select-none">
+                          <span className="text-xs font-bold tracking-wider uppercase text-zinc-300">
+                            Notifications
+                          </span>
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={handleMarkAllAsRead}
+                              className="text-[10px] font-semibold text-primary hover:underline transition-all"
+                            >
+                              Mark all as read
+                            </button>
+                          )}
+                        </div>
 
-                                <div className="flex-1 space-y-0.5 min-w-0 text-left">
-                                  <div className="flex items-center justify-between gap-1.5">
-                                    <h4 className={cn(
-                                      "text-[11px] font-semibold truncate text-zinc-300",
-                                      !isRead && "text-white font-bold"
-                                    )}>
-                                      {notif.title}
-                                    </h4>
-                                    {!isRead && (
-                                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                                    )}
+                        <div className="max-h-[360px] overflow-y-auto divide-y divide-white/[0.06] bg-black/10">
+                          {notifications.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                              <Sparkles className="w-8 h-8 text-zinc-600 mb-2 animate-pulse" />
+                              <p className="text-xs text-zinc-400 font-semibold">All quiet here</p>
+                              <p className="text-[10px] text-zinc-500 mt-0.5">No notifications yet.</p>
+                            </div>
+                          ) : (
+                            notifications.map((notif) => {
+                              const isRead = readIds.includes(notif.id)
+                              const IconComponent = getNotificationIcon(notif.type)
+                              
+                              const itemContent = (
+                                <div className="flex gap-3.5 p-3.5 items-start">
+                                  <div className={cn(
+                                    "w-7.5 h-7.5 rounded-lg flex items-center justify-center shrink-0 border",
+                                    notif.type === "system" && "bg-blue-500/10 border-blue-500/20 text-blue-400",
+                                    notif.type === "user" && "bg-green-500/10 border-green-500/20 text-green-400",
+                                    notif.type === "promo" && "bg-pink-500/10 border-pink-500/20 text-pink-400",
+                                    notif.type === "tip" && "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                  )}>
+                                    <IconComponent className="w-4 h-4" />
                                   </div>
-                                  <p className="text-[10px] text-zinc-400 leading-relaxed font-normal break-words">
-                                    {notif.message}
-                                  </p>
-                                  <span className="text-[8px] text-zinc-500 block pt-0.5">
-                                    {formatTime(notif.timestamp)}
-                                  </span>
-                                </div>
-                              </div>
-                            )
 
-                            if (notif.link) {
+                                  <div className="flex-1 space-y-0.5 min-w-0 text-left">
+                                    <div className="flex items-center justify-between gap-1.5">
+                                      <h4 className={cn(
+                                        "text-[11px] font-semibold truncate text-zinc-300",
+                                        !isRead && "text-white font-bold"
+                                      )}>
+                                        {notif.title}
+                                      </h4>
+                                      {!isRead && (
+                                        <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                                      )}
+                                    </div>
+                                    <p className="text-[10px] text-zinc-400 leading-relaxed font-normal break-words">
+                                      {notif.message}
+                                    </p>
+                                    <span className="text-[8px] text-zinc-500 block pt-0.5">
+                                      {formatTime(notif.timestamp)}
+                                    </span>
+                                  </div>
+                                </div>
+                              )
+
+                              if (notif.link) {
+                                return (
+                                  <Link
+                                    key={notif.id}
+                                    href={notif.link}
+                                    onClick={() => {
+                                      handleNotificationClick(notif.id)
+                                      setNotificationsOpen(false)
+                                    }}
+                                    className="block hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors"
+                                  >
+                                    {itemContent}
+                                  </Link>
+                                )
+                              }
+
                               return (
-                                <Link
+                                <div
                                   key={notif.id}
-                                  href={notif.link}
-                                  onClick={() => {
-                                    handleNotificationClick(notif.id)
-                                    setNotificationsOpen(false)
-                                  }}
-                                  className="block hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors"
+                                  onClick={() => handleNotificationClick(notif.id)}
+                                  className="hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors cursor-pointer"
                                 >
                                   {itemContent}
-                                </Link>
+                                </div>
                               )
-                            }
-
-                            return (
-                              <div
-                                key={notif.id}
-                                onClick={() => handleNotificationClick(notif.id)}
-                                className="hover:bg-white/[0.01] active:bg-white/[0.02] transition-colors cursor-pointer"
-                              >
-                                {itemContent}
-                              </div>
-                            )
-                          })
-                        )}
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="relative">
-              <button
-                onClick={() =>
-                  setUserMenuOpen((prev) => !prev)
-                }
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
-                  {userImage ? (
-                    <img key={userImage} src={userImage} alt={userName} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-medium text-white">
-                      {userInitials}
-                    </span>
+                            })
+                          )}
+                        </div>
+                      </motion.div>
+                    </>
                   )}
-                </div>
+                </AnimatePresence>
+              </div>
 
-                <span className="text-sm font-medium">
-                  {userName}
-                </span>
-
-                <ChevronDown
-                  className={cn(
-                    "w-4 h-4 transition-transform",
-                    userMenuOpen && "rotate-180"
-                  )}
-                />
-              </button>
-
-              <AnimatePresence>
-                {userMenuOpen && (
-                  <motion.div
-                    initial={{
-                      opacity: 0,
-                      y: 10,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: 10,
-                    }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
-                  >
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
-                      onClick={() =>
-                        setUserMenuOpen(false)
-                      }
-                    >
-                      <Settings className="w-4 h-4" />
-
-                      <span className="text-sm">
-                        Settings
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setUserMenuOpen((prev) => !prev)
+                  }
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+                    {userImage ? (
+                      <img key={userImage} src={userImage} alt={userName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-sm font-medium text-white">
+                        {userInitials}
                       </span>
-                    </Link>
+                    )}
+                  </div>
 
-                    <Link
-                      href="/dashboard/upgrade"
-                      className="flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
-                      onClick={() =>
-                        setUserMenuOpen(false)
-                      }
-                    >
-                      <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    {userName}
+                  </span>
 
-                      <span className="text-sm">
-                        {activeTier === "free" ? "Upgrade to Pro" : activeTier === "pro" ? "Upgrade to Premium" : "View Subscription"}
-                      </span>
-                    </Link>
+                  <ChevronDown
+                    className={cn(
+                      "w-4 h-4 transition-transform",
+                      userMenuOpen && "rotate-180"
+                    )}
+                  />
+                </button>
 
-                    <hr className="border-border" />
-
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false)
-                        signOut()
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        y: 10,
                       }}
-                      className="flex w-full items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors text-danger text-left"
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 10,
+                      }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-[#071022]/98 backdrop-blur-none md:backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-2xl z-50 overflow-hidden"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <Link
+                        href="/dashboard/settings"
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
+                        onClick={() =>
+                          setUserMenuOpen(false)
+                        }
+                      >
+                        <Settings className="w-4 h-4" />
 
-                      <span className="text-sm">
-                        Sign Out
-                      </span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        <span className="text-sm">
+                          Settings
+                        </span>
+                      </Link>
+
+                      <Link
+                        href="/dashboard/upgrade"
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors"
+                        onClick={() =>
+                          setUserMenuOpen(false)
+                        }
+                      >
+                        <Crown className="w-4 h-4 text-primary" />
+
+                        <span className="text-sm">
+                          {activeTier === "free" ? "Upgrade to Pro" : activeTier === "pro" ? "Upgrade to Premium" : "View Subscription"}
+                        </span>
+                      </Link>
+
+                      <hr className="border-border" />
+
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false)
+                          signOut()
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-3 hover:bg-secondary transition-colors text-danger text-left"
+                      >
+                        <LogOut className="w-4 h-4" />
+
+                        <span className="text-sm">
+                          Sign Out
+                        </span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         <div className="p-4 lg:p-6">{children}</div>
       </main>
