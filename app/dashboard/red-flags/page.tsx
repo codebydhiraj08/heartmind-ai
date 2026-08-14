@@ -526,10 +526,10 @@ function RedFlagsPageInner() {
 
               const bgClass = 
                 severity === "high"
-                  ? "bg-[#1c0d15]/90 hover:bg-[#25111c]/95 shadow-[0_4px_30px_rgba(244,63,94,0.03)]"
+                  ? "bg-zinc-950/40 bg-rose-500/[0.02] hover:bg-rose-500/[0.04] transition-colors"
                   : severity === "medium"
-                  ? "bg-[#18110b]/90 hover:bg-[#21170f]/95 shadow-[0_4px_30px_rgba(245,158,11,0.03)]"
-                  : "bg-[#0a1122]/90 hover:bg-[#0f1932]/95 shadow-[0_4px_30px_rgba(59,130,246,0.03)]";
+                  ? "bg-zinc-950/40 bg-amber-500/[0.02] hover:bg-amber-500/[0.04] transition-colors"
+                  : "bg-zinc-950/40 bg-blue-500/[0.02] hover:bg-blue-500/[0.04] transition-colors";
 
               const iconBoxClass =
                 severity === "high"
