@@ -21,7 +21,8 @@ import {
   Flame,
   Ghost,
   Scale,
-  Brain
+  Brain,
+  ChevronDown
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -482,159 +483,199 @@ function RedFlagsPageInner() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
+          className="space-y-4"
         >
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <AlertOctagon className="w-5 h-5 text-danger" />
-            Detected Patterns
-          </h2>
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-3 mb-2 select-none">
+            <div className="space-y-1 text-left">
+              <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <AlertOctagon className="w-5 h-5 text-rose-500 animate-pulse" />
+                Detected Red Flag Patterns
+              </h2>
+              <p className="text-[11px] text-zinc-500 leading-normal">
+                AI has identified patterns that may impact emotional safety in your conversation.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className="flex items-center gap-1.5 bg-zinc-950/40 border border-zinc-900 rounded-xl px-3 py-1.5">
+                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Show:</span>
+                <span className="text-[9px] font-black text-zinc-200 uppercase tracking-wider">All</span>
+              </div>
+              <div className="flex items-center gap-0.5 border border-zinc-900 rounded-xl p-0.5 bg-zinc-950/40">
+                <div className="w-7 h-7 bg-indigo-600/90 rounded-lg flex items-center justify-center text-white shadow-lg">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
+                </div>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-650 hover:text-zinc-400 cursor-not-allowed">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Grid Layout of Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {detectedFlags.map((pattern, index) => (
-              <motion.div
-                key={pattern.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-              >
-                <Card
-                  className={`glass border cursor-pointer transition-all hover:scale-[1.02] ${
-                    selectedPattern === pattern.id ? "border-primary neon-glow-pink" : "border-border"
-                  }`}
-                  onClick={() => setSelectedPattern(selectedPattern === pattern.id ? null : pattern.id)}
+            {detectedFlags.map((pattern, index) => {
+              const severity = (pattern.displaySeverity || pattern.severity).toLowerCase();
+              const borderClass = 
+                severity === "high"
+                  ? "border-rose-500/20 hover:border-rose-500/40 shadow-rose-950/5"
+                  : severity === "medium"
+                  ? "border-amber-500/20 hover:border-amber-500/40 shadow-amber-950/5"
+                  : "border-blue-500/20 hover:border-blue-500/40 shadow-blue-950/5";
+
+              const iconBoxClass =
+                severity === "high"
+                  ? "bg-rose-500/10 border border-rose-500/20 text-rose-450"
+                  : severity === "medium"
+                  ? "bg-amber-500/10 border border-amber-500/20 text-amber-450"
+                  : "bg-blue-500/10 border border-blue-500/20 text-blue-450";
+
+              const badgeClass =
+                severity === "high"
+                  ? "bg-rose-500/10 text-rose-450 border border-rose-500/20"
+                  : severity === "medium"
+                  ? "bg-amber-500/10 text-amber-450 border border-amber-500/20"
+                  : "bg-blue-500/10 text-blue-450 border border-blue-500/20";
+
+              const impactText =
+                severity === "high"
+                  ? "text-rose-500"
+                  : severity === "medium"
+                  ? "text-amber-500"
+                  : "text-blue-500";
+
+              const Icon = pattern.icon;
+
+              return (
+                <motion.div
+                  key={pattern.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
                 >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getSeverityColor(pattern.displaySeverity || pattern.severity)}`}>
-                        <pattern.icon className="w-6 h-6" />
+                  <div
+                    className={`bg-zinc-950/40 border rounded-3xl p-5 relative transition-all duration-300 flex flex-col justify-between min-h-[190px] shadow-xl ${borderClass}`}
+                  >
+                    <div>
+                      {/* Header Row */}
+                      <div className="flex items-center justify-between gap-3 select-none">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconBoxClass}`}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <h3 className="text-xs md:text-sm font-bold text-white tracking-wide truncate max-w-[170px]">
+                            {pattern.displayName || pattern.name}
+                          </h3>
+                        </div>
+                        <span className={`px-2.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${badgeClass}`}>
+                          {pattern.displaySeverity || pattern.severity}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">{pattern.displayName || pattern.name}</h3>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(pattern.displaySeverity || pattern.severity)}`}>
-                            {pattern.displaySeverity || pattern.severity}
+
+                      {/* Description */}
+                      <p className="text-[11px] md:text-xs text-zinc-400 leading-relaxed mt-4 mb-5 font-semibold text-left">
+                        {pattern.displayDescription || pattern.description}
+                      </p>
+                    </div>
+
+                    {/* Footer Row */}
+                    <div className="flex items-center justify-between border-t border-zinc-900/60 pt-3.5 mt-auto">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-zinc-550 select-none">
+                          Confidence
+                          <span className="text-zinc-200 font-extrabold">{pattern.confidence}%</span>
+                          <span title="Statistical confidence rating calculated by LLM model analysis.">
+                            <Info className="w-3.5 h-3.5 text-zinc-650 hover:text-zinc-400 transition-colors cursor-help" />
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">{pattern.displayDescription || pattern.description}</p>
-                        
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground">Confidence:</span>
-                            <span className="font-medium">{pattern.confidence}%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-muted-foreground">Examples:</span>
-                            <span className="font-medium">{pattern.examples}</span>
-                          </div>
+
+                        <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wider text-zinc-550 select-none">
+                          Impact
+                          <span className={`font-extrabold ${impactText}`}>
+                            {severity === "high" ? "High" : severity === "medium" ? "Moderate" : "Positive"}
+                          </span>
                         </div>
-
-                        {selectedPattern === pattern.id && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            className="mt-4 pt-4 border-t border-border space-y-4"
-                          >
-                            {pattern.realEvidence && pattern.realEvidence.length > 0 ? (
-                              <div className="rounded-lg p-3.5 bg-danger/10 border border-danger/20 text-zinc-200 text-sm space-y-3">
-                                <p className="font-semibold text-danger flex items-center gap-1.5">
-                                  <AlertTriangle className="w-4 h-4" />
-                                  Detected Evidence in Your Uploads:
-                                </p>
-                                <ul className="space-y-3">
-                                  {pattern.realEvidence.map((evidence, i) => {
-                                    // Parse standard evidence structure: "sentence (from Source Name)"
-                                    const sourceMatch = evidence.match(/\(from ([^)]+)\)$/)
-                                    const sourceName = sourceMatch ? sourceMatch[1] : null
-                                    const cleanText = sourceMatch ? evidence.replace(/\s*\(from [^)]+\)$/, "") : evidence
-
-                                    return (
-                                      <li key={i} className="border-l-2 border-danger/40 pl-3 py-0.5">
-                                        <p className="text-zinc-200 italic font-medium leading-relaxed">&ldquo;{cleanText}&rdquo;</p>
-                                        {sourceName && (
-                                          <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold mt-1 block">
-                                            Source: {sourceName}
-                                          </span>
-                                        )}
-                                      </li>
-                                    )
-                                  })}
-                                </ul>
-                              </div>
-                            ) : null}
-
-                            {pattern.id === "reassurance_dependency" && (
-                              <div className="p-3.5 rounded-xl border border-white/[0.04] bg-white/[0.01] space-y-2">
-                                <p className="text-xs font-semibold text-zinc-350 flex items-center gap-1.5">
-                                  <Heart className="w-3.5 h-3.5 text-primary" />
-                                  Is this a normal expression of vulnerability for you?
-                                </p>
-                                <p className="text-[10px] text-zinc-400 leading-normal">
-                                  Every relationship is unique. If you consider this healthy communication rather than codependency, mark it as &quot;Normal Vulnerability&quot; to calibrate the AI to your attachment style.
-                                </p>
-                                {((session?.user as any)?.reassuranceBaseline === "vulnerable") ? (
-                                  <div className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-xl text-center">
-                                    Baseline calibrated! Scan frames reassurance as secure vulnerability. 🍃
-                                  </div>
-                                ) : (
-                                  <Button
-                                    type="button"
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      try {
-                                        const res = await fetch("/api/user/update", {
-                                          method: "POST",
-                                          headers: {
-                                            "Content-Type": "application/json",
-                                          },
-                                          body: JSON.stringify({
-                                            name: session?.user?.name,
-                                            email: session?.user?.email,
-                                            reassuranceBaseline: "vulnerable"
-                                          }),
-                                        });
-                                        if (res.ok) {
-                                          if (updateSession) {
-                                            await updateSession({
-                                              reassuranceBaseline: "vulnerable",
-                                              user: {
-                                                reassuranceBaseline: "vulnerable"
-                                              }
-                                            });
-                                          }
-                                          alert("Baseline calibrated! Future scans will frame reassurance expressions as secure vulnerability. 🍃");
-                                          window.location.reload();
-                                        }
-                                      } catch (err) {
-                                        console.error("Failed to update feedback loop:", err);
-                                      }
-                                    }}
-                                    size="sm"
-                                    className="w-full bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary font-bold text-[10px] uppercase tracking-wider h-8 rounded-lg"
-                                  >
-                                    Mark as Normal Vulnerability 🍃
-                                  </Button>
-                                )}
-                              </div>
-                            )}
-
-                            <div>
-                              <p className="text-sm font-medium mb-2 text-zinc-300">Common Indicators:</p>
-                              <ul className="space-y-1">
-                                {pattern.indicators.map((indicator, i) => (
-                                  <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                                    <ChevronRight className="w-3 h-3 text-primary" />
-                                    {indicator}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </motion.div>
-                        )}
                       </div>
+
+                      <button
+                        onClick={() => setSelectedPattern(selectedPattern === pattern.id ? null : pattern.id)}
+                        className="text-[9px] font-black uppercase tracking-wider text-zinc-450 hover:text-white transition-colors flex items-center gap-1 cursor-pointer bg-transparent border-0"
+                      >
+                        View Details <ChevronRight className={`w-3.5 h-3.5 transition-transform ${selectedPattern === pattern.id ? "rotate-90" : ""}`} />
+                      </button>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+
+                    {/* Expanded details list */}
+                    {selectedPattern === pattern.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="mt-4 pt-4 border-t border-zinc-900/60 space-y-4"
+                      >
+                        {pattern.realEvidence && pattern.realEvidence.length > 0 ? (
+                          <div className="rounded-2xl p-4 bg-zinc-950/80 border border-zinc-900 text-zinc-300 text-[11px] space-y-3 shadow-inner text-left">
+                            <p className="font-extrabold text-rose-450 uppercase tracking-widest text-[8.5px] flex items-center gap-1.5 select-none">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              Detected Evidence:
+                            </p>
+                            <ul className="space-y-3 pl-1">
+                              {pattern.realEvidence.map((evidence, i) => {
+                                const sourceMatch = evidence.match(/\(from ([^)]+)\)$/)
+                                const cleanText = sourceMatch ? evidence.replace(/\s*\(from [^)]+\)$/, "") : evidence
+
+                                return (
+                                  <li key={i} className="border-l-2 border-rose-500/40 pl-3 py-0.5">
+                                    <p className="text-zinc-200 italic font-medium leading-relaxed">&ldquo;{cleanText}&rdquo;</p>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-zinc-500 italic select-none text-left">No specific text evidence parsed yet.</p>
+                        )}
+
+                        {pattern.id === "reassurance_dependency" && (
+                          <div className="p-3.5 rounded-2xl border border-zinc-900 bg-zinc-950/80 space-y-2 select-none text-left">
+                            <p className="text-[10.5px] font-bold text-zinc-300 flex items-center gap-1.5">
+                              <Heart className="w-3.5 h-3.5 text-indigo-400" />
+                              Is this a normal expression of vulnerability?
+                            </p>
+                            <p className="text-[9.5px] text-zinc-500 leading-normal">
+                              If you consider this healthy communication rather than reassurance dependency, calibrate the AI to your attachment style.
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="select-none text-left">
+                          <p className="text-[10px] font-bold mb-2 text-zinc-300 uppercase tracking-wider">Common Indicators:</p>
+                          <ul className="space-y-1 pl-1">
+                            {pattern.indicators.map((indicator, i) => (
+                              <li key={i} className="text-[10.5px] text-zinc-500 flex items-center gap-1.5">
+                                <ChevronRight className="w-3 h-3 text-indigo-500" />
+                                {indicator}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </motion.div>
+                    )}
+
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
+
+          {/* View All Patterns Trigger */}
+          {detectedFlags.length > 6 && (
+            <div className="flex justify-center mt-6">
+              <button className="text-[10px] font-black uppercase tracking-wider text-zinc-500 hover:text-zinc-300 flex items-center gap-1 transition-colors bg-transparent border-0 cursor-pointer">
+                View All Patterns <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
 
@@ -643,57 +684,116 @@ function RedFlagsPageInner() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
+        className="space-y-4 pt-2"
       >
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-success" />
-          No Signs Detected
-        </h2>
+        <div className="space-y-1 text-left select-none">
+          <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-emerald-500" />
+            No Significant Red Flags Detected
+          </h2>
+          <p className="text-[11px] text-zinc-500 leading-normal">
+            These areas look healthy in your conversation.
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {safePatterns.map((pattern, index) => (
-            <motion.div
-              key={pattern.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7 + index * 0.05 }}
-            >
-              <Card className="glass border-border opacity-75 hover:opacity-100 transition-opacity">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                      <CheckCircle className="w-5 h-5 text-success" />
+          {safePatterns.map((pattern, index) => {
+            const getSafePatternIcon = (id: string) => {
+              switch (id) {
+                case "defensive_behavior": return Shield;
+                case "avoidance_pattern": return Eye;
+                case "manipulation_pattern": return Brain;
+                case "communication_breakdown": return XCircle;
+                case "stress_escalation": return Zap;
+                case "passive_aggression": return Scale;
+                case "reassurance_dependency": return Heart;
+                case "conflict_loop": return AlertOctagon;
+                case "emotional_withdrawal": return TrendingDown;
+                default: return CheckCircle;
+              }
+            };
+            const SafeIcon = getSafePatternIcon(pattern.id);
+
+            return (
+              <motion.div
+                key={pattern.id}
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 + index * 0.05 }}
+              >
+                <div className="bg-zinc-950/40 border border-zinc-900/60 hover:border-zinc-800 rounded-2xl p-4 flex items-center justify-between gap-3 group transition-all duration-300">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-450 flex items-center justify-center shrink-0">
+                      <SafeIcon className="w-5 h-5" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium">{pattern.name}</h3>
-                      <p className="text-sm text-muted-foreground">{pattern.description}</p>
+                    <div className="text-left min-w-0">
+                      <h3 className="text-xs font-bold text-white tracking-wide truncate">{pattern.name}</h3>
+                      <p className="text-[10px] text-zinc-500 leading-normal mt-0.5 truncate max-w-[200px] sm:max-w-[320px]">
+                        {pattern.description}
+                      </p>
                     </div>
-                    <span className="text-sm text-success">Clear</span>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  <div className="flex items-center gap-1.5 shrink-0 select-none">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-450 text-[9px] font-black uppercase tracking-wider">
+                      Clear
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-zinc-650 group-hover:text-white transition-colors" />
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </motion.div>
 
-      {/* Disclaimer */}
+      {/* Disclaimer & Trust Badges */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.9 }}
+        className="space-y-6 pt-2"
       >
-        <Card className="glass border-border bg-accent/5">
-          <CardContent className="p-5">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-medium mb-1">Important Disclaimer</h4>
-                <p className="text-sm text-muted-foreground">
-                  This analysis shows <strong>possible indicators</strong> based on communication patterns. AI cannot determine intent or context with certainty. Use these insights as conversation starters, not definitive conclusions. If you&apos;re experiencing genuine concerns about your relationship, consider speaking with a licensed therapist or counselor.
-                </p>
+        <div className="bg-[#0c0a1b]/60 border border-[#1e193c] rounded-3xl p-5 relative overflow-hidden text-left flex items-start gap-4 shadow-xl select-none">
+          <div className="w-9 h-9 rounded-xl bg-[#271d47] border border-[#3e2e73]/60 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
+            <Info className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1.5">Important Disclaimer</h4>
+            <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
+              This analysis shows <strong>possible indicators</strong> based on communication patterns. AI cannot determine intent or context with certainty. Use these insights as conversation starters, not definitive conclusions. If you&apos;re experiencing genuine concerns about your relationship, consider speaking with a licensed therapist or counselor.
+            </p>
+          </div>
+
+          {/* Decorative SVG Graphic background */}
+          <div className="absolute right-3 bottom-0 opacity-5 pointer-events-none transform translate-y-1">
+            <svg width="100" height="60" viewBox="0 0 100 60" fill="none">
+              <circle cx="50" cy="30" r="28" stroke="currentColor" strokeWidth="2" className="text-indigo-400" />
+              <path d="M50 10 L50 50 M30 30 L70 30" stroke="currentColor" strokeWidth="1.5" className="text-indigo-400" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Footer Trust Badges */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 select-none">
+          {[
+            { label: "Privacy & Secure", desc: "Your data is encrypted", icon: Shield },
+            { label: "AI Powered", desc: "Advanced pattern recognition", icon: Brain },
+            { label: "Relationship Insights", desc: "Better understanding", icon: Heart }
+          ].map((badge, bIdx) => {
+            const BadgeIcon = badge.icon;
+            return (
+              <div key={bIdx} className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-3 flex items-center gap-3 transition-colors hover:border-zinc-800">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
+                  <BadgeIcon className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-zinc-200 leading-tight">{badge.label}</p>
+                  <p className="text-[9px] text-zinc-500 leading-none mt-0.5">{badge.desc}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            );
+          })}
+        </div>
       </motion.div>
     </div>
     </PremiumGate>
