@@ -466,9 +466,8 @@ export function DashboardNav({
         isCollapsed ? "lg:ml-0" : "lg:ml-72"
       )}>
         {/* Desktop Header */}
-        {cleanPath !== "/dashboard/analyzer" && (
-          <header className="hidden lg:flex items-center justify-between h-16 px-6 glass-strong border-b border-border sticky top-0 z-30">
-            <div className="flex items-center gap-2">
+        <header className="hidden lg:flex items-center justify-between h-16 px-6 glass-strong border-b border-border sticky top-0 z-30">
+          <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
@@ -710,7 +709,6 @@ export function DashboardNav({
               </div>
             </div>
           </header>
-        )}
 
         <div className="p-4 lg:p-6">{children}</div>
       </main>
