@@ -992,12 +992,12 @@ function ChatAnalyzerInner() {
                   {/* Platform Pills */}
                   <div className="flex flex-wrap gap-1.5 pt-1 select-none">
                     {[
-                      { name: "WhatsApp", icon: WhatsAppIcon, color: "text-[#25D366]" },
-                      { name: "Instagram", icon: InstagramIcon, color: "text-[#E1306C]" },
-                      { name: "Telegram", icon: TelegramIcon, color: "text-[#0088cc]" },
-                      { name: "Snapchat", icon: SnapchatIcon, color: "text-[#FFFC00]" },
-                      { name: "iMessage", icon: IMessageIcon, color: "text-[#53d769]" },
-                      { name: "Other", icon: MoreHorizontal, color: "text-zinc-400" },
+                      { name: "WhatsApp", icon: WhatsAppIcon },
+                      { name: "Instagram", icon: InstagramIcon },
+                      { name: "Telegram", icon: TelegramIcon },
+                      { name: "Snapchat", icon: SnapchatIcon },
+                      { name: "iMessage", icon: IMessageIcon },
+                      { name: "Other", icon: MoreHorizontal },
                     ].map((platform) => {
                       const Icon = platform.icon;
                       const isSelected = selectedPlatform === platform.name;
@@ -1011,7 +1011,7 @@ function ChatAnalyzerInner() {
                               : "bg-zinc-950 border-zinc-900 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
                           }`}
                         >
-                          <Icon className={`w-3.5 h-3.5 ${platform.color}`} />
+                          <Icon className="w-3.5 h-3.5" />
                           {platform.name}
                         </button>
                       );
