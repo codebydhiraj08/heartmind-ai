@@ -519,17 +519,17 @@ function RedFlagsPageInner() {
               const severity = (pattern.displaySeverity || pattern.severity).toLowerCase();
               const borderClass = 
                 severity === "high"
-                  ? "border-[#35141b] hover:border-[#4d1d27] shadow-[0_0_30px_rgba(244,63,94,0.02)]"
+                  ? "border-rose-500/20 hover:border-rose-500/40 shadow-rose-950/5"
                   : severity === "medium"
-                  ? "border-[#2e1a10] hover:border-[#452718] shadow-[0_0_30px_rgba(245,158,11,0.02)]"
-                  : "border-[#132038] hover:border-[#1e3054] shadow-[0_0_30px_rgba(59,130,246,0.02)]";
+                  ? "border-amber-500/20 hover:border-amber-500/40 shadow-amber-950/5"
+                  : "border-blue-500/20 hover:border-blue-500/40 shadow-blue-950/5";
 
               const bgClass = 
                 severity === "high"
-                  ? "bg-[#16080b] transition-colors"
+                  ? "bg-gradient-to-b from-[#0a0c14]/98 to-[#220a14]/90 hover:from-[#0f111b]/98 hover:to-[#2c0d1b]/95"
                   : severity === "medium"
-                  ? "bg-[#140c06] transition-colors"
-                  : "bg-[#060c18] transition-colors";
+                  ? "bg-gradient-to-b from-[#0a0c14]/98 to-[#201308]/90 hover:from-[#0f111b]/98 hover:to-[#2a190b]/95"
+                  : "bg-gradient-to-b from-[#0a0c14]/98 to-[#0b172a]/90 hover:from-[#0f111b]/98 hover:to-[#10213d]/95";
 
               const iconBoxClass =
                 severity === "high"
