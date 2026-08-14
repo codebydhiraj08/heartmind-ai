@@ -524,6 +524,13 @@ function RedFlagsPageInner() {
                   ? "border-amber-500/20 hover:border-amber-500/40 shadow-amber-950/5"
                   : "border-blue-500/20 hover:border-blue-500/40 shadow-blue-950/5";
 
+              const bgClass = 
+                severity === "high"
+                  ? "bg-[#1c0d15]/90 hover:bg-[#25111c]/95 shadow-[0_4px_30px_rgba(244,63,94,0.03)]"
+                  : severity === "medium"
+                  ? "bg-[#18110b]/90 hover:bg-[#21170f]/95 shadow-[0_4px_30px_rgba(245,158,11,0.03)]"
+                  : "bg-[#0a1122]/90 hover:bg-[#0f1932]/95 shadow-[0_4px_30px_rgba(59,130,246,0.03)]";
+
               const iconBoxClass =
                 severity === "high"
                   ? "bg-rose-500/10 border border-rose-500/20 text-rose-450"
@@ -555,7 +562,7 @@ function RedFlagsPageInner() {
                   transition={{ delay: 0.5 + index * 0.1 }}
                 >
                   <div
-                    className={`bg-zinc-950/40 border rounded-3xl p-5 relative transition-all duration-300 flex flex-col justify-between min-h-[190px] shadow-xl ${borderClass}`}
+                    className={`border rounded-3xl p-5 relative transition-all duration-300 flex flex-col justify-between min-h-[190px] shadow-xl ${bgClass} ${borderClass}`}
                   >
                     <div>
                       {/* Header Row */}
