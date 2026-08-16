@@ -106,9 +106,9 @@ export default function TermsPage() {
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-base font-bold text-white uppercase tracking-wider">6. AI-Generated Content Disclaimer</h2>
+              <h2 className="text-base font-bold text-white uppercase tracking-wider">6. AI-Powered Insights & Guidance</h2>
               <p>
-                Our AI engines process user-provided screenshots or text messages to return communication insights. You understand and acknowledge that AI-generated data is subject to errors, hallucinations, and misinterpretations. HeartMind AI makes no guarantees regarding the accuracy, validity, or usefulness of the generated analytical metrics.
+                Our advanced AI engines process uploaded screenshots and text messages to provide helpful, deep communication insights for your self-reflection. While we continuously refine our models for maximum accuracy and emotional depth, AI-generated analysis is designed to support, not replace, human judgment and intuition. You acknowledge that AI insights represent supportive guidance and analytical suggestions, and you agree to utilize your own personal judgment when making decisions based on Platform data.
               </p>
             </section>
 
