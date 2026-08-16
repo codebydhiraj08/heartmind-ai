@@ -350,11 +350,9 @@ export default function SignupPage() {
                     </div>
                   </div>
 
-                  {/* Central Glowing Heart Badge (LARGER & INTENSE GLOW) */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-25 flex items-center justify-center">
-                    <div className="w-14 h-14 rounded-full bg-[#070511] border-2 border-pink-500 flex items-center justify-center animate-heart-glow shadow-[0_0_35px_rgba(236,72,153,0.75)]">
-                      <Heart className="w-6.5 h-6.5 text-pink-400 fill-pink-400/25" />
-                    </div>
+                  {/* Central Glowing Heart Symbol (LARGER & INTENSE GLOW) */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-25 flex items-center justify-center pointer-events-none">
+                    <Heart className="w-14 h-14 text-pink-500 fill-pink-500/20 animate-heart-glow" />
                   </div>
 
                   {/* Bubble 2 (Right) */}
@@ -685,8 +683,8 @@ export default function SignupPage() {
           50% { transform: translateY(8px) rotate(0.5deg); }
         }
         @keyframes heart-pulse-glow {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(236,72,153,0.5), 0 0 40px rgba(99,102,241,0.3); }
-          50% { transform: scale(1.15); box-shadow: 0 0 45px rgba(236,72,153,0.9), 0 0 70px rgba(99,102,241,0.6); }
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(236,72,153,0.6)) drop-shadow(0 0 20px rgba(99,102,241,0.3)); }
+          50% { transform: scale(1.15); filter: drop-shadow(0 0 25px rgba(236,72,153,0.9)) drop-shadow(0 0 45px rgba(99,102,241,0.6)); }
         }
         @keyframes ecg-flow {
           0% { stroke-dashoffset: 400; }
