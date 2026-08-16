@@ -195,8 +195,8 @@ export default function SignupPage() {
         </Link>
       </header>
 
-      {/* Left Panel: Value Props & Chat Mockups (Col-8) */}
-      <div className="hidden xl:flex xl:col-span-8 flex-col justify-between p-12 pt-28 pb-10 border-r border-[#131520]/30 bg-[#030408]/15 relative overflow-y-auto">
+      {/* Left Panel: Value Props & Chat Mockups (Col-8 - Transparent Combined background layout) */}
+      <div className="hidden xl:flex xl:col-span-8 flex-col justify-between p-12 pt-28 pb-10 bg-transparent relative overflow-y-auto">
         
         {/* Main Content wrapper */}
         <div className="w-full space-y-6">
@@ -234,7 +234,7 @@ export default function SignupPage() {
                     title: "Private & Secure",
                     desc: "Your data is encrypted and always stays private.",
                     icon: Shield,
-                    color: "bg-[#10192e] border border-blue-500/20 text-blue-450"
+                    color: "bg-[#10192e] border border-blue-500/20 text-blue-455"
                   },
                   {
                     title: "Actionable Guidance",
@@ -304,10 +304,10 @@ export default function SignupPage() {
                     </div>
                   </div>
 
-                  {/* Central Glowing Heart Badge */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-full bg-[#070511] border border-pink-500/40 flex items-center justify-center animate-heart-glow">
-                      <Heart className="w-4.5 h-4.5 text-pink-400 fill-pink-400/15" />
+                  {/* Central Glowing Heart Badge (LARGER & INTENSE GLOW) */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-25 flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-[#070511] border-2 border-pink-500 flex items-center justify-center animate-heart-glow shadow-[0_0_35px_rgba(236,72,153,0.75)]">
+                      <Heart className="w-6.5 h-6.5 text-pink-400 fill-pink-400/25" />
                     </div>
                   </div>
 
@@ -321,15 +321,22 @@ export default function SignupPage() {
                   </div>
                 </div>
 
-                {/* Heart rhythm path with SVG definition gradient */}
-                <div className="py-1 opacity-80 select-none">
-                  <svg className="w-full h-8" viewBox="0 0 200 40" fill="none">
-                    <path d="M0 20 L50 20 L58 10 L66 30 L74 20 L110 20 L118 5 L126 35 L134 20 L200 20" stroke="url(#waveGrad)" strokeWidth="2.5" strokeLinecap="round" className="animate-ecg" />
+                {/* Heart rhythm path with SVG definition gradient (EXTENDED LENGTH) */}
+                <div className="py-1 opacity-80 select-none w-full">
+                  <svg className="w-full h-10" viewBox="0 0 400 40" fill="none">
+                    <path 
+                      d="M0 20 L50 20 L58 10 L66 30 L74 20 L110 20 L118 5 L126 35 L134 20 L170 20 L178 8 L186 32 L194 20 L230 20 L238 3 L246 37 L254 20 L290 20 L298 12 L306 28 L314 20 L400 20" 
+                      stroke="url(#waveGrad)" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round" 
+                      className="animate-ecg" 
+                    />
                     <defs>
                       <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-                        <stop offset="50%" stopColor="#ec4899" stopOpacity="0.8" />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.4" />
+                        <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                        <stop offset="35%" stopColor="#ec4899" stopOpacity="0.9" />
+                        <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.9" />
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.3" />
                       </linearGradient>
                     </defs>
                   </svg>
@@ -632,8 +639,8 @@ export default function SignupPage() {
           50% { transform: translateY(8px) rotate(0.5deg); }
         }
         @keyframes heart-pulse-glow {
-          0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(236,72,153,0.3); }
-          50% { transform: scale(1.1); box-shadow: 0 0 35px rgba(236,72,153,0.6); }
+          0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(236,72,153,0.5), 0 0 40px rgba(99,102,241,0.3); }
+          50% { transform: scale(1.15); box-shadow: 0 0 45px rgba(236,72,153,0.9), 0 0 70px rgba(99,102,241,0.6); }
         }
         @keyframes ecg-flow {
           0% { stroke-dashoffset: 400; }
@@ -641,7 +648,7 @@ export default function SignupPage() {
         }
         @keyframes ring-draw {
           from { stroke-dashoffset: 201; }
-          to { stroke-dashoffset: 56.28; } /* 72% of 201 is 144.72. Dashoffset is 201 - 144.72 = 56.28 */
+          to { stroke-dashoffset: 56.28; }
         }
         .animate-float-you {
           animation: float-you 6s ease-in-out infinite;
@@ -653,7 +660,7 @@ export default function SignupPage() {
           animation: heart-pulse-glow 3s ease-in-out infinite;
         }
         .animate-ecg {
-          stroke-dasharray: 40 160;
+          stroke-dasharray: 60 340;
           animation: ecg-flow 4s linear infinite;
         }
         .animate-ring-draw {
