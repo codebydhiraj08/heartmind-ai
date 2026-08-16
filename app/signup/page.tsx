@@ -3,8 +3,24 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Mail, Lock, User, Sparkles, ArrowRight, AlertCircle, CheckCircle2, Loader2, Eye, EyeOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { signIn } from "next-auth/react";
+import { 
+  Mail, 
+  Lock, 
+  User, 
+  ArrowRight, 
+  AlertCircle, 
+  CheckCircle2, 
+  Loader2, 
+  Eye, 
+  EyeOff, 
+  Brain, 
+  Shield, 
+  Heart, 
+  Sparkles, 
+  ChevronLeft 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
@@ -13,23 +29,22 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
-    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
-  };
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -63,170 +78,527 @@ export default function SignupPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#0a0a12] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Decorative ambient backgrounds */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError("");
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <div className="flex justify-center mb-6">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/10">
-            <Sparkles className="w-5 h-5 text-white" />
+    try {
+      const checkRes = await fetch("/api/auth/google-check");
+      const { isPlaceholder } = await checkRes.json();
+
+      const isRawNetworkIP = window.location.hostname.startsWith("192.168.") || 
+                            window.location.hostname.startsWith("10.") || 
+                            (window.location.hostname.startsWith("172.") && 
+                             parseInt(window.location.hostname.split(".")[1]) >= 16 &&
+                             parseInt(window.location.hostname.split(".")[1]) <= 31);
+
+      if (isPlaceholder || isRawNetworkIP) {
+        const googleEmail = prompt(
+          "🛡️ Google OAuth Mock Sign-in (Network IP Mode)\n\n" +
+          "Aap local network IP se connect hain jahan Google OAuth redirect setup impossible hai.\n" +
+          "Local testing ke liye koi bhi mock Google Email enter karein:",
+          "dhiraj.google@gmail.com"
+        );
+
+        if (!googleEmail) {
+          setLoading(false);
+          return;
+        }
+
+        const emailClean = googleEmail.trim().toLowerCase();
+        if (!emailClean.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          setError("Please enter a valid email address for mock login.");
+          setLoading(false);
+          return;
+        }
+
+        const mockName = emailClean.split("@")[0]
+          .split(/[\._-]/)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ") + " (Google)";
+
+        const mockPassword = "google_mock_password_bypass_123";
+
+        const result = await signIn("credentials", {
+          email: emailClean,
+          password: mockPassword,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          const signupRes = await fetch("/api/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: mockName,
+              email: emailClean,
+              password: mockPassword,
+            }),
+          });
+
+          if (signupRes.ok) {
+            const loginResult = await signIn("credentials", {
+              email: emailClean,
+              password: mockPassword,
+              redirect: false,
+            });
+
+            if (loginResult?.error) {
+              setError(loginResult.error);
+            } else {
+              router.push("/dashboard");
+              router.refresh();
+            }
+          } else {
+            const signupData = await signupRes.json();
+            setError(signupData.error || "Mock Google registration failed.");
+          }
+        } else {
+          router.push("/dashboard");
+          router.refresh();
+        }
+      } else {
+        await signIn("google", { callbackUrl: "/dashboard" });
+      }
+    } catch (err: any) {
+      console.error("Google sign-in error:", err);
+      setError("An error occurred during Google Sign-in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#07080c] grid grid-cols-12 relative overflow-hidden select-none font-sans">
+      
+      {/* Decorative ambient backgrounds */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-pink-500/5 blur-[120px] pointer-events-none" />
+
+      {/* Global Top Navbar */}
+      <header className="absolute top-0 inset-x-0 h-20 px-6 sm:px-12 flex items-center justify-between z-30 pointer-events-auto">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/10">
+            <Brain className="w-4.5 h-4.5 text-white" />
+          </div>
+          <span className="text-base font-black text-white tracking-wide">
+            HeartMind <span className="bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">AI</span>
+          </span>
+        </Link>
+
+        <Link 
+          href="/" 
+          className="text-xs font-bold text-zinc-455 hover:text-white flex items-center gap-1.5 transition-colors group"
+        >
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          Back to Home
+        </Link>
+      </header>
+
+      {/* Left Panel: Marketing/Value Props & Interactive Mockup */}
+      <div className="hidden xl:flex xl:col-span-6 flex-col justify-between p-12 pt-28 pb-10 border-r border-zinc-900/40 bg-[#030408]/60 relative overflow-y-auto">
+        
+        {/* Marketing Heading & Value Props */}
+        <div className="space-y-8 max-w-lg">
+          <div className="space-y-4">
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-[1.15] text-left">
+              Start understanding <br />
+              what truly <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">matters.</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed text-left">
+              Create your account and unlock AI-powered insights to build healthier, happier relationships.
+            </p>
+          </div>
+
+          {/* Core Feature List */}
+          <div className="space-y-5">
+            {[
+              {
+                title: "AI-Powered Insights",
+                desc: "Advanced AI analyzes conversations to reveal hidden patterns.",
+                icon: Brain,
+                color: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"
+              },
+              {
+                title: "Relationship Intelligence",
+                desc: "Understand emotional dynamics and communication style.",
+                icon: Heart,
+                color: "bg-pink-500/10 border-pink-500/20 text-pink-400"
+              },
+              {
+                title: "Private & Secure",
+                desc: "Your data is encrypted and always stays private.",
+                icon: Shield,
+                color: "bg-blue-500/10 border-blue-500/20 text-blue-400"
+              },
+              {
+                title: "Actionable Guidance",
+                desc: "Get personalized suggestions to improve your relationships.",
+                icon: Sparkles,
+                color: "bg-purple-500/10 border-purple-500/20 text-purple-400"
+              }
+            ].map((item, idx) => {
+              const ItemIcon = item.icon;
+              return (
+                <div key={idx} className="flex items-start gap-4 text-left">
+                  <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${item.color}`}>
+                    <ItemIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-zinc-200 tracking-wide">{item.title}</h3>
+                    <p className="text-[11px] text-zinc-500 leading-normal mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-        <h2 className="text-center text-3xl font-extrabold tracking-tight text-white font-display">
-          Create account
-        </h2>
-        <p className="mt-2 text-center text-xs text-zinc-400">
-          Get started with your relationship intelligence helper
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <div
-          onMouseMove={handleMouseMove}
-          className="premium-card spotlight-glow rounded-2xl border border-white/[0.04] shadow-2xl p-8 relative overflow-hidden bg-gradient-to-b from-zinc-900/60 to-zinc-950/60"
-        >
-          {success ? (
-            <div className="text-center py-6 relative z-10 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
-                <CheckCircle2 className="w-6 h-6" />
+        {/* Dynamic Mockup Graphic (Center Left) */}
+        <div className="my-8 relative flex flex-col items-center justify-center w-full max-w-md mx-auto">
+          {/* Glowing central connector backdrop */}
+          <div className="absolute inset-0 bg-indigo-500/5 blur-[50px] rounded-full pointer-events-none" />
+
+          <div className="w-full space-y-6 relative z-10">
+            {/* Chats Container */}
+            <div className="flex flex-col gap-4 relative">
+              {/* Connected Line Background */}
+              <div className="absolute left-1/2 top-10 bottom-10 w-0.5 bg-gradient-to-b from-indigo-500/20 via-pink-500/20 to-indigo-500/10 -translate-x-1/2 z-0 hidden sm:block" />
+
+              {/* Left Bubble (You) */}
+              <div className="flex justify-start">
+                <div className="bg-[#100d23]/80 border border-indigo-500/25 rounded-2xl rounded-tl-none p-3 max-w-[210px] text-left shadow-2xl relative z-10">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-indigo-400">You</span>
+                  <p className="text-[11px] text-zinc-200 font-semibold mt-0.5 leading-relaxed">I feel like we don&apos;t talk anymore...</p>
+                  <span className="text-[8px] text-zinc-550 block text-right mt-1.5">10:24 AM ✓✓</span>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Registration Successful!</h3>
-                <p className="text-xs text-zinc-400 mt-2 leading-relaxed max-w-sm mx-auto">
-                  Your account has been created! To complete registration, please check your **development terminal logs** to retrieve and copy the printed email verification link.
-                </p>
+
+              {/* Central Glowing Heart Connector Badge */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-[#0a0715] border border-pink-500/35 flex items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.3)] animate-pulse">
+                  <Heart className="w-4 h-4 text-pink-400 fill-pink-400/15" />
+                </div>
               </div>
-              <div className="pt-4">
-                <Link href="/login">
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold text-xs py-2 h-9 rounded-lg border border-white/5 shadow-md shadow-primary/10 transition-all duration-300">
-                    Go to Login
-                  </Button>
-                </Link>
+
+              {/* Right Bubble (Partner) */}
+              <div className="flex justify-end">
+                <div className="bg-[#0b1424]/80 border border-blue-500/25 rounded-2xl rounded-tr-none p-3 max-w-[210px] text-left shadow-2xl relative z-10">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-blue-450">Partner</span>
+                  <p className="text-[11px] text-zinc-200 font-semibold mt-0.5 leading-relaxed">I&apos;m just tired, it&apos;s not you.</p>
+                  <span className="text-[8px] text-zinc-550 block text-right mt-1.5">10:25 AM ✓✓</span>
+                </div>
               </div>
             </div>
-          ) : (
-            <>
-              {error && (
-                <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 leading-normal relative z-10">
-                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
 
-              <form className="space-y-4 relative z-10" onSubmit={handleSignup}>
-                <div>
-                  <label htmlFor="name" className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Your Name
-                  </label>
-                  <div className="relative rounded-lg shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-4 w-4 text-zinc-500" />
-                    </div>
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      disabled={loading}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="John Doe"
-                      className="block w-full pl-9 pr-3 py-2 bg-zinc-950/60 border border-white/[0.06] rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
+            {/* Neon ECG wave path */}
+            <div className="py-2 opacity-80 select-none">
+              <svg className="w-full h-8 text-indigo-500/30" viewBox="0 0 200 40" fill="none">
+                <path d="M0 20 L50 20 L58 10 L66 30 L74 20 L110 20 L118 5 L126 35 L134 20 L200 20" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+
+            {/* AI Insight Card */}
+            <div className="bg-[#090b16]/75 border border-indigo-950/60 rounded-3xl p-4.5 shadow-2xl relative overflow-hidden text-left mx-auto max-w-sm flex items-center justify-between gap-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-1 text-[9px] font-black text-indigo-400 uppercase tracking-widest">
+                  <Sparkles className="w-3.5 h-3.5 fill-indigo-400/20" />
+                  AI Insight
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                    <span className="text-[10px] text-zinc-300 font-semibold leading-none">Emotional distance increasing</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <span className="text-[10px] text-zinc-300 font-semibold leading-none">Communication balance</span>
                   </div>
                 </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Email Address
-                  </label>
-                  <div className="relative rounded-lg shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-4 w-4 text-zinc-500" />
-                    </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      disabled={loading}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@example.com"
-                      className="block w-full pl-9 pr-3 py-2 bg-zinc-950/60 border border-white/[0.06] rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                  </div>
+                <div className="text-[9.5px] text-zinc-500 leading-none">
+                  Room to grow together 🚀
                 </div>
+              </div>
 
-                 <div>
-                  <label htmlFor="password" className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative rounded-lg shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-zinc-500" />
-                    </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      disabled={loading}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="block w-full pl-9 pr-10 py-2 bg-zinc-950/60 border border-white/[0.06] rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+              {/* Progress score ring */}
+              <div className="relative w-18 h-18 shrink-0 flex items-center justify-center select-none">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="36" cy="36" r="30" stroke="currentColor" strokeWidth="5.5" fill="none" className="text-zinc-900" />
+                  <circle cx="36" cy="36" r="30" stroke="url(#insightsGrad)" strokeWidth="5.5" fill="none" strokeDasharray={`${72 * 1.88} 188`} strokeLinecap="round" className="drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                  <defs>
+                    <linearGradient id="insightsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center mt-0.5">
+                  <span className="text-xs font-black text-white leading-none">72%</span>
+                  <span className="text-[7px] font-black uppercase text-zinc-500 tracking-wider scale-90 mt-1">Score</span>
                 </div>
-
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold text-xs py-2 h-9 rounded-lg border border-white/5 shadow-md shadow-primary/10 transition-all duration-300 flex items-center justify-center gap-1.5"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Creating Account...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Register Account</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </>
-                  )}
-                </Button>
-              </form>
-            </>
-          )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <p className="mt-4 text-center text-xs text-zinc-500">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-semibold text-primary hover:text-primary/95 transition-colors"
-          >
-            Sign in here
-          </Link>
-        </p>
+        {/* Trusted By thousands bottom banner */}
+        <div className="bg-zinc-950/20 border border-zinc-900/60 rounded-2xl p-4 flex items-center justify-between gap-4 max-w-lg">
+          <div className="text-left">
+            <h4 className="text-xs font-bold text-zinc-200">Trusted by thousands</h4>
+            <p className="text-[10px] text-zinc-500 leading-normal mt-0.5">People choose HeartMind AI for deeper connections every day.</p>
+          </div>
+          <div className="flex items-center shrink-0">
+            <div className="flex -space-x-2.5 select-none">
+              {[
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80",
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80",
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80",
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80"
+              ].map((src, i) => (
+                <img key={i} src={src} alt="Client" className="w-7.5 h-7.5 rounded-full border-2 border-[#030408] object-cover" />
+              ))}
+              <div className="w-7.5 h-7.5 rounded-full border-2 border-[#030408] bg-indigo-650 flex items-center justify-center text-[9px] font-black text-white uppercase tracking-wider shrink-0 select-none">
+                +5K
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Right Panel: Sign-up Card View */}
+      <div className="col-span-12 xl:col-span-6 flex flex-col justify-center items-center p-6 sm:p-12 pt-28 pb-10 relative overflow-y-auto bg-[#07080c]">
+        
+        {/* Container box */}
+        <div className="w-full max-w-md space-y-6">
+          <div className="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-8 relative overflow-hidden shadow-[0_0_50px_rgba(99,102,241,0.02)] backdrop-blur-xl">
+            {success ? (
+              <div className="text-center py-6 space-y-4 relative z-10">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Registration Successful!</h3>
+                  <p className="text-xs text-zinc-400 mt-2 leading-relaxed max-w-sm mx-auto">
+                    Your account has been created! To complete registration, please check your **development terminal logs** to retrieve and copy the printed email verification link.
+                  </p>
+                </div>
+                <div className="pt-4">
+                  <Link href="/login">
+                    <Button className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 h-10 rounded-xl border border-white/5 shadow-md shadow-indigo-500/10 transition-all duration-300">
+                      Go to Login
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Logo & Headline */}
+                <div className="text-center mb-6 select-none">
+                  <div className="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 mx-auto mb-4">
+                    <Brain className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-black text-white tracking-tight leading-none">
+                    Create your account 👋
+                  </h2>
+                  <p className="text-xs text-zinc-550 mt-2 leading-normal">
+                    Get started with your relationship intelligence helper
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 leading-normal relative z-10 text-left">
+                    <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Form fields */}
+                <form className="space-y-4 relative z-10 text-left" onSubmit={handleSignup}>
+                  <div>
+                    <label htmlFor="name" className="block text-[10px] font-black text-zinc-550 uppercase tracking-widest mb-1.5 select-none">
+                      Your Name
+                    </label>
+                    <div className="relative rounded-lg shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none select-none">
+                        <User className="h-4 w-4 text-zinc-500" />
+                      </div>
+                      <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        disabled={loading}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="John Doe"
+                        className="block w-full pl-10 pr-3 py-2.5 bg-zinc-950/60 border border-zinc-900 rounded-xl text-xs text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-[10px] font-black text-zinc-550 uppercase tracking-widest mb-1.5 select-none">
+                      Email Address
+                    </label>
+                    <div className="relative rounded-lg shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none select-none">
+                        <Mail className="h-4 w-4 text-zinc-500" />
+                      </div>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        disabled={loading}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="name@example.com"
+                        className="block w-full pl-10 pr-3 py-2.5 bg-zinc-950/60 border border-zinc-900 rounded-xl text-xs text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="password" className="block text-[10px] font-black text-zinc-550 uppercase tracking-widest mb-1.5 select-none">
+                      Password
+                    </label>
+                    <div className="relative rounded-lg shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none select-none">
+                        <Lock className="h-4 w-4 text-zinc-500" />
+                      </div>
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        disabled={loading}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="block w-full pl-10 pr-10 py-2.5 bg-zinc-950/60 border border-zinc-900 rounded-xl text-xs text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 disabled:opacity-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors select-none cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-[10px] font-black text-zinc-550 uppercase tracking-widest mb-1.5 select-none">
+                      Confirm Password
+                    </label>
+                    <div className="relative rounded-lg shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none select-none">
+                        <Lock className="h-4 w-4 text-zinc-500" />
+                      </div>
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        required
+                        disabled={loading}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="block w-full pl-10 pr-10 py-2.5 bg-zinc-950/60 border border-zinc-900 rounded-xl text-xs text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 disabled:opacity-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-550 hover:text-zinc-300 transition-colors select-none cursor-pointer"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs py-3 h-11 rounded-xl border border-white/5 shadow-lg shadow-indigo-500/10 transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Creating Account...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Register Account</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+
+                {/* Continue With Separator */}
+                <div className="flex items-center my-5 select-none">
+                  <div className="flex-grow border-t border-zinc-900" />
+                  <span className="px-3 text-[9px] font-black text-zinc-650 tracking-wider uppercase">Or Continue With</span>
+                  <div className="flex-grow border-t border-zinc-900" />
+                </div>
+
+                {/* Google Sign In */}
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="w-full bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-900 hover:border-zinc-800 text-zinc-200 font-bold text-xs py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer select-none"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                    <path
+                      fill="#EA4335"
+                      d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.336 0 3.327 2.673 1.345 6.573L5.266 9.765z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M16.04 15.327c-1.109.736-2.509 1.182-4.04 1.182a7.077 7.077 0 0 1-6.734-4.855L1.345 14.83C3.327 18.727 7.336 21.4 12 21.4c3.09 0 5.864-1.018 7.827-2.773l-3.787-3.3z"
+                    />
+                    <path
+                      fill="#4285F4"
+                      d="M23.49 12.273c0-.818-.082-1.609-.227-2.373H12v4.518h6.464a5.536 5.536 0 0 1-2.4 3.636l3.787 3.3c2.209-2.036 3.639-5.027 3.639-8.811z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.266 11.655a7.03 7.03 0 0 1 0-1.89L1.345 6.573A11.93 11.93 0 0 0 0 12c0 1.918.455 3.736 1.345 5.427l3.921-3.172c-.227-.7-.345-1.464-.345-2.2z"
+                    />
+                  </svg>
+                  Continue with Google
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Bottom Login Redirect */}
+          <div className="text-center text-xs text-zinc-550 select-none">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-bold text-indigo-400 hover:text-indigo-350 transition-colors"
+            >
+              Sign in here
+            </Link>
+          </div>
+
+          {/* Footer disclaimer */}
+          <div className="flex items-center justify-center gap-1.5 text-[9.5px] text-zinc-600 select-none pt-4 leading-normal">
+            <Shield className="w-3.5 h-3.5" />
+            <span>
+              By creating an account, you agree to our{" "}
+              <Link href="/terms" className="hover:text-zinc-400 transition-colors underline">Terms of Service</Link>
+              {" "}and{" "}
+              <Link href="/privacy" className="hover:text-zinc-400 transition-colors underline">Privacy Policy</Link>
+            </span>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }
