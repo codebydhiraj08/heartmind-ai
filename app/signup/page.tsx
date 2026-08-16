@@ -339,8 +339,8 @@ export default function SignupPage() {
                 <div className="flex flex-col gap-4 relative">
                   
                   {/* Central connector thread - Split around the heart */}
-                  <div className="absolute left-1/2 top-8 h-[calc(50%-6px)] w-0.5 bg-gradient-to-b from-indigo-500/20 to-pink-500/20 -translate-x-1/2 z-0 hidden sm:block" />
-                  <div className="absolute left-1/2 top-[calc(50%+42px)] bottom-8 w-0.5 bg-gradient-to-b from-pink-500/20 to-indigo-500/10 -translate-x-1/2 z-0 hidden sm:block" />
+                  <div className="absolute left-1/2 top-8 h-[calc(50%-15px)] w-0.5 bg-gradient-to-b from-indigo-500/20 to-pink-500/20 -translate-x-1/2 z-0 hidden sm:block" />
+                  <div className="absolute left-1/2 top-[calc(50%+43px)] bottom-8 w-0.5 bg-gradient-to-b from-pink-500/20 to-indigo-500/10 -translate-x-1/2 z-0 hidden sm:block" />
 
                   {/* Bubble 1 (Left) */}
                   <div className="flex justify-start animate-float-you">
