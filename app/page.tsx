@@ -935,6 +935,20 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </motion.div>
+
+          <motion.div
+            variants={fadeInUp}
+            className="text-center text-zinc-500 text-xs mt-10 max-w-2xl mx-auto leading-relaxed select-none"
+          >
+            By continuing, you agree to our{" "}
+            <Link href="/terms" className="text-zinc-400 hover:text-white underline">Terms & Conditions</Link>
+            {" "}and{" "}
+            <Link href="/privacy" className="text-zinc-400 hover:text-white underline">Privacy Policy</Link>. 
+            For subscription cancellation details, please refer to our{" "}
+            <Link href="/cancellation" className="text-zinc-400 hover:text-white underline">Cancellation Policy</Link>
+            {" "}and{" "}
+            <Link href="/refund" className="text-zinc-400 hover:text-white underline">Refund Policy</Link>.
+          </motion.div>
         </div>
       </section>
 
@@ -1065,9 +1079,10 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">Privacy Policy</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Terms of Service</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Cookie Policy</Link></li>
+                <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-foreground">Terms & Conditions</Link></li>
+                <li><Link href="/refund" className="hover:text-foreground">Refund Policy</Link></li>
+                <li><Link href="/cancellation" className="hover:text-foreground">Cancellation Policy</Link></li>
               </ul>
             </div>
           </div>

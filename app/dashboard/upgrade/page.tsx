@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Crown,
   Check,
@@ -535,6 +536,23 @@ export default function UpgradePage() {
           Instant activation and hassle-free cancellation
         </span>
       </motion.div>
+
+      {/* Compliance policies disclaimer */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.45 }}
+        className="text-center text-zinc-500 text-[10px] sm:text-xs max-w-2xl mx-auto pt-6 leading-relaxed select-none"
+      >
+        By continuing, you agree to our{" "}
+        <Link href="/terms" className="text-zinc-400 hover:text-white underline">Terms & Conditions</Link>
+        {" "}and{" "}
+        <Link href="/privacy" className="text-zinc-400 hover:text-white underline">Privacy Policy</Link>. 
+        For subscription cancellation details, please refer to our{" "}
+        <Link href="/cancellation" className="text-zinc-400 hover:text-white underline">Cancellation Policy</Link>
+        {" "}and{" "}
+        <Link href="/refund" className="text-zinc-400 hover:text-white underline">Refund Policy</Link>.
+      </motion.p>
     </div>
   );
 }
