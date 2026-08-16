@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { 
   Mail, 
@@ -21,6 +22,25 @@ import {
   ChevronLeft 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Static particle data matching Login page to prevent hydration mismatch
+const backgroundParticles = [
+  { top: "5%", left: "10%", x: [0, 80, -40, 0], y: [0, -60, 40, 0], duration: 18 },
+  { top: "15%", left: "60%", x: [0, -90, 50, 0], y: [0, 80, -70, 0], duration: 24 },
+  { top: "25%", left: "30%", x: [0, 50, -80, 0], y: [0, -70, 50, 0], duration: 20 },
+  { top: "35%", left: "80%", x: [0, -60, 90, 0], y: [0, 50, -80, 0], duration: 28 },
+  { top: "45%", left: "15%", x: [0, 70, -50, 0], y: [0, -80, 60, 0], duration: 22 },
+  { top: "50%", left: "70%", x: [0, -80, 70, 0], y: [0, 60, -90, 0], duration: 26 },
+  { top: "60%", left: "40%", x: [0, 90, -40, 0], y: [0, -50, 80, 0], duration: 19 },
+  { top: "70%", left: "85%", x: [0, -50, 60, 0], y: [0, 80, -50, 0], duration: 25 },
+  { top: "80%", left: "20%", x: [0, 80, -70, 0], y: [0, -60, 70, 0], duration: 21 },
+  { top: "85%", left: "65%", x: [0, -70, 80, 0], y: [0, 50, -80, 0], duration: 27 },
+  { top: "90%", left: "5%", x: [0, 60, -90, 0], y: [0, -80, 50, 0], duration: 23 },
+  { top: "95%", left: "50%", x: [0, -80, 60, 0], y: [0, 70, -60, 0], duration: 29 },
+  { top: "8%", left: "88%", x: [0, 50, -50, 0], y: [0, -40, 50, 0], duration: 17 },
+  { top: "18%", left: "22%", x: [0, -50, 50, 0], y: [0, 40, -50, 0], duration: 23 },
+  { top: "58%", left: "92%", x: [0, 60, -60, 0], y: [0, -60, 60, 0], duration: 25 }
+];
 
 export default function SignupPage() {
   const router = useRouter();
@@ -175,14 +195,39 @@ export default function SignupPage() {
       <div className="absolute bottom-[-15%] right-[-5%] w-[60%] h-[60%] rounded-full bg-pink-500/[0.04] blur-[150px] pointer-events-none animate-pulse" />
       <div className="absolute top-[35%] left-[25%] w-[450px] h-[450px] rounded-full bg-purple-500/[0.03] blur-[120px] pointer-events-none" />
 
+      {/* Dynamic Flying/Floating Light Particles matching Login and Home Page */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {backgroundParticles.map((p, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#04c7f0] opacity-35 blur-[0.5px]"
+            style={{
+              top: p.top,
+              left: p.left,
+            }}
+            animate={{
+              x: p.x,
+              y: p.y,
+              opacity: [0.15, 0.6, 0.15]
+            }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
       {/* Global Top Navbar */}
       <header className="absolute top-0 inset-x-0 h-16 px-6 sm:px-12 flex items-center justify-between z-30 pointer-events-auto">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/10">
+        {/* LOGO ICON BACKGROUND AND TEXT GRADIENT MATCHING HOME/LOGIN PAGES */}
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] flex items-center justify-center shadow-lg shadow-purple-500/20">
             <Brain className="w-4.5 h-4.5 text-white" />
           </div>
-          <span className="text-base font-black text-white tracking-wide">
-            HeartMind <span className="bg-gradient-to-r from-indigo-400 to-pink-400 bg-clip-text text-transparent">AI</span>
+          <span className="text-base font-bold text-white tracking-wide">
+            HeartMind <span className="bg-gradient-to-r from-[#ea409b] to-[#04c7f0] bg-clip-text text-transparent">AI</span>
           </span>
         </Link>
 
@@ -421,9 +466,9 @@ export default function SignupPage() {
                 </div>
               ) : (
                 <>
-                  {/* Logo & Headline */}
+                  {/* Logo & Headline (UPDATED LOGO STYLE MATCHING HOME/LOGIN PAGES) */}
                   <div className="text-center mb-4.5 select-none">
-                    <div className="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 mx-auto mb-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#8b5cf6] to-[#06b6d4] rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 mx-auto mb-3">
                       <Brain className="w-5 h-5 text-white" />
                     </div>
                     <h2 className="text-xl font-black text-white tracking-tight leading-none">
@@ -449,7 +494,7 @@ export default function SignupPage() {
                       </label>
                       <div className="relative rounded-lg shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none select-none">
-                          <User className="h-4 w-4 text-zinc-450" />
+                          <User className="h-4 w-4 text-zinc-455" />
                         </div>
                         <input
                           id="name"
@@ -549,7 +594,7 @@ export default function SignupPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold text-xs py-2.5 h-10 rounded-xl border border-white/5 shadow-lg shadow-indigo-500/10 transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                      className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-500 text-white font-bold text-xs py-2.5 h-10 rounded-xl border border-white/5 shadow-lg shadow-indigo-500/10 transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
                     >
                       {loading ? (
                         <>
@@ -568,7 +613,7 @@ export default function SignupPage() {
                   {/* Continue With Separator */}
                   <div className="flex items-center my-3 select-none">
                     <div className="flex-grow border-t border-[#1a1c24]" />
-                    <span className="px-2 text-[8px] font-black text-zinc-600 tracking-wider uppercase">Or Continue With</span>
+                    <span className="px-2 text-[8px] font-black text-zinc-650 tracking-wider uppercase">Or Continue With</span>
                     <div className="flex-grow border-t border-[#1a1c24]" />
                   </div>
 
