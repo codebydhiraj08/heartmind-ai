@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { 
   Mail, 
@@ -169,11 +168,11 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05060c] grid grid-cols-12 relative overflow-hidden select-none font-sans">
+    <div className="min-h-screen bg-[#07080c] animated-gradient grid grid-cols-12 relative overflow-hidden select-none font-sans">
       
       {/* Decorative ambient backgrounds matching mockup space theme */}
-      <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] rounded-full bg-indigo-500/[0.04] blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-15%] right-[-5%] w-[60%] h-[60%] rounded-full bg-pink-500/[0.04] blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] rounded-full bg-indigo-500/[0.04] blur-[150px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-15%] right-[-5%] w-[60%] h-[60%] rounded-full bg-pink-500/[0.04] blur-[150px] pointer-events-none animate-pulse" />
       <div className="absolute top-[35%] left-[25%] w-[450px] h-[450px] rounded-full bg-purple-500/[0.03] blur-[120px] pointer-events-none" />
 
       {/* Global Top Navbar */}
@@ -197,7 +196,7 @@ export default function SignupPage() {
       </header>
 
       {/* Left Panel: Value Props & Chat Mockups (Col-8) */}
-      <div className="hidden xl:flex xl:col-span-8 flex-col justify-between p-12 pt-28 pb-10 border-r border-[#131520]/60 bg-[#030408]/65 relative overflow-y-auto">
+      <div className="hidden xl:flex xl:col-span-8 flex-col justify-between p-12 pt-28 pb-10 border-r border-[#131520]/30 bg-[#030408]/15 relative overflow-y-auto">
         
         {/* Main Content wrapper */}
         <div className="w-full space-y-6">
@@ -273,7 +272,7 @@ export default function SignupPage() {
                       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80",
                       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80"
                     ].map((src, i) => (
-                      <img key={i} src={src} alt="Client" className="w-7 h-7 rounded-full border-2 border-[#030408] object-cover" />
+                      <img key={i} src={src} alt="Client" className="w-7.5 h-7.5 rounded-full border-2 border-[#030408] object-cover" />
                     ))}
                     <div className="w-7 h-7 rounded-full border-2 border-[#030408] bg-indigo-650 flex items-center justify-center text-[8.5px] font-black text-white shrink-0 select-none">
                       +5K
@@ -283,49 +282,49 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Chat Mockup visual (Right side of left panel - middle screen area) */}
-            <div className="col-span-6 relative flex flex-col items-center justify-center w-full max-w-sm mx-auto">
+            {/* Chat Mockup visual (Right side of left panel - middle screen area - LARGER SIZE & ANIMATED) */}
+            <div className="col-span-6 relative flex flex-col items-center justify-center w-full max-w-[440px] mx-auto pt-2">
               
               {/* Glowing ring connector behind */}
-              <div className="absolute inset-0 bg-indigo-500/5 blur-[50px] rounded-full pointer-events-none" />
+              <div className="absolute inset-0 bg-indigo-500/5 blur-[55px] rounded-full pointer-events-none" />
 
-              <div className="w-full space-y-5 relative z-10">
+              <div className="w-full space-y-6 relative z-10">
                 {/* Chats bubbles */}
-                <div className="flex flex-col gap-3.5 relative">
+                <div className="flex flex-col gap-4 relative">
                   
                   {/* Central connector thread */}
                   <div className="absolute left-1/2 top-8 bottom-8 w-0.5 bg-gradient-to-b from-indigo-500/20 via-pink-500/20 to-indigo-500/10 -translate-x-1/2 z-0 hidden sm:block" />
 
                   {/* Bubble 1 (Left) */}
-                  <div className="flex justify-start">
-                    <div className="bg-[#0e0c1b]/95 border border-indigo-500/15 rounded-2xl rounded-tl-none p-3 max-w-[190px] text-left shadow-2xl relative z-10">
-                      <span className="text-[8.5px] font-black uppercase tracking-wider text-indigo-400">You</span>
-                      <p className="text-[10.5px] text-zinc-200 font-semibold mt-0.5 leading-normal">I feel like we don&apos;t talk anymore...</p>
-                      <span className="text-[8px] text-zinc-550 block text-right mt-1">10:24 AM ✓✓</span>
+                  <div className="flex justify-start animate-float-you">
+                    <div className="bg-[#0e0c1b]/95 border border-indigo-500/15 rounded-2xl rounded-tl-none p-3.5 max-w-[230px] text-left shadow-2xl relative z-10 transition-transform">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-indigo-400">You</span>
+                      <p className="text-[11px] text-zinc-200 font-semibold mt-0.5 leading-normal">I feel like we don&apos;t talk anymore...</p>
+                      <span className="text-[8.5px] text-zinc-550 block text-right mt-1.5">10:24 AM ✓✓</span>
                     </div>
                   </div>
 
                   {/* Central Glowing Heart Badge */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-[#070511] border border-pink-500/40 flex items-center justify-center shadow-[0_0_25px_rgba(236,72,153,0.4)] animate-pulse">
-                      <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400/15" />
+                    <div className="w-10 h-10 rounded-full bg-[#070511] border border-pink-500/40 flex items-center justify-center animate-heart-glow">
+                      <Heart className="w-4.5 h-4.5 text-pink-400 fill-pink-400/15" />
                     </div>
                   </div>
 
                   {/* Bubble 2 (Right) */}
-                  <div className="flex justify-end">
-                    <div className="bg-[#09121f]/95 border border-blue-500/15 rounded-2xl rounded-tr-none p-3 max-w-[190px] text-left shadow-2xl relative z-10">
-                      <span className="text-[8.5px] font-black uppercase tracking-wider text-blue-400">Partner</span>
-                      <p className="text-[10.5px] text-zinc-200 font-semibold mt-0.5 leading-normal">I&apos;m just tired, it&apos;s not you.</p>
-                      <span className="text-[8px] text-zinc-555 block text-right mt-1">10:25 AM ✓✓</span>
+                  <div className="flex justify-end animate-float-partner">
+                    <div className="bg-[#09121f]/95 border border-blue-500/15 rounded-2xl rounded-tr-none p-3.5 max-w-[230px] text-left shadow-2xl relative z-10 transition-transform">
+                      <span className="text-[9px] font-black uppercase tracking-wider text-blue-400">Partner</span>
+                      <p className="text-[11px] text-zinc-200 font-semibold mt-0.5 leading-normal">I&apos;m just tired, it&apos;s not you.</p>
+                      <span className="text-[8.5px] text-zinc-555 block text-right mt-1.5">10:25 AM ✓✓</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Heart rhythm path with SVG definition gradient */}
-                <div className="py-1 opacity-70 select-none">
+                <div className="py-1 opacity-80 select-none">
                   <svg className="w-full h-8" viewBox="0 0 200 40" fill="none">
-                    <path d="M0 20 L50 20 L58 10 L66 30 L74 20 L110 20 L118 5 L126 35 L134 20 L200 20" stroke="url(#waveGrad)" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="M0 20 L50 20 L58 10 L66 30 L74 20 L110 20 L118 5 L126 35 L134 20 L200 20" stroke="url(#waveGrad)" strokeWidth="2.5" strokeLinecap="round" className="animate-ecg" />
                     <defs>
                       <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
@@ -336,8 +335,8 @@ export default function SignupPage() {
                   </svg>
                 </div>
 
-                {/* AI Insight Card */}
-                <div className="bg-[#05060b]/90 border border-indigo-950/40 rounded-3xl p-4.5 shadow-2xl relative overflow-hidden text-left mx-auto max-w-sm flex items-center justify-between gap-4">
+                {/* AI Insight Card (LARGER SIZE) */}
+                <div className="bg-[#05060b]/90 border border-indigo-950/40 rounded-3xl p-5 shadow-2xl relative overflow-hidden text-left mx-auto max-w-[390px] flex items-center justify-between gap-4">
                   <div className="space-y-2.5">
                     <div className="flex items-center gap-1 text-[8.5px] font-black text-indigo-400 uppercase tracking-widest">
                       <Sparkles className="w-3.5 h-3.5 fill-indigo-400/20" />
@@ -346,23 +345,23 @@ export default function SignupPage() {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0 shadow-[0_0_6px_#f43f5e]" />
-                        <span className="text-[10px] text-zinc-300 font-semibold leading-none truncate max-w-[150px]">Emotional distance increasing</span>
+                        <span className="text-[10.5px] text-zinc-300 font-semibold leading-none truncate max-w-[170px]">Emotional distance increasing</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 shadow-[0_0_6px_#f59e0b]" />
-                        <span className="text-[10px] text-zinc-300 font-semibold leading-none truncate max-w-[150px]">Communication balance</span>
+                        <span className="text-[10.5px] text-zinc-300 font-semibold leading-none truncate max-w-[170px]">Communication balance</span>
                       </div>
                     </div>
-                    <div className="text-[9px] text-zinc-555 leading-none">
+                    <div className="text-[9.5px] text-zinc-555 leading-none">
                       Room to grow together 🚀
                     </div>
                   </div>
 
-                  {/* Relationship progress circle */}
-                  <div className="relative w-16 h-16 shrink-0 flex items-center justify-center select-none">
+                  {/* Relationship progress circle (Larger size) */}
+                  <div className="relative w-20 h-20 shrink-0 flex items-center justify-center select-none">
                     <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="32" cy="32" r="26" stroke="currentColor" strokeWidth="4.5" fill="none" className="text-zinc-950" />
-                      <circle cx="32" cy="32" r="26" stroke="url(#insightsGrad)" strokeWidth="4.5" fill="none" strokeDasharray={`${72 * 1.63} 163`} strokeLinecap="round" className="drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
+                      <circle cx="40" cy="40" r="32" stroke="currentColor" strokeWidth="5.5" fill="none" className="text-zinc-950" />
+                      <circle cx="40" cy="40" r="32" stroke="url(#insightsGrad)" strokeWidth="5.5" fill="none" strokeDasharray="201" strokeDashoffset="201" strokeLinecap="round" className="animate-ring-draw drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
                       <defs>
                         <linearGradient id="insightsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stopColor="#4338ca" />
@@ -371,8 +370,8 @@ export default function SignupPage() {
                       </defs>
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center mt-0.5">
-                      <span className="text-xs font-black text-white leading-none">72%</span>
-                      <span className="text-[6.5px] font-black uppercase text-zinc-500 tracking-wider mt-0.5 scale-90">Score</span>
+                      <span className="text-sm font-black text-white leading-none">72%</span>
+                      <span className="text-[6.5px] font-black uppercase text-zinc-500 tracking-wider mt-1 scale-90">Score</span>
                     </div>
                   </div>
                 </div>
@@ -385,8 +384,8 @@ export default function SignupPage() {
 
       </div>
 
-      {/* Right Panel: Sign-up Card View (Col-4) */}
-      <div className="col-span-12 xl:col-span-4 flex flex-col justify-center items-center p-6 sm:p-12 pt-28 pb-10 relative overflow-y-auto bg-[#05060c]">
+      {/* Right Panel: Sign-up Card View (Col-4 - Transparent overlay matching unified theme) */}
+      <div className="col-span-12 xl:col-span-4 flex flex-col justify-center items-center p-6 sm:p-12 pt-28 pb-10 relative overflow-y-auto bg-transparent">
         
         {/* Container box */}
         <div className="w-full max-w-sm space-y-5">
@@ -424,7 +423,7 @@ export default function SignupPage() {
                     </h2>
                     <p className="text-xs text-zinc-450 mt-1.5 leading-normal">
                       Get started with your relationship intelligence helper
-                  </p>
+                    </p>
                   </div>
 
                   {error && (
@@ -532,7 +531,7 @@ export default function SignupPage() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-zinc-550 hover:text-zinc-300 transition-colors select-none cursor-pointer"
+                          className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-zinc-555 hover:text-zinc-350 transition-colors select-none cursor-pointer"
                         >
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -609,7 +608,7 @@ export default function SignupPage() {
           </div>
 
           {/* Footer disclaimer */}
-          <div className="flex items-center justify-center gap-1.5 text-[9px] text-zinc-600 select-none pt-2.5 leading-normal">
+          <div className="flex items-center justify-center gap-1.5 text-[9px] text-zinc-650 select-none pt-2.5 leading-normal">
             <Shield className="w-3.5 h-3.5 shrink-0" />
             <span>
               By creating an account, you agree to our{" "}
@@ -621,6 +620,47 @@ export default function SignupPage() {
         </div>
 
       </div>
+
+      {/* CSS Keyframes for glowing animations */}
+      <style jsx global>{`
+        @keyframes float-you {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-8px) rotate(-0.5deg); }
+        }
+        @keyframes float-partner {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(8px) rotate(0.5deg); }
+        }
+        @keyframes heart-pulse-glow {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(236,72,153,0.3); }
+          50% { transform: scale(1.1); box-shadow: 0 0 35px rgba(236,72,153,0.6); }
+        }
+        @keyframes ecg-flow {
+          0% { stroke-dashoffset: 400; }
+          100% { stroke-dashoffset: 0; }
+        }
+        @keyframes ring-draw {
+          from { stroke-dashoffset: 201; }
+          to { stroke-dashoffset: 56.28; } /* 72% of 201 is 144.72. Dashoffset is 201 - 144.72 = 56.28 */
+        }
+        .animate-float-you {
+          animation: float-you 6s ease-in-out infinite;
+        }
+        .animate-float-partner {
+          animation: float-partner 6s ease-in-out infinite;
+        }
+        .animate-heart-glow {
+          animation: heart-pulse-glow 3s ease-in-out infinite;
+        }
+        .animate-ecg {
+          stroke-dasharray: 40 160;
+          animation: ecg-flow 4s linear infinite;
+        }
+        .animate-ring-draw {
+          stroke-dasharray: 201;
+          animation: ring-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
 
     </div>
   );
