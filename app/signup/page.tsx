@@ -168,7 +168,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080c] animated-gradient grid grid-cols-12 relative overflow-hidden select-none font-sans">
+    <div className="h-screen w-screen max-h-screen overflow-hidden bg-[#07080c] animated-gradient grid grid-cols-12 relative select-none font-sans">
       
       {/* Decorative ambient backgrounds matching mockup space theme */}
       <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] rounded-full bg-indigo-500/[0.04] blur-[150px] pointer-events-none animate-pulse" />
@@ -176,7 +176,7 @@ export default function SignupPage() {
       <div className="absolute top-[35%] left-[25%] w-[450px] h-[450px] rounded-full bg-purple-500/[0.03] blur-[120px] pointer-events-none" />
 
       {/* Global Top Navbar */}
-      <header className="absolute top-0 inset-x-0 h-20 px-6 sm:px-12 flex items-center justify-between z-30 pointer-events-auto">
+      <header className="absolute top-0 inset-x-0 h-16 px-6 sm:px-12 flex items-center justify-between z-30 pointer-events-auto">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/10">
             <Brain className="w-4.5 h-4.5 text-white" />
@@ -195,18 +195,18 @@ export default function SignupPage() {
         </Link>
       </header>
 
-      {/* Left Panel: Value Props & Chat Mockups (Col-8 - Transparent Combined background layout) */}
-      <div className="hidden xl:flex xl:col-span-8 flex-col justify-between p-12 pt-28 pb-10 bg-transparent relative overflow-y-auto">
+      {/* Left Panel: Value Props & Chat Mockups (Col-8 - Transparent Combined background layout - NO SCROLL) */}
+      <div className="hidden xl:flex xl:col-span-8 flex-col justify-between p-12 pt-20 pb-8 bg-transparent relative h-full max-h-screen overflow-hidden">
         
         {/* Main Content wrapper */}
-        <div className="w-full space-y-6">
+        <div className="w-full space-y-4">
           {/* Header text */}
-          <div className="space-y-3.5 text-left">
+          <div className="space-y-2 text-left">
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-[1.15]">
               Start understanding <br />
               what truly <span className="bg-gradient-to-r from-pink-500 via-purple-400 to-indigo-400 bg-clip-text text-transparent">matters.</span>
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-xl">
+            <p className="text-xs text-zinc-400 leading-relaxed max-w-xl">
               Create your account and unlock AI-powered insights to build healthier, happier relationships.
             </p>
           </div>
@@ -214,9 +214,9 @@ export default function SignupPage() {
           {/* Grid: Value Props (Left) & Chat Mockup (Right) */}
           <div className="grid grid-cols-12 gap-8 items-center pt-2">
             
-            {/* Value props (Left side of left panel) */}
-            <div className="col-span-6 space-y-6 text-left">
-              <div className="space-y-5">
+            {/* Value props (Left side of left panel - INCREASED ICON SIZES) */}
+            <div className="col-span-6 space-y-5 text-left">
+              <div className="space-y-4.5">
                 {[
                   {
                     title: "AI-Powered Insights",
@@ -245,11 +245,12 @@ export default function SignupPage() {
                 ].map((item, idx) => {
                   const ItemIcon = item.icon;
                   return (
-                    <div key={idx} className="flex items-start gap-3.5">
-                      <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${item.color}`}>
-                        <ItemIcon className="w-5 h-5" />
+                    <div key={idx} className="flex items-start gap-4">
+                      {/* INCREASED ICON CONTAINER TO w-12 h-12 AND ICON TO w-6.5 h-6.5 */}
+                      <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-md ${item.color}`}>
+                        <ItemIcon className="w-6.5 h-6.5" />
                       </div>
-                      <div>
+                      <div className="pt-0.5">
                         <h3 className="text-xs font-bold text-zinc-200 tracking-wide">{item.title}</h3>
                         <p className="text-[10.5px] text-zinc-500 leading-normal mt-0.5">{item.desc}</p>
                       </div>
@@ -259,7 +260,7 @@ export default function SignupPage() {
               </div>
 
               {/* Trusted card below the list */}
-              <div className="bg-zinc-950/30 border border-zinc-900/60 rounded-2xl p-4 flex items-center justify-between gap-4 max-w-xs pt-3.5">
+              <div className="bg-zinc-950/30 border border-zinc-900/60 rounded-2xl p-3.5 flex items-center justify-between gap-4 max-w-xs pt-3">
                 <div className="text-left">
                   <h4 className="text-[11px] font-bold text-zinc-200 leading-none">Trusted by thousands</h4>
                   <p className="text-[9.5px] text-zinc-555 leading-normal mt-1">People choose HeartMind AI for deeper connections.</p>
@@ -391,14 +392,14 @@ export default function SignupPage() {
 
       </div>
 
-      {/* Right Panel: Sign-up Card View (Col-4 - Transparent overlay matching unified theme) */}
-      <div className="col-span-12 xl:col-span-4 flex flex-col justify-center items-center p-6 sm:p-12 pt-28 pb-10 relative overflow-y-auto bg-transparent">
+      {/* Right Panel: Sign-up Card View (Col-4 - Transparent overlay matching unified theme - NO SCROLL) */}
+      <div className="col-span-12 xl:col-span-4 flex flex-col justify-center items-center p-6 sm:p-12 pt-20 pb-8 relative h-full max-h-screen overflow-hidden bg-transparent">
         
         {/* Container box */}
-        <div className="w-full max-w-sm space-y-5">
+        <div className="w-full max-w-sm space-y-4">
           {/* Gradient Glowing Wrapper Border */}
           <div className="relative rounded-3xl p-[1px] bg-gradient-to-tr from-blue-500/35 via-[#1a1c28] to-indigo-500/40 shadow-2xl">
-            <div className="bg-[#05060b]/98 rounded-[23px] p-6.5 relative overflow-hidden backdrop-blur-xl">
+            <div className="bg-[#05060b]/98 rounded-[23px] p-5.5 relative overflow-hidden backdrop-blur-xl">
               {success ? (
                 <div className="text-center py-6 space-y-4 relative z-10">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
@@ -421,9 +422,9 @@ export default function SignupPage() {
               ) : (
                 <>
                   {/* Logo & Headline */}
-                  <div className="text-center mb-5 select-none">
-                    <div className="w-11 h-11 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 mx-auto mb-3.5">
-                      <Brain className="w-5.5 h-5.5 text-white" />
+                  <div className="text-center mb-4.5 select-none">
+                    <div className="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 mx-auto mb-3">
+                      <Brain className="w-5 h-5 text-white" />
                     </div>
                     <h2 className="text-xl font-black text-white tracking-tight leading-none">
                       Create your account 👋
@@ -434,14 +435,14 @@ export default function SignupPage() {
                   </div>
 
                   {error && (
-                    <div className="mb-4.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2 leading-normal relative z-10 text-left">
+                    <div className="mb-4 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2 leading-normal relative z-10 text-left">
                       <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}
 
                   {/* Form fields */}
-                  <form className="space-y-3.5 relative z-10 text-left" onSubmit={handleSignup}>
+                  <form className="space-y-3 relative z-10 text-left" onSubmit={handleSignup}>
                     <div>
                       <label htmlFor="name" className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1 select-none">
                         Your Name
@@ -548,7 +549,7 @@ export default function SignupPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold text-xs py-3 h-10.5 rounded-xl border border-white/5 shadow-lg shadow-indigo-500/10 transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                      className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-bold text-xs py-2.5 h-10 rounded-xl border border-white/5 shadow-lg shadow-indigo-500/10 transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
                     >
                       {loading ? (
                         <>
@@ -565,9 +566,9 @@ export default function SignupPage() {
                   </form>
 
                   {/* Continue With Separator */}
-                  <div className="flex items-center my-4 select-none">
+                  <div className="flex items-center my-3 select-none">
                     <div className="flex-grow border-t border-[#1a1c24]" />
-                    <span className="px-2.5 text-[8.5px] font-black text-zinc-600 tracking-wider uppercase">Or Continue With</span>
+                    <span className="px-2 text-[8px] font-black text-zinc-600 tracking-wider uppercase">Or Continue With</span>
                     <div className="flex-grow border-t border-[#1a1c24]" />
                   </div>
 
@@ -576,7 +577,7 @@ export default function SignupPage() {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={loading}
-                    className="w-full bg-zinc-950/80 hover:bg-[#0c0d12] border border-[#1a1c24] hover:border-zinc-800 text-zinc-200 font-bold text-xs py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer select-none"
+                    className="w-full bg-zinc-950/80 hover:bg-[#0c0d12] border border-[#1a1c24] hover:border-zinc-800 text-zinc-200 font-bold text-xs py-2 rounded-xl transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer select-none"
                   >
                     <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                       <path
@@ -615,7 +616,7 @@ export default function SignupPage() {
           </div>
 
           {/* Footer disclaimer */}
-          <div className="flex items-center justify-center gap-1.5 text-[9px] text-zinc-650 select-none pt-2.5 leading-normal">
+          <div className="flex items-center justify-center gap-1.5 text-[8.5px] text-zinc-650 select-none pt-2.5 leading-normal">
             <Shield className="w-3.5 h-3.5 shrink-0" />
             <span>
               By creating an account, you agree to our{" "}
