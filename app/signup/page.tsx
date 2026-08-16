@@ -338,10 +338,6 @@ export default function SignupPage() {
                 {/* Chats bubbles */}
                 <div className="flex flex-col gap-4 relative">
                   
-                  {/* Central connector thread - Split around the heart */}
-                  <div className="absolute left-1/2 top-8 h-[calc(50%-15px)] w-0.5 bg-gradient-to-b from-indigo-500/20 to-pink-500/20 -translate-x-1/2 z-0 hidden sm:block" />
-                  <div className="absolute left-1/2 top-[calc(50%+43px)] bottom-8 w-0.5 bg-gradient-to-b from-pink-500/20 to-indigo-500/10 -translate-x-1/2 z-0 hidden sm:block" />
-
                   {/* Bubble 1 (Left) */}
                   <div className="flex justify-start animate-float-you">
                     <div className="bg-[#0e0c1b]/95 border border-indigo-500/15 rounded-2xl rounded-tl-none p-3.5 max-w-[230px] text-left shadow-2xl relative z-10 transition-transform">
@@ -352,7 +348,7 @@ export default function SignupPage() {
                   </div>
 
                   {/* Central Glowing Heart Symbol (LARGER & INTENSE GLOW) */}
-                  <div className="absolute top-[calc(50%+16px)] left-1/2 -translate-x-1/2 -translate-y-1/2 z-25 flex items-center justify-center pointer-events-none">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-25 flex items-center justify-center pointer-events-none">
                     <Heart strokeWidth={1.3} className="w-14 h-14 text-pink-500 fill-pink-500/20 animate-heart-glow" />
                   </div>
 
