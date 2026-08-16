@@ -193,7 +193,7 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080c] animated-gradient relative overflow-x-hidden flex flex-col justify-center pt-24 pb-12 px-4 sm:px-8 lg:px-12">
+    <div className="h-screen w-screen max-h-screen overflow-hidden bg-[#07080c] animated-gradient relative flex flex-col justify-center px-4 sm:px-8 lg:px-12 font-sans select-none">
       {/* Decorative ambient backgrounds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div 

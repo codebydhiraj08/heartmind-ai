@@ -644,8 +644,8 @@ export default function SignupPage() {
           </div>
 
           {/* Footer disclaimer */}
-          <div className="flex items-center justify-center gap-1.5 text-[8.5px] text-zinc-650 select-none pt-2.5 leading-normal">
-            <Shield className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex items-center justify-center gap-1.5 text-[10.5px] text-zinc-500 select-none pt-2.5 leading-normal">
+            <Shield className="w-4 h-4 shrink-0 text-zinc-500" />
             <span>
               By creating an account, you agree to our{" "}
               <Link href="/terms" className="hover:text-zinc-400 transition-colors underline">Terms of Service</Link>
