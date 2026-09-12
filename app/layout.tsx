@@ -14,11 +14,27 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-display'
 })
 
+const siteUrl = process.env.NEXTAUTH_URL || 'https://heartmind-ai.vercel.app'
+
 export const metadata: Metadata = {
-  title: 'HeartMind AI | Relationship Intelligence Platform',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'HeartMind AI | Relationship Intelligence Platform',
+    template: '%s | HeartMind AI',
+  },
   description: 'AI-powered emotional intelligence and relationship wellness assistant. Analyze conversations, detect red flags, and build healthier relationships.',
-  keywords: ['relationship AI', 'emotional intelligence', 'conversation analyzer', 'red flag detection', 'relationship health'],
-  authors: [{ name: 'HeartMind AI' }],
+  keywords: [
+    'relationship AI',
+    'emotional intelligence',
+    'conversation analyzer',
+    'red flag detection',
+    'relationship health',
+    'attachment style',
+    'relationship coach',
+  ],
+  authors: [{ name: 'HeartMind AI', url: siteUrl }],
+  creator: 'HeartMind AI',
+  publisher: 'HeartMind AI',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
@@ -36,8 +52,17 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'HeartMind AI | Relationship Intelligence Platform',
-    description: 'AI-powered emotional intelligence and relationship wellness assistant',
+    description: 'AI-powered emotional intelligence and relationship wellness assistant. Analyze conversations, detect red flags, and build healthier relationships.',
+    url: siteUrl,
+    siteName: 'HeartMind AI',
+    locale: 'en_US',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'HeartMind AI | Relationship Intelligence Platform',
+    description: 'AI-powered emotional intelligence and relationship wellness assistant.',
+    creator: '@heartmindai',
   },
 }
 
