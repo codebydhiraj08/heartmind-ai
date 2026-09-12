@@ -19,6 +19,21 @@ export const metadata: Metadata = {
   description: 'AI-powered emotional intelligence and relationship wellness assistant. Analyze conversations, detect red flags, and build healthier relationships.',
   keywords: ['relationship AI', 'emotional intelligence', 'conversation analyzer', 'red flag detection', 'relationship health'],
   authors: [{ name: 'HeartMind AI' }],
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'HeartMind AI',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: 'HeartMind AI | Relationship Intelligence Platform',
     description: 'AI-powered emotional intelligence and relationship wellness assistant',
