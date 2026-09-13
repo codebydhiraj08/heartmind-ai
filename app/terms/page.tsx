@@ -166,9 +166,9 @@ export default function TermsPage() {
               <p>
                 If you have any questions or clarifications regarding these Terms & Conditions, please contact us at:
               </p>
-              <p className="text-indigo-400 font-semibold mt-1">
-                support@heartmind-ai.com
-              </p>
+              <a href="mailto:official.heartmindai@gmail.com" className="text-indigo-400 hover:text-indigo-300 font-semibold mt-1 inline-block underline">
+                official.heartmindai@gmail.com
+              </a>
             </section>
 
           </div>

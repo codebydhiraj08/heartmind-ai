@@ -152,9 +152,9 @@ export default function PrivacyPage() {
               <p>
                 If you wish to assert your data rights, request account deletion, or have questions about how we handle user privacy, please contact:
               </p>
-              <p className="text-indigo-400 font-semibold mt-1">
-                support@heartmind-ai.com
-              </p>
+              <a href="mailto:official.heartmindai@gmail.com" className="text-indigo-400 hover:text-indigo-300 font-semibold mt-1 inline-block underline">
+                official.heartmindai@gmail.com
+              </a>
             </section>
 
           </div>

@@ -71,7 +71,7 @@ export default function CancellationPage() {
                   <strong>Self-Service Billing Portal:</strong> Navigate to your dashboard, click on <em>Upgrade/Billing</em>, and click the <strong>Manage Subscription</strong> button. This redirect will open your secure Stripe customer billing portal where you can cancel instantly with one click.
                 </li>
                 <li>
-                  <strong>Support Request:</strong> If you are billing via Razorpay or require assistance, send an email to <span className="text-indigo-400 font-semibold">support@heartmind-ai.com</span> requesting cancellation. Please include your registered email address and name.
+                  <strong>Support Request:</strong> If you are billing via Razorpay or require assistance, send an email to <a href="mailto:official.heartmindai@gmail.com" className="text-indigo-400 hover:text-indigo-300 font-semibold underline">official.heartmindai@gmail.com</a> requesting cancellation. Please include your registered email address and name.
                 </li>
               </ul>
             </section>
@@ -109,9 +109,9 @@ export default function CancellationPage() {
               <p>
                 For cancellation requests or portal issues, please contact:
               </p>
-              <p className="text-indigo-400 font-semibold mt-1">
-                support@heartmind-ai.com
-              </p>
+              <a href="mailto:official.heartmindai@gmail.com" className="text-indigo-400 hover:text-indigo-300 font-semibold mt-1 inline-block underline">
+                official.heartmindai@gmail.com
+              </a>
             </section>
 
           </div>
