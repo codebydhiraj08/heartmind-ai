@@ -70,7 +70,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background animated-gradient relative overflow-x-hidden">
       {/* Ambient Floating Background Glow Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <motion.div 
+        <motion.div
           animate={{
             x: [0, 80, -60, 0],
             y: [0, -100, 60, 0],
@@ -83,7 +83,7 @@ export default function LandingPage() {
           }}
           className="absolute top-[10%] left-[15%] w-[450px] h-[450px] bg-[#ea409b]/12 rounded-full blur-[140px]"
         />
-        <motion.div 
+        <motion.div
           animate={{
             x: [0, -90, 70, 0],
             y: [0, 80, -90, 0],
@@ -96,7 +96,7 @@ export default function LandingPage() {
           }}
           className="absolute bottom-[20%] right-[10%] w-[450px] h-[450px] bg-[#04c7f0]/12 rounded-full blur-[140px]"
         />
-        <motion.div 
+        <motion.div
           animate={{
             x: [0, 50, -50, 0],
             y: [0, -40, 50, 0],
@@ -134,7 +134,7 @@ export default function LandingPage() {
       </div>
 
       {/* Navigation */}
-      <motion.nav 
+      <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -183,7 +183,7 @@ export default function LandingPage() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             className="md:hidden glass-strong border-t border-border"
@@ -211,7 +211,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative pt-36 pb-20 px-4 sm:px-8 lg:px-12 overflow-hidden hero-container z-10">
-        <motion.div 
+        <motion.div
           variants={staggerContainer}
           initial="initial"
           animate="animate"
@@ -219,16 +219,16 @@ export default function LandingPage() {
         >
           {/* Hero Left Side: Copy */}
           <div className="lg:col-span-5 text-left flex flex-col items-start">
-            <motion.div 
-              variants={fadeInUp} 
+            <motion.div
+              variants={fadeInUp}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-800/80 mb-6 select-none"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#ea409b] animate-pulse" />
               <span className="text-[11px] text-zinc-400 font-semibold uppercase tracking-wider">AI Relationship Intelligence</span>
             </motion.div>
 
-            <motion.h1 
-              variants={fadeInUp} 
+            <motion.h1
+              variants={fadeInUp}
               className="text-4xl sm:text-5xl md:text-[62px] font-extrabold leading-[1.08] tracking-tight mb-6 text-white"
             >
               Understand What <br className="hidden sm:inline" />
@@ -237,8 +237,8 @@ export default function LandingPage() {
               <span className="text-[#04c7f0]">Really Reveal.</span>
             </motion.h1>
 
-            <motion.p 
-              variants={fadeInUp} 
+            <motion.p
+              variants={fadeInUp}
               className="text-base sm:text-[17px] text-zinc-400 mb-8 max-w-lg leading-relaxed text-pretty"
             >
               AI-powered relationship intelligence that analyzes conversations, uncovers emotional patterns, and helps you understand communication on a deeper level.
@@ -261,8 +261,8 @@ export default function LandingPage() {
               </Link>
             </motion.div>
 
-            <motion.div 
-              variants={fadeInUp} 
+            <motion.div
+              variants={fadeInUp}
               className="mt-6 flex items-center justify-start gap-2 text-zinc-500 text-xs select-none"
             >
               <Check className="w-4 h-4 text-[#ea409b]" />
@@ -272,7 +272,7 @@ export default function LandingPage() {
 
           {/* Hero Right Side: High-Fidelity Mockup Dashboard (Expanded Height aspect-[1.12]) */}
           <div className="lg:col-span-7 flex justify-center lg:justify-end relative pr-0 lg:pr-4">
-            <motion.div 
+            <motion.div
               animate={{
                 y: [0, -8, 0]
               }}
@@ -281,11 +281,11 @@ export default function LandingPage() {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="relative w-full max-w-[650px] aspect-[1.12] rounded-[24px] bg-[#0b0c10]/95 border border-[#161b26] p-6 shadow-2xl select-none"
+              className="relative w-full max-w-[650px] sm:aspect-[1.12] rounded-[24px] bg-[#0b0c10]/95 border border-[#161b26] p-4 sm:p-6 shadow-2xl select-none"
             >
               {/* Header inside mockup */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-5 sm:mb-6 gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                   <div className="flex items-center gap-1">
                     <div className="w-1.5 h-3 bg-indigo-500 rounded-full animate-pulse" />
                     <div className="w-1.5 h-5 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
@@ -293,17 +293,18 @@ export default function LandingPage() {
                   </div>
                   <span className="text-xs font-bold text-white tracking-tight">Conversation Intelligence</span>
                 </div>
-                
-                <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-950/80 border border-zinc-900">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="text-[10px] text-zinc-400 font-medium">AI analyzing communication patterns...</span>
+
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded-full bg-zinc-950/80 border border-zinc-900 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                  <span className="text-[10px] text-zinc-400 font-medium hidden sm:inline">AI analyzing communication patterns...</span>
+                  <span className="text-[10px] text-zinc-400 font-medium sm:hidden">Analyzing...</span>
                 </div>
               </div>
 
               {/* Conversation log */}
               <div className="space-y-4 mb-6">
                 {/* Message A */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6, duration: 0.4 }}
@@ -324,7 +325,7 @@ export default function LandingPage() {
                 </motion.div>
 
                 {/* Message B */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1.0, duration: 0.4 }}
@@ -374,25 +375,25 @@ export default function LandingPage() {
                       </linearGradient>
                     </defs>
                     {/* Line 1 (Person A Sync) */}
-                    <motion.path 
+                    <motion.path
                       initial={{ pathLength: 0 }}
                       animate={{ pathLength: 1 }}
                       transition={{ delay: 1.2, duration: 1.8, ease: "easeInOut" }}
-                      d="M0,14 Q15,4 30,11 T60,5 T90,13 L100,9" 
-                      stroke="#8b5cf6" 
-                      strokeWidth="0.75" 
+                      d="M0,14 Q15,4 30,11 T60,5 T90,13 L100,9"
+                      stroke="#8b5cf6"
+                      strokeWidth="0.75"
                       strokeLinecap="round"
                     />
                     <path d="M0,14 Q15,4 30,11 T60,5 T90,13 L100,9 L100,20 L0,20 Z" fill="url(#areaGradient)" />
-                    
+
                     {/* Line 2 (Person B Sync) */}
-                    <motion.path 
+                    <motion.path
                       initial={{ pathLength: 0 }}
                       animate={{ pathLength: 1 }}
                       transition={{ delay: 1.4, duration: 2.2, ease: "easeInOut" }}
-                      d="M0,11 Q20,15 40,7 T70,11 T100,5" 
-                      stroke="#ea409b" 
-                      strokeWidth="0.75" 
+                      d="M0,11 Q20,15 40,7 T70,11 T100,5"
+                      stroke="#ea409b"
+                      strokeWidth="0.75"
                       strokeLinecap="round"
                     />
                     <path d="M0,11 Q20,15 40,7 T70,11 T100,5 L100,20 L0,20 Z" fill="url(#areaGradient2)" />
@@ -401,7 +402,7 @@ export default function LandingPage() {
               </div>
 
               {/* Glowing visualizer line */}
-              <div className="relative h-12 flex items-center justify-center mb-6 overflow-hidden select-none">
+              <div className="relative h-8 sm:h-12 flex items-center justify-center mb-3 sm:mb-6 overflow-hidden select-none">
                 <div className="absolute inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#04c7f0] to-transparent opacity-25" />
                 <svg className="w-full h-8 stroke-[#04c7f0] fill-none opacity-80" viewBox="0 0 100 10" preserveAspectRatio="none">
                   <path d="M 0,5 Q 5,1 10,5 T 20,5 T 30,5 T 40,1 T 50,9 T 60,3 T 70,7 T 80,5 T 90,5 T 100,5" strokeWidth="0.5" className="animate-pulse" />
@@ -410,17 +411,17 @@ export default function LandingPage() {
               </div>
 
               {/* AI Insight Card (Refined with interactive Radar Scanner Confidence chart) */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.4, duration: 0.4 }}
-                className="absolute bottom-6 left-6 right-[240px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-xl select-none"
+                className="relative sm:absolute sm:bottom-6 sm:left-6 sm:right-[230px] w-full sm:w-auto mb-3 sm:mb-0 bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-xl select-none"
               >
                 <div className="flex items-center gap-2 text-zinc-400 text-[10px] font-bold mb-2.5">
                   <Sparkles className="w-3 h-3 text-purple-400" />
                   <span>AI Insight</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-[9px] text-zinc-500 mb-0.5">Emotional tone detected</p>
@@ -429,7 +430,7 @@ export default function LandingPage() {
                       <span className="mx-1.5 text-zinc-600">→</span>
                       <span className="text-pink-400 font-semibold">Slightly Distant</span>
                     </p>
-                    
+
                     {/* Small tags */}
                     <div className="flex flex-wrap items-center gap-1">
                       <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-blue-950/40 text-blue-400 border border-blue-900/30">Shift</span>
@@ -444,18 +445,18 @@ export default function LandingPage() {
                     <div className="absolute left-1/2 top-2 bottom-2 w-[1px] bg-zinc-900/60" />
                     <svg className="absolute inset-0 w-full h-full transform -rotate-90">
                       <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.01)" strokeWidth="2" fill="none" />
-                      <motion.circle 
-                        cx="32" 
-                        cy="32" 
-                        r="28" 
-                        stroke="url(#radarGradient)" 
-                        strokeWidth="2.5" 
-                        fill="none" 
-                        strokeDasharray="176" 
+                      <motion.circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="url(#radarGradient)"
+                        strokeWidth="2.5"
+                        fill="none"
+                        strokeDasharray="176"
                         initial={{ strokeDashoffset: 176 }}
-                        animate={{ strokeDashoffset: 22.8 }} 
+                        animate={{ strokeDashoffset: 22.8 }}
                         transition={{ delay: 1.6, duration: 1.5, ease: "easeOut" }}
-                        strokeLinecap="round" 
+                        strokeLinecap="round"
                       />
                       <defs>
                         <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -474,20 +475,20 @@ export default function LandingPage() {
               </motion.div>
 
               {/* Relationship Signals Floating Card (Bottom Right overlap & Floating micro-animation) */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ 
-                  opacity: 1, 
+                animate={{
+                  opacity: 1,
                   scale: 1,
                   y: [0, 8, 0]
                 }}
-                transition={{ 
+                transition={{
                   opacity: { delay: 1.8, duration: 0.5 },
                   scale: { delay: 1.8, duration: 0.5 },
                   y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
                 }}
                 whileHover={{ scale: 1.03 }}
-                className="absolute bottom-8 -right-4 w-[210px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-2xl z-10 select-none backdrop-blur-md transition-shadow hover:shadow-[#ea409b]/5"
+                className="relative sm:absolute sm:bottom-8 sm:-right-4 w-full sm:w-[210px] bg-[#0c0d12]/95 border border-[#1d2331] rounded-2xl p-4 shadow-2xl z-10 select-none backdrop-blur-md transition-shadow hover:shadow-[#ea409b]/5"
               >
                 <div className="flex items-center gap-1.5 text-zinc-300 text-[10px] font-bold mb-3.5">
                   <Activity className="w-3 h-3 text-pink-400" />
@@ -504,11 +505,11 @@ export default function LandingPage() {
                       <span className="font-bold text-white">82%</span>
                     </div>
                     <div className="h-1 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: "82%" }}
                         transition={{ delay: 2.0, duration: 1.2, ease: "easeOut" }}
-                        className="h-full bg-pink-500 rounded-full" 
+                        className="h-full bg-pink-500 rounded-full"
                       />
                     </div>
                   </div>
@@ -522,11 +523,11 @@ export default function LandingPage() {
                       <span className="font-bold text-white">76%</span>
                     </div>
                     <div className="h-1 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: "76%" }}
                         transition={{ delay: 2.2, duration: 1.2, ease: "easeOut" }}
-                        className="h-full bg-purple-500 rounded-full" 
+                        className="h-full bg-purple-500 rounded-full"
                       />
                     </div>
                   </div>
@@ -540,11 +541,11 @@ export default function LandingPage() {
                       <span className="font-bold text-white">71%</span>
                     </div>
                     <div className="h-1 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/40">
-                      <motion.div 
+                      <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: "71%" }}
                         transition={{ delay: 2.4, duration: 1.2, ease: "easeOut" }}
-                        className="h-full bg-cyan-400 rounded-full" 
+                        className="h-full bg-cyan-400 rounded-full"
                       />
                     </div>
                   </div>
@@ -555,7 +556,7 @@ export default function LandingPage() {
         </motion.div>
 
         {/* Centered Horizontal Trust Badges Capsule Bar */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2.0, duration: 0.6 }}
@@ -601,7 +602,7 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="features" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -620,7 +621,7 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-100px" }}
@@ -726,7 +727,7 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -742,7 +743,7 @@ export default function LandingPage() {
             </h2>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-100px" }}
@@ -795,7 +796,7 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -813,7 +814,7 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-100px" }}
@@ -943,7 +944,7 @@ export default function LandingPage() {
             By continuing, you agree to our{" "}
             <Link href="/terms" className="text-zinc-400 hover:text-white underline">Terms & Conditions</Link>
             {" "}and{" "}
-            <Link href="/privacy" className="text-zinc-400 hover:text-white underline">Privacy Policy</Link>. 
+            <Link href="/privacy" className="text-zinc-400 hover:text-white underline">Privacy Policy</Link>.
             For subscription cancellation details, please refer to our{" "}
             <Link href="/cancellation" className="text-zinc-400 hover:text-white underline">Cancellation Policy</Link>
             {" "}and{" "}
@@ -955,7 +956,7 @@ export default function LandingPage() {
       {/* FAQ Section */}
       <section id="faq" className="py-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -970,7 +971,7 @@ export default function LandingPage() {
             </h2>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-100px" }}
@@ -1020,7 +1021,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
